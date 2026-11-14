@@ -9,12 +9,6 @@ object SplashRoute
 object LoginRoute
 
 @Serializable
-object SignupRoute
-
-@Serializable
-object ForgotPasswordRoute
-
-@Serializable
 object DashboardRoute
 
 @Serializable

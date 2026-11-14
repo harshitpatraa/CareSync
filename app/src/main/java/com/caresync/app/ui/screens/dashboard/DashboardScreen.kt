@@ -8,6 +8,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,8 +24,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.ChildCare
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Emergency
@@ -34,7 +36,9 @@ import androidx.compose.material.icons.rounded.MonitorHeart
 import androidx.compose.material.icons.rounded.PendingActions
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.PregnantWoman
+import androidx.compose.material.icons.rounded.Radar
 import androidx.compose.material.icons.rounded.SmartToy
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.rounded.Vaccines
 import androidx.compose.material3.Button
@@ -43,7 +47,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,12 +76,17 @@ import com.caresync.app.theme.CareSyncGreen
 import com.caresync.app.theme.CriticalRed
 import com.caresync.app.theme.PendingOrange
 import com.caresync.app.theme.WarningAmber
+import com.caresync.app.utils.LocalCareSyncStrings
 import com.caresync.app.viewmodel.DashboardUiState
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeDashboardScreen(
     state: DashboardUiState,
     onSyncNow: () -> Unit,
+    onScanWardOutbreak: () -> Unit,
+    onSpeakOutbreak: () -> Unit,
+    onStopSpeaking: () -> Unit,
     onOpenPatients: (String?) -> Unit,
     onOpenAddPatient: () -> Unit,
     onOpenPatientDetail: (String) -> Unit,
@@ -85,6 +96,8 @@ fun HomeDashboardScreen(
     onOpenRecords: () -> Unit,
     onOpenEmergency: () -> Unit
 ) {
+    val strings = LocalCareSyncStrings.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -115,7 +128,7 @@ fun HomeDashboardScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "CareSync Field Hub",
+                                    text = strings.fieldHubTitle,
                                     style = MaterialTheme.typography.labelMedium,
                                     color = Color.White.copy(alpha = 0.85f)
                                 )
@@ -159,7 +172,7 @@ fun HomeDashboardScreen(
                                         text = if (state.pendingSyncCount > 0) {
                                             "${state.pendingSyncCount} offline record(s) queued"
                                         } else {
-                                            "All local records synchronized"
+                                            strings.allSynced
                                         },
                                         style = MaterialTheme.typography.labelLarge,
                                         color = Color.White,
@@ -189,11 +202,11 @@ fun HomeDashboardScreen(
                                     } else {
                                         Icon(
                                             imageVector = Icons.Rounded.CloudSync,
-                                            contentDescription = "Sync now",
+                                            contentDescription = strings.syncNow,
                                             modifier = Modifier.size(16.dp)
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Sync Now", fontWeight = FontWeight.Bold)
+                                        Text(strings.syncNow, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -216,7 +229,7 @@ fun HomeDashboardScreen(
         item {
             Column {
                 Text(
-                    text = "Quick Actions",
+                    text = strings.quickActions,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -237,11 +250,11 @@ fun HomeDashboardScreen(
             }
         }
 
-        // Overview Grid: Today's Patients, Pending Visits, Emergency Cases, Follow Ups, Vaccination Status, Pregnancy Tracking, Child Monitoring
+        // Overview Grid
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "Clinical Care Overview",
+                    text = strings.clinicalOverview,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -250,7 +263,7 @@ fun HomeDashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DashboardStatCard(
-                        title = "Today's Patients",
+                        title = strings.todaysPatients,
                         value = "${state.todaysPatientsCount}",
                         subtitle = "Active home/OPD rounds",
                         icon = Icons.Rounded.Today,
@@ -260,13 +273,13 @@ fun HomeDashboardScreen(
                         modifier = Modifier.weight(1f)
                     )
                     DashboardStatCard(
-                        title = "Pending Visits",
+                        title = strings.pendingVisits,
                         value = "${state.pendingVisitsCount}",
                         subtitle = "Awaiting checkup",
                         icon = Icons.Rounded.PendingActions,
                         accentColor = PendingOrange,
                         testTag = "card_pending_visits",
-                        onClick = { onOpenPatients("PENDING_SYNC") },
+                        onClick = { onOpenPatients("PENDING_VISIT") },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -276,7 +289,7 @@ fun HomeDashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DashboardStatCard(
-                        title = "Emergency Cases",
+                        title = strings.emergencyCases,
                         value = "${state.emergencyCasesCount}",
                         subtitle = "Critical priority",
                         icon = Icons.Rounded.Emergency,
@@ -286,7 +299,7 @@ fun HomeDashboardScreen(
                         modifier = Modifier.weight(1f)
                     )
                     DashboardStatCard(
-                        title = "Follow Ups",
+                        title = strings.followUps,
                         value = "${state.followUpsCount}",
                         subtitle = "Scheduled reviews",
                         icon = Icons.Rounded.EventRepeat,
@@ -302,7 +315,7 @@ fun HomeDashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DashboardStatCard(
-                        title = "Pregnancy Tracking",
+                        title = strings.pregnancyTracking,
                         value = "${state.pregnancyCount}",
                         subtitle = "ANC mothers monitored",
                         icon = Icons.Rounded.PregnantWoman,
@@ -312,7 +325,7 @@ fun HomeDashboardScreen(
                         modifier = Modifier.weight(1f)
                     )
                     DashboardStatCard(
-                        title = "Child Monitoring",
+                        title = strings.childMonitoring,
                         value = "${state.childMonitoringCount}",
                         subtitle = "Growth & pediatric care",
                         icon = Icons.Rounded.ChildCare,
@@ -324,7 +337,7 @@ fun HomeDashboardScreen(
                 }
 
                 DashboardStatCard(
-                    title = "Vaccination Status",
+                    title = strings.vaccinationStatus,
                     value = "${state.vaccinationAvgProgress}%",
                     subtitle = "Cohort immunization coverage across ${state.totalPatientsCount} patients",
                     icon = Icons.Rounded.Vaccines,
@@ -333,6 +346,112 @@ fun HomeDashboardScreen(
                     onClick = onOpenRecords,
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+        }
+
+        // Ward Outbreak & Trend Radar (Gemini AI Cohort Intelligence)
+        item {
+            Card(
+                shape = CareSyncCardShape,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                            Icon(Icons.Rounded.Radar, contentDescription = null, tint = CareSyncBlue)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(strings.outbreakRadarTitle, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = if (state.isOfflineOnly) "Offline Cohort Mode" else "Gemini 3.8 Flash Surveillance",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        if (state.outbreakInsight != null) {
+                            IconButton(
+                                onClick = { if (state.isSpeaking) onStopSpeaking() else onSpeakOutbreak() },
+                                modifier = Modifier.testTag("outbreak_tts_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (state.isSpeaking) Icons.Rounded.Stop else Icons.AutoMirrored.Rounded.VolumeUp,
+                                    contentDescription = if (state.isSpeaking) "Stop speech" else "Speak cohort briefing",
+                                    tint = CareSyncBlue
+                                )
+                            }
+                        }
+                    }
+
+                    state.outbreakError?.let { err ->
+                        Text(err, style = MaterialTheme.typography.bodySmall, color = CriticalRed)
+                    }
+
+                    state.outbreakInsight?.let { insight ->
+                        Surface(
+                            shape = CareSyncButtonShape,
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = insight.headline,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    RiskLevelBadge(rawRisk = insight.alertLevel.name)
+                                }
+                                Text(insight.summary, style = MaterialTheme.typography.bodySmall)
+                                if (insight.affectedWards.isNotEmpty()) {
+                                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        insight.affectedWards.forEach { ward ->
+                                            Surface(shape = CareSyncButtonShape, color = CareSyncCyan.copy(alpha = 0.14f)) {
+                                                Text(
+                                                    text = ward,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = CareSyncBlue,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                insight.recommendations.forEach { rec ->
+                                    Text("• $rec", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = onScanWardOutbreak,
+                        enabled = !state.isScanningOutbreak,
+                        shape = CareSyncButtonShape,
+                        modifier = Modifier.fillMaxWidth().testTag("scan_ward_outbreak_button")
+                    ) {
+                        if (state.isScanningOutbreak) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Scanning Ward Cohort...")
+                        } else {
+                            Icon(Icons.Rounded.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(strings.scanCohortButton, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
             }
         }
 
@@ -407,7 +526,7 @@ fun HomeDashboardScreen(
         // Recent Activities
         item {
             Text(
-                text = "Recent Activities",
+                text = strings.recentActivities,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

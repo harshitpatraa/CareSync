@@ -20,12 +20,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.SmartToy
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -36,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,11 +50,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.caresync.app.components.AppLockGuard
 import com.caresync.app.database.PatientEntity
 import com.caresync.app.model.ChatMessage
 import com.caresync.app.theme.CareSyncBlue
 import com.caresync.app.theme.CareSyncButtonShape
 import com.caresync.app.theme.CareSyncCyan
+import com.caresync.app.theme.CriticalRed
 import com.caresync.app.viewmodel.AiToolsUiState
 
 @Composable
@@ -58,9 +64,20 @@ fun AiAssistantScreen(
     state: AiToolsUiState,
     patients: List<PatientEntity>,
     onSelectPatient: (String?) -> Unit,
-    onSendMessage: (String) -> Unit
+    onSendMessage: (String) -> Unit,
+    onVoiceError: (String) -> Unit,
+    onSpeakMessage: (String) -> Unit,
+    onStopSpeaking: () -> Unit
 ) {
     var inputText by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(state.chatMessages.size, state.isChatTyping) {
+        val lastIdx = (state.chatMessages.size - 1).coerceAtLeast(0)
+        if (state.chatMessages.isNotEmpty()) {
+            listState.animateScrollToItem(lastIdx)
+        }
+    }
 
     val speechLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -106,6 +123,7 @@ fun AiAssistantScreen(
 
         // Chat Stream
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -113,7 +131,12 @@ fun AiAssistantScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items(state.chatMessages, key = { it.id }) { msg ->
-                ChatBubble(msg)
+                ChatBubble(
+                    message = msg,
+                    isSpeaking = state.isSpeaking,
+                    onSpeak = { onSpeakMessage(msg.text) },
+                    onStopSpeaking = onStopSpeaking
+                )
             }
             if (state.isChatTyping) {
                 item {
@@ -122,7 +145,11 @@ fun AiAssistantScreen(
                         color = MaterialTheme.colorScheme.surface
                     ) {
                         Text(
-                            text = "CareSync AI is thinking offline...",
+                            text = if (state.isOfflineOnlyMode) {
+                                "CareSync AI is thinking offline..."
+                            } else {
+                                "CareSync AI is thinking..."
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
@@ -132,10 +159,10 @@ fun AiAssistantScreen(
             }
         }
 
-        // Error Banner (surfaces real Gemini / App Check / timeout errors)
+        // Error Banner (surfaces real Gemini / App Check / Voice / timeout errors)
         state.aiErrorMessage?.let { err ->
             Surface(
-                color = com.caresync.app.theme.CriticalRed.copy(alpha = 0.12f),
+                color = CriticalRed.copy(alpha = 0.12f),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
@@ -143,7 +170,7 @@ fun AiAssistantScreen(
             ) {
                 Text(
                     text = err,
-                    color = com.caresync.app.theme.CriticalRed,
+                    color = CriticalRed,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(10.dp)
                 )
@@ -185,8 +212,10 @@ fun AiAssistantScreen(
                             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                             putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak symptoms or clinical question")
                         }
+                        AppLockGuard.suppressNextAutoLock = true
                         runCatching { speechLauncher.launch(intent) }.onFailure {
-                            inputText = "Check fever and low SpO2 emergency protocol"
+                            AppLockGuard.suppressNextAutoLock = false
+                            onVoiceError("Speech recognition unavailable on this device. Please type your clinical query.")
                         }
                     },
                     colors = IconButtonDefaults.iconButtonColors(
@@ -230,7 +259,12 @@ fun AiAssistantScreen(
 }
 
 @Composable
-private fun ChatBubble(message: ChatMessage) {
+private fun ChatBubble(
+    message: ChatMessage,
+    isSpeaking: Boolean,
+    onSpeak: () -> Unit,
+    onStopSpeaking: () -> Unit
+) {
     val alignment = if (message.isUser) Alignment.End else Alignment.Start
     val bubbleColor = if (message.isUser) CareSyncBlue else MaterialTheme.colorScheme.surface
     val textColor = if (message.isUser) Color.White else MaterialTheme.colorScheme.onSurface
@@ -247,10 +281,27 @@ private fun ChatBubble(message: ChatMessage) {
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 if (!message.isUser) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.SmartToy, contentDescription = null, tint = CareSyncBlue, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("CareSync AI", style = MaterialTheme.typography.labelMedium, color = CareSyncBlue, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Rounded.SmartToy, contentDescription = null, tint = CareSyncBlue, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("CareSync AI", style = MaterialTheme.typography.labelMedium, color = CareSyncBlue, fontWeight = FontWeight.Bold)
+                        }
+                        IconButton(
+                            onClick = { if (isSpeaking) onStopSpeaking() else onSpeak() },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isSpeaking) Icons.Rounded.Stop else Icons.AutoMirrored.Rounded.VolumeUp,
+                                contentDescription = if (isSpeaking) "Stop speech" else "Read message aloud",
+                                tint = CareSyncBlue,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                 }

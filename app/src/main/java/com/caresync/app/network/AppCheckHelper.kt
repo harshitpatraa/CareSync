@@ -64,19 +64,30 @@ fun configureAppCheck(context: Context, intent: Intent?) {
 }
 
 fun initCustomFirebaseIfPresent(context: Context, projectId: String, appId: String, apiKey: String) {
-    if (projectId.isNotBlank() && appId.isNotBlank() && apiKey.isNotBlank()) {
+    if (appId.isNotBlank() && apiKey.isNotBlank()) {
         try {
+            val resolvedProject = projectId.trim().ifBlank {
+                appId.split(":").getOrNull(1) ?: "custom-project"
+            }
             val options = com.google.firebase.FirebaseOptions.Builder()
-                .setProjectId(projectId)
-                .setApplicationId(appId)
-                .setApiKey(apiKey)
+                .setProjectId(resolvedProject)
+                .setApplicationId(appId.trim())
+                .setApiKey(apiKey.trim())
                 .build()
             val existing = FirebaseApp.getApps(context).find { it.name == "custom_firebase" }
             existing?.delete()
             FirebaseApp.initializeApp(context, options, "custom_firebase")
-            Log.d(TAG, "Custom Firebase project initialized: $projectId")
+            Log.d(TAG, "Custom Firebase project initialized: $resolvedProject")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize custom Firebase options", e)
+        }
+    } else {
+        try {
+            val existing = FirebaseApp.getApps(context).find { it.name == "custom_firebase" }
+            existing?.delete()
+            Log.d(TAG, "Custom Firebase reset to default.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to reset custom Firebase", e)
         }
     }
 }

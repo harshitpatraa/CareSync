@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Password
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material3.AlertDialog
@@ -48,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.caresync.app.model.AppLanguage
 import com.caresync.app.theme.CareSyncBlue
@@ -55,6 +59,7 @@ import com.caresync.app.theme.CareSyncButtonShape
 import com.caresync.app.theme.CareSyncCardShape
 import com.caresync.app.theme.CriticalRed
 import com.caresync.app.theme.PendingOrange
+import com.caresync.app.utils.LocalCareSyncStrings
 import com.caresync.app.viewmodel.SettingsUiState
 
 @Composable
@@ -64,6 +69,7 @@ fun SettingsScreen(
     onToggleDarkMode: (Boolean) -> Unit,
     onToggleOfflineOnly: (Boolean) -> Unit,
     onToggleSecurityLock: (Boolean) -> Unit,
+    onSetSecurityPin: (String) -> Unit,
     onSelectLanguage: (AppLanguage) -> Unit,
     onUpdateApiKey: (String) -> Unit = {},
     onUpdateFirebaseConfig: (String, String, String) -> Unit = { _, _, _ -> },
@@ -73,9 +79,10 @@ fun SettingsScreen(
     onOpenHelp: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val strings = LocalCareSyncStrings.current
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showPrivacyDialog by remember { mutableStateOf(false) }
-    var showApiKeyDialog by remember { mutableStateOf(false) }
+    var showPinDialog by remember { mutableStateOf(false) }
     var showFirebaseDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -91,10 +98,10 @@ fun SettingsScreen(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Preferences", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(strings.settingsPreferences, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 SettingsToggleRow(
                     icon = Icons.Rounded.DarkMode,
-                    title = "Dark Mode",
+                    title = strings.darkMode,
                     subtitle = "Low-glare clinical palette for night rounds",
                     checked = state.preferences.isDarkMode,
                     testTag = "settings_dark_mode_switch",
@@ -103,7 +110,7 @@ fun SettingsScreen(
                 HorizontalDivider()
                 SettingsNavRow(
                     icon = Icons.Rounded.Language,
-                    title = "Language",
+                    title = strings.language,
                     subtitle = state.preferences.language.displayName,
                     onClick = { showLanguageDialog = true }
                 )
@@ -119,7 +126,7 @@ fun SettingsScreen(
                 Text("Offline Sync Engine", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 SettingsToggleRow(
                     icon = Icons.Rounded.CloudSync,
-                    title = "Offline-Only Mode",
+                    title = strings.offlineOnlyMode,
                     subtitle = "Keep all records local in Room queue until toggled off",
                     checked = state.preferences.isOfflineOnlyMode,
                     testTag = "settings_offline_switch",
@@ -160,35 +167,6 @@ fun SettingsScreen(
                         }
                     }
                 }
-            }
-        }
-
-        // Gemini AI & Clinical Engine
-        Card(
-            shape = CareSyncCardShape,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Gemini AI Engine", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    text = if (state.preferences.geminiApiKey.isNotBlank())
-                        "Status: Live Gemini 2.5 Flash active with personal API key."
-                    else
-                        "Status: Built-in Clinical Intelligence active (Bypasses Firebase App Check).",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
-                )
-                HorizontalDivider()
-                SettingsNavRow(
-                    icon = Icons.Rounded.Lock,
-                    title = "Gemini API Key (Optional)",
-                    subtitle = if (state.preferences.geminiApiKey.isNotBlank())
-                        "Configured (••••••••" + state.preferences.geminiApiKey.takeLast(4) + ")"
-                    else
-                        "Tap to paste Google Gemini API Key from Google AI Studio",
-                    onClick = { showApiKeyDialog = true }
-                )
             }
         }
 
@@ -233,14 +211,21 @@ fun SettingsScreen(
                 HorizontalDivider()
                 SettingsToggleRow(
                     icon = Icons.Rounded.Lock,
-                    title = "Security Lock",
+                    title = strings.securityLock,
                     subtitle = "Require PIN / biometric verification on resume",
                     checked = state.preferences.isSecurityLockEnabled,
                     testTag = "settings_security_switch",
                     onCheckedChange = onToggleSecurityLock
                 )
                 HorizontalDivider()
-                SettingsNavRow(Icons.Rounded.Policy, "Privacy Policy", "Local Room encryption & data handling", { showPrivacyDialog = true })
+                SettingsNavRow(
+                    icon = Icons.Rounded.Password,
+                    title = "Change 4-Digit Security PIN",
+                    subtitle = "Current PIN is set (default 1234)",
+                    onClick = { showPinDialog = true }
+                )
+                HorizontalDivider()
+                SettingsNavRow(Icons.Rounded.Policy, "Privacy Policy", "Local Room storage & cloud sync security", { showPrivacyDialog = true })
                 HorizontalDivider()
                 SettingsNavRow(Icons.Rounded.Info, "About CareSync", "Version 1.0.0 · Offline-First Architecture", onOpenAbout)
                 HorizontalDivider()
@@ -259,7 +244,7 @@ fun SettingsScreen(
         ) {
             Icon(Icons.AutoMirrored.Rounded.Logout, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Logout", fontWeight = FontWeight.Bold)
+            Text(strings.logout, fontWeight = FontWeight.Bold)
         }
     }
 
@@ -299,6 +284,55 @@ fun SettingsScreen(
         )
     }
 
+    if (showPinDialog) {
+        var newPin by remember { mutableStateOf("") }
+        var pinError by remember { mutableStateOf<String?>(null) }
+        AlertDialog(
+            onDismissRequest = { showPinDialog = false },
+            title = { Text("Set 4-Digit Security PIN") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Choose a 4-digit PIN used when Biometric unlock is unavailable.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    OutlinedTextField(
+                        value = newPin,
+                        onValueChange = { input ->
+                            newPin = input.filter { it.isDigit() }.take(4)
+                            pinError = null
+                        },
+                        label = { Text("4-Digit PIN") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        singleLine = true
+                    )
+                    pinError?.let {
+                        Text(it, color = CriticalRed, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newPin.length == 4) {
+                            onSetSecurityPin(newPin)
+                            showPinDialog = false
+                        } else {
+                            pinError = "PIN must be exactly 4 digits."
+                        }
+                    }
+                ) {
+                    Text("Save PIN")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPinDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
+
     if (showPrivacyDialog) {
         AlertDialog(
             onDismissRequest = { showPrivacyDialog = false },
@@ -311,56 +345,6 @@ fun SettingsScreen(
             },
             confirmButton = {
                 Button(onClick = { showPrivacyDialog = false }) { Text("Understood") }
-            }
-        )
-    }
-
-    if (showApiKeyDialog) {
-        var keyInput by remember { mutableStateOf(state.preferences.geminiApiKey) }
-        AlertDialog(
-            onDismissRequest = { showApiKeyDialog = false },
-            title = { Text("Configure Gemini API Key") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "Enter your Gemini API key from Google AI Studio (aistudio.google.com). This connects directly via official Google REST API, completely bypassing Firebase App Check.",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    androidx.compose.material3.OutlinedTextField(
-                        value = keyInput,
-                        onValueChange = { keyInput = it },
-                        label = { Text("Gemini API Key") },
-                        placeholder = { Text("AIzaSy...") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (keyInput.isNotBlank()) {
-                        TextButton(onClick = {
-                            keyInput = ""
-                            onUpdateApiKey("")
-                            showApiKeyDialog = false
-                        }) {
-                            Text("Clear Key (Use Offline Engine)", color = CriticalRed)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onUpdateApiKey(keyInput.trim())
-                        showApiKeyDialog = false
-                    },
-                    shape = CareSyncButtonShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue)
-                ) {
-                    Text("Save", softWrap = false)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showApiKeyDialog = false }) {
-                    Text("Cancel", softWrap = false)
-                }
             }
         )
     }

@@ -1,0 +1,232 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated CareSync clinician profile and workspace metadata.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owning clinician."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Clinician display name."
+        },
+        "email": {
+          "type": "string",
+          "description": "Clinician Google account email."
+        },
+        "clinicName": {
+          "type": "string",
+          "description": "Assigned clinic or ward hub name."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Community health worker identifier."
+        },
+        "district": {
+          "type": "string",
+          "description": "Assigned health circle or district."
+        },
+        "role": {
+          "type": "string",
+          "description": "Clinical role title."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated creation timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated last update timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["userId", "displayName", "clinicName", "workerId", "createdAt", "updatedAt"]
+    },
+    "PatientRecord": {
+      "title": "PatientRecord",
+      "description": "CareSync patient demographic, triage, and maternal/child tracking record.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "age": { "type": "integer" },
+        "gender": { "type": "string" },
+        "phone": { "type": "string" },
+        "villageOrWard": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["GENERAL", "PREGNANCY", "CHILD", "CHRONIC", "EMERGENCY"]
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL"]
+        },
+        "critical": { "type": "boolean" },
+        "todayVisit": { "type": "boolean" },
+        "pendingVisit": { "type": "boolean" },
+        "lastVisitLabel": { "type": "string" },
+        "nextFollowUpDate": { "type": "string" },
+        "allergies": { "type": "string" },
+        "chronicConditions": { "type": "string" },
+        "familyHeadName": { "type": "string" },
+        "familyMembersCount": { "type": "integer" },
+        "pregnancyWeeks": { "type": "integer" },
+        "expectedDueDate": { "type": "string" },
+        "childWeightKg": { "type": "number" },
+        "vaccinationProgress": { "type": "integer" },
+        "notes": { "type": "string" },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated creation timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated update timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "fullName",
+        "age",
+        "gender",
+        "villageOrWard",
+        "bloodGroup",
+        "category",
+        "riskLevel",
+        "critical",
+        "todayVisit",
+        "pendingVisit",
+        "familyMembersCount",
+        "pregnancyWeeks",
+        "childWeightKg",
+        "vaccinationProgress",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "VitalsEntry": {
+      "title": "VitalsEntry",
+      "description": "Point-in-time patient vitals measurement synchronized from offline vault.",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "systolicBp": { "type": "integer" },
+        "diastolicBp": { "type": "integer" },
+        "heartRate": { "type": "integer" },
+        "temperatureC": { "type": "number" },
+        "spo2Percent": { "type": "integer" },
+        "respiratoryRate": { "type": "integer" },
+        "bloodSugarMgDl": { "type": "integer" },
+        "weightKg": { "type": "number" },
+        "recordedAtLabel": { "type": "string" },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated creation timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated update timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "patientId",
+        "systolicBp",
+        "diastolicBp",
+        "heartRate",
+        "temperatureC",
+        "spo2Percent",
+        "respiratoryRate",
+        "bloodSugarMgDl",
+        "weightKg",
+        "recordedAtLabel",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HealthRecord": {
+      "title": "HealthRecord",
+      "description": "Clinical timeline, prescription, immunization, and lab document entry.",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "recordType": {
+          "type": "string",
+          "enum": ["TIMELINE", "HISTORY", "MEDICINE", "VACCINATION", "DOCUMENT"]
+        },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "detail": { "type": "string" },
+        "dateLabel": { "type": "string" },
+        "statusBadge": { "type": "string" },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated creation timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated update timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["patientId", "patientName", "recordType", "title", "createdAt", "updatedAt"]
+    },
+    "AlertNotification": {
+      "title": "AlertNotification",
+      "description": "CareSync clinical reminder, emergency SOS dispatch, or sync alert.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["MEDICINE", "VACCINATION", "FOLLOW_UP", "SYNC", "EMERGENCY"]
+        },
+        "timestampLabel": { "type": "string" },
+        "read": { "type": "boolean" },
+        "patientId": { "type": "string" },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated creation timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated update timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["title", "message", "type", "timestampLabel", "read", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Authenticated clinician profile isolated per Firebase Auth UID."
+    },
+    "/users/{userId}/patients/{patientId}": {
+      "schema": { "$ref": "#/entities/PatientRecord" },
+      "description": "Clinician's synchronized CareSync patient roster."
+    },
+    "/users/{userId}/vitals/{vitalsId}": {
+      "schema": { "$ref": "#/entities/VitalsEntry" },
+      "description": "Clinician's synchronized patient vitals measurements."
+    },
+    "/users/{userId}/health_records/{recordId}": {
+      "schema": { "$ref": "#/entities/HealthRecord" },
+      "description": "Clinician's synchronized patient timeline, medicine, and immunization records."
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/AlertNotification" },
+      "description": "Clinician's synchronized emergency SOS alerts and clinical reminders."
+    }
+  }
+}

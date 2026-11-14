@@ -1,19 +1,26 @@
 package com.caresync.app.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.caresync.app.database.NotificationEntity
 import com.caresync.app.database.PatientEntity
 import com.caresync.app.database.SyncQueueEntity
+import com.caresync.app.database.VitalsEntity
 import com.caresync.app.model.AppLanguage
 import com.caresync.app.model.EmergencyContact
 import com.caresync.app.model.EmergencyInstruction
 import com.caresync.app.model.NearbyHealthCenter
 import com.caresync.app.model.UserProfile
 import com.caresync.app.network.SyncState
+import com.caresync.app.network.initCustomFirebaseIfPresent
 import com.caresync.app.repository.AppPreferences
 import com.caresync.app.repository.CareSyncRepository
+import com.caresync.app.utils.FieldCoordinates
+import com.caresync.app.utils.LocationHelper
+import com.caresync.app.utils.TtsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,9 +34,13 @@ data class EmergencyUiState(
     val sosTriggered: Boolean = false,
     val lastSosPatient: String? = null,
     val criticalPatients: List<PatientEntity> = emptyList(),
+    val latestVitalsByPatient: Map<String, VitalsEntity> = emptyMap(),
     val contacts: List<EmergencyContact> = emptyList(),
     val healthCenters: List<NearbyHealthCenter> = emptyList(),
-    val instructions: List<EmergencyInstruction> = emptyList()
+    val instructions: List<EmergencyInstruction> = emptyList(),
+    val fieldCoordinates: FieldCoordinates? = null,
+    val clinicianName: String = "Dr. Priya Kulkarni",
+    val isSpeaking: Boolean = false
 )
 
 data class SettingsUiState(
@@ -51,24 +62,55 @@ data class SettingsUiState(
 
 @HiltViewModel
 class OperationsViewModel @Inject constructor(
-    private val repository: CareSyncRepository
+    @param:ApplicationContext private val context: Context,
+    private val repository: CareSyncRepository,
+    private val ttsManager: TtsManager
 ) : ViewModel() {
 
     private val _sosTriggered = MutableStateFlow(false)
     private val _lastSosPatient = MutableStateFlow<String?>(null)
+    private val _coordinates = MutableStateFlow<FieldCoordinates?>(null)
+    private val latestLanguage = MutableStateFlow(AppLanguage.ENGLISH)
 
     val emergencyState: StateFlow<EmergencyUiState> = combine(
         repository.allPatientsFlow,
+        repository.allVitalsFlow,
+        repository.customContactsFlow,
+        repository.preferencesFlow,
         _sosTriggered,
-        _lastSosPatient
-    ) { patients, triggered, sosPatient ->
+        _lastSosPatient,
+        _coordinates,
+        ttsManager.isSpeaking
+    ) { values ->
+        @Suppress("UNCHECKED_CAST")
+        val patients = values[0] as List<PatientEntity>
+        @Suppress("UNCHECKED_CAST")
+        val vitals = values[1] as List<VitalsEntity>
+        val prefs = values[3] as AppPreferences
+        val triggered = values[4] as Boolean
+        val sosPatient = values[5] as String?
+        val coords = values[6] as FieldCoordinates?
+        val speaking = values[7] as Boolean
+        latestLanguage.value = prefs.language
+
+        val vitalsMap = vitals.groupBy { it.patientId }.mapValues { (_, list) -> list.first() }
+        val updatedCenters = repository.getNearbyHealthCenters().map { center ->
+            center.copy(
+                distanceKm = LocationHelper.distanceLabelKm(coords, center.latitude, center.longitude, center.distanceKm)
+            )
+        }
+
         EmergencyUiState(
             sosTriggered = triggered,
             lastSosPatient = sosPatient,
             criticalPatients = patients.filter { it.isCritical },
+            latestVitalsByPatient = vitalsMap,
             contacts = repository.getEmergencyContacts(),
-            healthCenters = repository.getNearbyHealthCenters(),
-            instructions = repository.getEmergencyInstructions()
+            healthCenters = updatedCenters,
+            instructions = repository.getEmergencyInstructions(),
+            fieldCoordinates = coords,
+            clinicianName = prefs.userName,
+            isSpeaking = speaking
         )
     }.stateIn(
         scope = viewModelScope,
@@ -101,11 +143,11 @@ class OperationsViewModel @Inject constructor(
             totalPatientCount = patients.size,
             profile = UserProfile(
                 name = prefs.userName,
-                role = "Senior Community Health Officer",
+                role = prefs.role,
                 workerId = prefs.workerId,
                 clinicName = prefs.clinicName,
-                district = "North Health Circle · Zone B",
-                phone = "+91 98111 70409",
+                district = prefs.district,
+                phone = prefs.phone,
                 email = prefs.userEmail
             )
         )
@@ -117,6 +159,27 @@ class OperationsViewModel @Inject constructor(
 
     private val _syncResultMessage = MutableStateFlow<String?>(null)
     val syncResultMessage: StateFlow<String?> = _syncResultMessage.asStateFlow()
+
+    fun refreshLocation(context: Context) {
+        viewModelScope.launch {
+            _coordinates.value = LocationHelper.getBestLastLocation(context)
+        }
+    }
+
+    fun addEmergencyContact(name: String, role: String, phone: String) {
+        if (name.isBlank() || phone.isBlank()) return
+        viewModelScope.launch {
+            repository.addEmergencyContact(name, role, phone)
+        }
+    }
+
+    fun speakInstruction(text: String) {
+        ttsManager.speak(text, latestLanguage.value)
+    }
+
+    fun stopSpeaking() {
+        ttsManager.stop()
+    }
 
     fun triggerSos(patientName: String? = null) {
         viewModelScope.launch {
@@ -154,6 +217,10 @@ class OperationsViewModel @Inject constructor(
         viewModelScope.launch { repository.setSecurityLock(enabled) }
     }
 
+    fun setSecurityPin(pin: String) {
+        viewModelScope.launch { repository.setSecurityPin(pin) }
+    }
+
     fun setLanguage(language: AppLanguage) {
         viewModelScope.launch { repository.setLanguage(language) }
     }
@@ -163,7 +230,23 @@ class OperationsViewModel @Inject constructor(
     }
 
     fun updateFirebaseConfig(projectId: String, appId: String, apiKey: String) {
-        viewModelScope.launch { repository.setFirebaseCredentials(projectId, appId, apiKey) }
+        viewModelScope.launch {
+            repository.setFirebaseCredentials(projectId, appId, apiKey)
+            initCustomFirebaseIfPresent(context, projectId, appId, apiKey)
+        }
+    }
+
+    fun updateProfile(
+        name: String,
+        role: String,
+        workerId: String,
+        clinicName: String,
+        district: String,
+        phone: String
+    ) {
+        viewModelScope.launch {
+            repository.updateUserProfile(name, role, workerId, clinicName, district, phone)
+        }
     }
 
     fun syncNow() {
@@ -173,17 +256,6 @@ class OperationsViewModel @Inject constructor(
                 onSuccess = { count -> if (count == 0) "All records already synced." else "Synced $count queued record(s)." },
                 onFailure = { err -> err.message ?: "Offline mode active." }
             )
-        }
-    }
-
-    fun clearSyncResultMessage() {
-        _syncResultMessage.value = null
-    }
-
-    fun logout(onDone: () -> Unit) {
-        viewModelScope.launch {
-            repository.logout()
-            onDone()
         }
     }
 }

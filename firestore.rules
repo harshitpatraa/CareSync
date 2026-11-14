@@ -1,0 +1,272 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Shared Hardened Primitives ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidCreateTimestamps(data) {
+      return data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidUpdateTimestamps(data) {
+      return data.createdAt == existing().createdAt &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // --- Entity Validation Helpers ---
+
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+             data.clinicName is string && data.clinicName.size() >= 1 && data.clinicName.size() <= 150 &&
+             data.workerId is string && data.workerId.size() >= 1 && data.workerId.size() <= 60 &&
+             (!('email' in data) || data.email == null || (data.email is string && data.email.size() <= 200)) &&
+             (!('district' in data) || data.district == null || (data.district is string && data.district.size() <= 120)) &&
+             (!('role' in data) || data.role == null || (data.role is string && data.role.size() <= 100));
+    }
+
+    function isValidPatientRecord(data) {
+      return data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 120 &&
+             data.age is int && data.age >= 0 && data.age <= 150 &&
+             data.gender is string && data.gender.size() >= 1 && data.gender.size() <= 40 &&
+             data.villageOrWard is string && data.villageOrWard.size() >= 1 && data.villageOrWard.size() <= 150 &&
+             data.bloodGroup is string && data.bloodGroup.size() >= 1 && data.bloodGroup.size() <= 16 &&
+             data.category in ['GENERAL', 'PREGNANCY', 'CHILD', 'CHRONIC', 'EMERGENCY'] &&
+             data.riskLevel in ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'] &&
+             data.critical is bool &&
+             data.todayVisit is bool &&
+             data.pendingVisit is bool &&
+             data.familyMembersCount is int && data.familyMembersCount >= 1 && data.familyMembersCount <= 50 &&
+             data.pregnancyWeeks is int && data.pregnancyWeeks >= 0 && data.pregnancyWeeks <= 45 &&
+             data.childWeightKg is number && data.childWeightKg >= 0 && data.childWeightKg <= 300 &&
+             data.vaccinationProgress is int && data.vaccinationProgress >= 0 && data.vaccinationProgress <= 100 &&
+             (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 40)) &&
+             (!('lastVisitLabel' in data) || data.lastVisitLabel == null || (data.lastVisitLabel is string && data.lastVisitLabel.size() <= 80)) &&
+             (!('nextFollowUpDate' in data) || data.nextFollowUpDate == null || (data.nextFollowUpDate is string && data.nextFollowUpDate.size() <= 80)) &&
+             (!('allergies' in data) || data.allergies == null || (data.allergies is string && data.allergies.size() <= 500)) &&
+             (!('chronicConditions' in data) || data.chronicConditions == null || (data.chronicConditions is string && data.chronicConditions.size() <= 500)) &&
+             (!('familyHeadName' in data) || data.familyHeadName == null || (data.familyHeadName is string && data.familyHeadName.size() <= 120)) &&
+             (!('expectedDueDate' in data) || data.expectedDueDate == null || (data.expectedDueDate is string && data.expectedDueDate.size() <= 80)) &&
+             (!('notes' in data) || data.notes == null || (data.notes is string && data.notes.size() <= 2000));
+    }
+
+    function isValidVitalsEntry(data) {
+      return data.patientId is string && isValidId(data.patientId) &&
+             data.systolicBp is int && data.systolicBp >= 30 && data.systolicBp <= 300 &&
+             data.diastolicBp is int && data.diastolicBp >= 20 && data.diastolicBp <= 200 &&
+             data.heartRate is int && data.heartRate >= 20 && data.heartRate <= 260 &&
+             data.temperatureC is number && data.temperatureC >= 25 && data.temperatureC <= 46 &&
+             data.spo2Percent is int && data.spo2Percent >= 40 && data.spo2Percent <= 100 &&
+             data.respiratoryRate is int && data.respiratoryRate >= 5 && data.respiratoryRate <= 80 &&
+             data.bloodSugarMgDl is int && data.bloodSugarMgDl >= 20 && data.bloodSugarMgDl <= 800 &&
+             data.weightKg is number && data.weightKg >= 0 && data.weightKg <= 400 &&
+             data.recordedAtLabel is string && data.recordedAtLabel.size() >= 1 && data.recordedAtLabel.size() <= 80;
+    }
+
+    function isValidHealthRecord(data) {
+      return data.patientId is string && isValidId(data.patientId) &&
+             data.patientName is string && data.patientName.size() >= 1 && data.patientName.size() <= 120 &&
+             data.recordType in ['TIMELINE', 'HISTORY', 'MEDICINE', 'VACCINATION', 'DOCUMENT'] &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 160 &&
+             (!('subtitle' in data) || data.subtitle == null || (data.subtitle is string && data.subtitle.size() <= 240)) &&
+             (!('detail' in data) || data.detail == null || (data.detail is string && data.detail.size() <= 2000)) &&
+             (!('dateLabel' in data) || data.dateLabel == null || (data.dateLabel is string && data.dateLabel.size() <= 80)) &&
+             (!('statusBadge' in data) || data.statusBadge == null || (data.statusBadge is string && data.statusBadge.size() <= 60));
+    }
+
+    function isValidAlertNotification(data) {
+      return data.title is string && data.title.size() >= 1 && data.title.size() <= 160 &&
+             data.message is string && data.message.size() >= 1 && data.message.size() <= 600 &&
+             data.type in ['MEDICINE', 'VACCINATION', 'FOLLOW_UP', 'SYNC', 'EMERGENCY'] &&
+             data.timestampLabel is string && data.timestampLabel.size() >= 1 && data.timestampLabel.size() <= 80 &&
+             data.read is bool &&
+             (!('patientId' in data) || data.patientId == null || isValidId(data.patientId));
+    }
+
+    // --- User Profile Document (/users/{userId}) ---
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll(['userId', 'displayName', 'clinicName', 'workerId', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'displayName', 'email', 'clinicName', 'workerId', 'district', 'role', 'createdAt', 'updatedAt']) &&
+                       isValidCreateTimestamps(incoming()) &&
+                       isValidUserProfile(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       isValidUpdateTimestamps(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'clinicName', 'workerId', 'district', 'role', 'updatedAt']);
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // --- Patients Subcollection (/users/{userId}/patients/{patientId}) ---
+      match /patients/{patientId} {
+        allow get: if isOwner(userId) && isValidId(patientId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(patientId) &&
+                         incoming().keys().hasAll([
+                           'fullName', 'age', 'gender', 'villageOrWard', 'bloodGroup',
+                           'category', 'riskLevel', 'critical', 'todayVisit', 'pendingVisit',
+                           'familyMembersCount', 'pregnancyWeeks', 'childWeightKg',
+                           'vaccinationProgress', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'fullName', 'age', 'gender', 'phone', 'villageOrWard', 'bloodGroup',
+                           'category', 'riskLevel', 'critical', 'todayVisit', 'pendingVisit',
+                           'lastVisitLabel', 'nextFollowUpDate', 'allergies', 'chronicConditions',
+                           'familyHeadName', 'familyMembersCount', 'pregnancyWeeks',
+                           'expectedDueDate', 'childWeightKg', 'vaccinationProgress', 'notes',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidCreateTimestamps(incoming()) &&
+                         isValidPatientRecord(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(patientId) &&
+                         isValidPatientRecord(incoming()) &&
+                         isValidUpdateTimestamps(incoming()) &&
+                         (
+                           // Action: Toggle critical / risk triage state
+                           incoming().diff(existing()).affectedKeys().hasOnly(['critical', 'riskLevel', 'updatedAt']) ||
+                           // Action: Full patient clinical update
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'fullName', 'age', 'gender', 'phone', 'villageOrWard', 'bloodGroup',
+                             'category', 'riskLevel', 'critical', 'todayVisit', 'pendingVisit',
+                             'lastVisitLabel', 'nextFollowUpDate', 'allergies', 'chronicConditions',
+                             'familyHeadName', 'familyMembersCount', 'pregnancyWeeks',
+                             'expectedDueDate', 'childWeightKg', 'vaccinationProgress', 'notes',
+                             'updatedAt'
+                           ])
+                         );
+
+        allow delete: if isOwner(userId) && isValidId(patientId);
+      }
+
+      // --- Vitals Subcollection (/users/{userId}/vitals/{vitalsId}) ---
+      match /vitals/{vitalsId} {
+        allow get: if isOwner(userId) && isValidId(vitalsId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(vitalsId) &&
+                         incoming().keys().hasAll([
+                           'patientId', 'systolicBp', 'diastolicBp', 'heartRate', 'temperatureC',
+                           'spo2Percent', 'respiratoryRate', 'bloodSugarMgDl', 'weightKg',
+                           'recordedAtLabel', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'patientId', 'systolicBp', 'diastolicBp', 'heartRate', 'temperatureC',
+                           'spo2Percent', 'respiratoryRate', 'bloodSugarMgDl', 'weightKg',
+                           'recordedAtLabel', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidCreateTimestamps(incoming()) &&
+                         isValidVitalsEntry(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(vitalsId) &&
+                         isValidVitalsEntry(incoming()) &&
+                         incoming().patientId == existing().patientId &&
+                         isValidUpdateTimestamps(incoming()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'systolicBp', 'diastolicBp', 'heartRate', 'temperatureC',
+                           'spo2Percent', 'respiratoryRate', 'bloodSugarMgDl', 'weightKg',
+                           'recordedAtLabel', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(vitalsId);
+      }
+
+      // --- Health Records Subcollection (/users/{userId}/health_records/{recordId}) ---
+      match /health_records/{recordId} {
+        allow get: if isOwner(userId) && isValidId(recordId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(recordId) &&
+                         incoming().keys().hasAll([
+                           'patientId', 'patientName', 'recordType', 'title', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'patientId', 'patientName', 'recordType', 'title', 'subtitle',
+                           'detail', 'dateLabel', 'statusBadge', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidCreateTimestamps(incoming()) &&
+                         isValidHealthRecord(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(recordId) &&
+                         isValidHealthRecord(incoming()) &&
+                         incoming().patientId == existing().patientId &&
+                         isValidUpdateTimestamps(incoming()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'patientName', 'recordType', 'title', 'subtitle',
+                           'detail', 'dateLabel', 'statusBadge', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(recordId);
+      }
+
+      // --- Notifications Subcollection (/users/{userId}/notifications/{notificationId}) ---
+      match /notifications/{notificationId} {
+        allow get: if isOwner(userId) && isValidId(notificationId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(notificationId) &&
+                         incoming().keys().hasAll([
+                           'title', 'message', 'type', 'timestampLabel', 'read', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'title', 'message', 'type', 'timestampLabel', 'read', 'patientId', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidCreateTimestamps(incoming()) &&
+                         isValidAlertNotification(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(notificationId) &&
+                         isValidAlertNotification(incoming()) &&
+                         isValidUpdateTimestamps(incoming()) &&
+                         (
+                           // Action: Mark notification read/unread
+                           incoming().diff(existing()).affectedKeys().hasOnly(['read', 'updatedAt']) ||
+                           // Action: Update alert details
+                           incoming().diff(existing()).affectedKeys().hasOnly(['title', 'message', 'type', 'timestampLabel', 'read', 'patientId', 'updatedAt'])
+                         );
+
+        allow delete: if isOwner(userId) && isValidId(notificationId);
+      }
+    }
+  }
+}

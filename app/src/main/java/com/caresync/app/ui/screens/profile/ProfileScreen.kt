@@ -14,31 +14,43 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Badge
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocalHospital
+import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.caresync.app.theme.CareSyncBlue
 import com.caresync.app.theme.CareSyncButtonShape
@@ -51,12 +63,15 @@ import com.caresync.app.viewmodel.SettingsUiState
 @Composable
 fun ProfileScreen(
     state: SettingsUiState,
+    onUpdateProfile: (name: String, role: String, workerId: String, clinicName: String, district: String, phone: String) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
     onOpenHelp: () -> Unit,
     onLogout: () -> Unit
 ) {
     val profile = state.profile
+    var showEditDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,7 +89,10 @@ fun ProfileScreen(
                     .background(Brush.linearGradient(listOf(CareSyncBlue, Color(0xFF1A5FD9))))
                     .padding(20.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Surface(
                         shape = CircleShape,
                         color = Color.White.copy(alpha = 0.22f),
@@ -90,10 +108,16 @@ fun ProfileScreen(
                         }
                     }
                     Spacer(modifier = Modifier.width(14.dp))
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(profile.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.White)
                         Text(profile.role, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.88f))
                         Text(profile.email, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.8f))
+                    }
+                    IconButton(
+                        onClick = { showEditDialog = true },
+                        modifier = Modifier.testTag("edit_profile_button")
+                    ) {
+                        Icon(Icons.Rounded.Edit, contentDescription = "Edit profile", tint = Color.White)
                     }
                 }
             }
@@ -106,6 +130,7 @@ fun ProfileScreen(
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ProfileRow(Icons.Rounded.Badge, "Worker ID", profile.workerId)
                 ProfileRow(Icons.Rounded.LocalHospital, "Assigned Hub", profile.clinicName)
+                ProfileRow(Icons.Rounded.Map, "District / Sector", profile.district)
                 ProfileRow(Icons.Rounded.Phone, "Phone", profile.phone)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -164,6 +189,50 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Logout from CareSync", fontWeight = FontWeight.Bold)
         }
+    }
+
+    if (showEditDialog) {
+        var name by remember { mutableStateOf(profile.name) }
+        var role by remember { mutableStateOf(profile.role) }
+        var workerId by remember { mutableStateOf(profile.workerId) }
+        var clinicName by remember { mutableStateOf(profile.clinicName) }
+        var district by remember { mutableStateOf(profile.district) }
+        var phone by remember { mutableStateOf(profile.phone) }
+
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit Clinician Profile") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(name, { name = it }, label = { Text("Full Name") }, singleLine = true)
+                    OutlinedTextField(role, { role = it }, label = { Text("Clinical Role") }, singleLine = true)
+                    OutlinedTextField(workerId, { workerId = it }, label = { Text("Worker ID") }, singleLine = true)
+                    OutlinedTextField(clinicName, { clinicName = it }, label = { Text("Assigned Hub") }, singleLine = true)
+                    OutlinedTextField(district, { district = it }, label = { Text("District / Circle") }, singleLine = true)
+                    OutlinedTextField(
+                        phone,
+                        { phone = it },
+                        label = { Text("Contact Phone") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onUpdateProfile(name, role, workerId, clinicName, district, phone)
+                        showEditDialog = false
+                    },
+                    enabled = name.isNotBlank()
+                ) {
+                    Text("Save Profile")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }
 

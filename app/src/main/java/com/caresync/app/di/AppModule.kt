@@ -56,4 +56,11 @@ object AppModule {
 
     @Provides
     fun provideActivityDao(db: CareSyncDatabase): ActivityDao = db.activityDao()
+
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(@ApplicationContext context: Context): com.google.firebase.firestore.FirebaseFirestore =
+        com.google.firebase.firestore.FirebaseFirestore.getInstance(
+            context.getString(com.caresync.app.R.string.firestore_database_id)
+        )
 }

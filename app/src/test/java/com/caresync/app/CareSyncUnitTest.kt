@@ -2,11 +2,16 @@ package com.caresync.app
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.caresync.app.model.AppLanguage
 import com.caresync.app.model.RiskLevel
 import com.caresync.app.network.AiMedicalEngine
 import com.caresync.app.utils.FormatUtils
+import com.caresync.app.utils.LocationHelper
+import com.caresync.app.utils.QrUtils
+import com.caresync.app.utils.stringsForLanguage
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,5 +48,29 @@ class CareSyncUnitTest {
         )
         assertEquals(RiskLevel.CRITICAL, result.riskLevel)
         assertTrue(result.redFlags.isNotEmpty())
+    }
+
+    @Test
+    fun qrUtils_extractsPatientIdFromStructuredAndRawPayloads() {
+        assertEquals("PT-1001", QrUtils.extractPatientIdFromQr("CARESYNC|PT-1001|Meera Devi|BG:O+|ALLERGY:None|RISK:HIGH"))
+        assertEquals("PT-A1B2C3", QrUtils.extractPatientIdFromQr("Patient ID: PT-A1B2C3"))
+        assertNull(QrUtils.extractPatientIdFromQr("INVALID_QR_PAYLOAD"))
+    }
+
+    @Test
+    fun locationHelper_computesHaversineDistanceAccurately() {
+        val km = LocationHelper.haversineKm(28.6139, 77.2090, 28.6289, 77.2195)
+        assertTrue(km > 1.5 && km < 2.5)
+    }
+
+    @Test
+    fun localization_returnsDistinctTranslationsForAllSupportedLanguages() {
+        val en = stringsForLanguage(AppLanguage.ENGLISH)
+        val hi = stringsForLanguage(AppLanguage.HINDI)
+        val mr = stringsForLanguage(AppLanguage.MARATHI)
+        val ta = stringsForLanguage(AppLanguage.TAMIL)
+        val bn = stringsForLanguage(AppLanguage.BENGALI)
+        assertEquals("Home", en.navHome)
+        assertTrue(hi.navHome != en.navHome && mr.navHome != en.navHome && ta.navHome != en.navHome && bn.navHome != en.navHome)
     }
 }

@@ -1,6 +1,7 @@
 package com.caresync.app
 
 import android.app.Application
+import com.caresync.app.database.DatabaseSeeder
 import com.caresync.app.network.initCustomFirebaseIfPresent
 import com.caresync.app.repository.CareSyncRepository
 import dagger.hilt.android.HiltAndroidApp
@@ -14,6 +15,9 @@ import javax.inject.Inject
 @HiltAndroidApp
 class CareSyncApplication : Application() {
     @Inject
+    lateinit var seeder: DatabaseSeeder
+
+    @Inject
     lateinit var repository: CareSyncRepository
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -21,10 +25,10 @@ class CareSyncApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         appScope.launch {
-            repository.ensureSeeded()
+            seeder.seedIfEmpty()
             try {
                 val prefs = repository.preferencesFlow.first()
-                if (prefs.firebaseProjectId.isNotBlank() && prefs.firebaseAppId.isNotBlank()) {
+                if (prefs.firebaseAppId.isNotBlank() && prefs.geminiApiKey.isNotBlank()) {
                     initCustomFirebaseIfPresent(
                         this@CareSyncApplication,
                         prefs.firebaseProjectId,

@@ -12,7 +12,20 @@
           "package_name": "com.caresync.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "879174369515-6qfhfn5oesksi0a210g924phq9cgbdt2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caresync.app",
+            "certificate_hash": "b2b74874340b970a8218c940f7ebb1d8eeb52795"
+          }
+        },
+        {
+          "client_id": "879174369515-3r8qs9202jh6ne0l5gctp0emf8s5u81s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCqdq4ZaZ4MAH8LXfHwHn9V62CDRCyOR2o"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "879174369515-3r8qs9202jh6ne0l5gctp0emf8s5u81s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -5,18 +5,21 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.caresync.app.database.PatientEntity
-import com.caresync.app.database.VitalsEntity
+import com.caresync.app.model.AppLanguage
 import com.caresync.app.model.ChatMessage
 import com.caresync.app.model.ClinicalAssessmentResult
+import com.caresync.app.model.PatientCategory
+import com.caresync.app.model.RxAnalysisResult
 import com.caresync.app.network.AiMedicalEngine
 import com.caresync.app.repository.AppPreferences
 import com.caresync.app.repository.CareSyncRepository
+import com.caresync.app.utils.TtsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -29,7 +32,6 @@ data class AiToolsUiState(
     val durationDays: Int = 2,
     val severity: String = "Moderate",
     val selectedPatientId: String? = null,
-    val prefillVitals: VitalsEntity? = null,
     val isEvaluating: Boolean = false,
     val symptomResult: ClinicalAssessmentResult? = null,
     val riskResult: ClinicalAssessmentResult? = null,
@@ -45,23 +47,32 @@ data class AiToolsUiState(
     ),
     val isChatTyping: Boolean = false,
     val imageAnalysisResult: String? = null,
+    val rxAnalysisResult: RxAnalysisResult? = null,
+    val rxSavedBanner: String? = null,
     val selectedImageUri: Uri? = null,
-    val isAnalyzingImage: Boolean = false
+    val isAnalyzingImage: Boolean = false,
+    val isOfflineOnlyMode: Boolean = false,
+    val activeLanguage: AppLanguage = AppLanguage.ENGLISH,
+    val isSpeaking: Boolean = false,
+    // Pre-filled assessment fields when opened from a specific patient
+    val prefillSystolic: String = "142",
+    val prefillDiastolic: String = "92",
+    val prefillHeartRate: String = "94",
+    val prefillSpo2: String = "95",
+    val prefillTempC: String = "37.8",
+    val prefillBloodSugar: String = "138",
+    val prefillIsPregnant: Boolean = false,
+    val prefillVersion: Int = 0
 )
 
 @HiltViewModel
 class AiToolsViewModel @Inject constructor(
     private val repository: CareSyncRepository,
-    private val aiEngine: AiMedicalEngine
+    private val aiEngine: AiMedicalEngine,
+    private val ttsManager: TtsManager
 ) : ViewModel() {
 
     val patients: StateFlow<List<PatientEntity>> = repository.allPatientsFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    val allVitals: StateFlow<List<VitalsEntity>> = repository.allVitalsFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
@@ -73,60 +84,98 @@ class AiToolsViewModel @Inject constructor(
         initialValue = AppPreferences()
     )
 
-    private val _uiState = MutableStateFlow(AiToolsUiState())
-    val uiState: StateFlow<AiToolsUiState> = _uiState.asStateFlow()
+    private val _rawState = MutableStateFlow(AiToolsUiState())
+    val uiState: StateFlow<AiToolsUiState> = combine(
+        _rawState,
+        preferences,
+        ttsManager.isSpeaking
+    ) { raw, prefs, speaking ->
+        raw.copy(
+            isOfflineOnlyMode = prefs.isOfflineOnlyMode,
+            activeLanguage = prefs.language,
+            isSpeaking = speaking
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AiToolsUiState()
+    )
+
+    fun loadPatientForAssessment(patientId: String?) {
+        if (patientId.isNullOrBlank()) return
+        viewModelScope.launch {
+            val patient = repository.getPatientOnce(patientId) ?: return@launch
+            val vitals = repository.getLatestVitalsOnce(patientId)
+            val isPregnant = patient.category == PatientCategory.PREGNANCY.name || patient.pregnancyWeeks > 0
+            _rawState.value = _rawState.value.copy(
+                selectedPatientId = patientId,
+                prefillSystolic = (vitals?.systolicBp ?: 122).toString(),
+                prefillDiastolic = (vitals?.diastolicBp ?: 80).toString(),
+                prefillHeartRate = (vitals?.heartRate ?: 80).toString(),
+                prefillSpo2 = (vitals?.spo2Percent ?: 98).toString(),
+                prefillTempC = (vitals?.temperatureC ?: 36.8f).toString(),
+                prefillBloodSugar = (vitals?.bloodSugarMgDl ?: 105).toString(),
+                prefillIsPregnant = isPregnant,
+                prefillVersion = _rawState.value.prefillVersion + 1
+            )
+        }
+    }
 
     fun toggleSymptom(symptom: String) {
-        val current = _uiState.value.selectedSymptoms
+        val current = _rawState.value.selectedSymptoms
         val updated = if (symptom in current) current - symptom else current + symptom
-        _uiState.value = _uiState.value.copy(selectedSymptoms = updated, aiErrorMessage = null)
+        _rawState.value = _rawState.value.copy(selectedSymptoms = updated, aiErrorMessage = null)
     }
 
     fun setDurationDays(days: Int) {
-        _uiState.value = _uiState.value.copy(durationDays = days.coerceIn(1, 30))
+        _rawState.value = _rawState.value.copy(durationDays = days.coerceIn(1, 30))
     }
 
     fun setSeverity(severity: String) {
-        _uiState.value = _uiState.value.copy(severity = severity)
+        _rawState.value = _rawState.value.copy(severity = severity)
     }
 
     fun selectPatient(patientId: String?) {
-        val latestVitals = patientId?.let { id ->
-            allVitals.value.filter { it.patientId == id }.maxByOrNull { it.recordedAtMillis }
-        }
-        _uiState.value = _uiState.value.copy(
-            selectedPatientId = patientId,
-            prefillVitals = latestVitals
-        )
+        _rawState.value = _rawState.value.copy(selectedPatientId = patientId)
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(aiErrorMessage = null)
+    fun setError(message: String?) {
+        _rawState.value = _rawState.value.copy(aiErrorMessage = message)
+    }
+
+    fun speakText(text: String) {
+        ttsManager.speak(text, preferences.value.language)
+    }
+
+    fun stopSpeaking() {
+        ttsManager.stop()
     }
 
     fun runSymptomCheck() {
-        val state = _uiState.value
+        val state = _rawState.value
         if (state.selectedSymptoms.isEmpty()) return
         val patient = patients.value.find { it.id == state.selectedPatientId }
-        val offlineOnly = preferences.value.isOfflineOnlyMode
-        val apiKey = preferences.value.geminiApiKey
+        val prefs = preferences.value
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isEvaluating = true, aiErrorMessage = null)
+            _rawState.value = _rawState.value.copy(isEvaluating = true, aiErrorMessage = null)
             try {
+                val latestVitals = patient?.let { repository.getLatestVitalsOnce(it.id) }
                 val result = aiEngine.evaluateSymptoms(
                     symptoms = state.selectedSymptoms.toList(),
                     durationDays = state.durationDays,
                     severity = state.severity,
                     patient = patient,
-                    offlineOnly = offlineOnly,
-                    apiKey = apiKey
+                    latestVitals = latestVitals,
+                    language = prefs.language,
+                    offlineOnly = prefs.isOfflineOnlyMode,
+                    apiKey = prefs.geminiApiKey
                 )
-                _uiState.value = _uiState.value.copy(isEvaluating = false, symptomResult = result)
+                _rawState.value = _rawState.value.copy(isEvaluating = false, symptomResult = result)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Symptom check failed", e)
-                _uiState.value = _uiState.value.copy(
+                _rawState.value = _rawState.value.copy(
                     isEvaluating = false,
                     aiErrorMessage = e.localizedMessage ?: "Gemini symptom check failed."
                 )
@@ -143,11 +192,10 @@ class AiToolsViewModel @Inject constructor(
         bloodSugar: Int,
         isPregnant: Boolean
     ) {
-        val patient = patients.value.find { it.id == _uiState.value.selectedPatientId }
-        val offlineOnly = preferences.value.isOfflineOnlyMode
-        val apiKey = preferences.value.geminiApiKey
+        val prefs = preferences.value
+        val patient = patients.value.find { it.id == _rawState.value.selectedPatientId }
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isEvaluating = true, aiErrorMessage = null)
+            _rawState.value = _rawState.value.copy(isEvaluating = true, aiErrorMessage = null)
             try {
                 val result = aiEngine.evaluateVitalsRisk(
                     systolic = systolic,
@@ -158,15 +206,16 @@ class AiToolsViewModel @Inject constructor(
                     bloodSugar = bloodSugar,
                     isPregnant = isPregnant,
                     patient = patient,
-                    offlineOnly = offlineOnly,
-                    apiKey = apiKey
+                    language = prefs.language,
+                    offlineOnly = prefs.isOfflineOnlyMode,
+                    apiKey = prefs.geminiApiKey
                 )
-                _uiState.value = _uiState.value.copy(isEvaluating = false, riskResult = result)
+                _rawState.value = _rawState.value.copy(isEvaluating = false, riskResult = result)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Disease risk assessment failed", e)
-                _uiState.value = _uiState.value.copy(
+                _rawState.value = _rawState.value.copy(
                     isEvaluating = false,
                     aiErrorMessage = e.localizedMessage ?: "Gemini risk assessment failed."
                 )
@@ -177,10 +226,10 @@ class AiToolsViewModel @Inject constructor(
     fun sendChatMessage(text: String) {
         val trimmed = text.trim()
         if (trimmed.isBlank()) return
-        val activePatient = patients.value.find { it.id == _uiState.value.selectedPatientId }
-        val offlineOnly = preferences.value.isOfflineOnlyMode
-        val apiKey = preferences.value.geminiApiKey
-        val historySnapshot = _uiState.value.chatMessages
+        val activePatient = patients.value.find { it.id == _rawState.value.selectedPatientId }
+        val prefs = preferences.value
+        val offlineOnly = prefs.isOfflineOnlyMode
+        val historySnapshot = _rawState.value.chatMessages
 
         val userMsg = ChatMessage(
             id = "u-${UUID.randomUUID().toString().take(6)}",
@@ -190,8 +239,8 @@ class AiToolsViewModel @Inject constructor(
         )
         val streamingBotId = "a-${UUID.randomUUID().toString().take(6)}"
 
-        _uiState.value = _uiState.value.copy(
-            chatMessages = _uiState.value.chatMessages + userMsg,
+        _rawState.value = _rawState.value.copy(
+            chatMessages = _rawState.value.chatMessages + userMsg,
             isChatTyping = true,
             aiErrorMessage = null
         )
@@ -199,22 +248,29 @@ class AiToolsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 var botAdded = false
-                aiEngine.streamChatReply(trimmed, historySnapshot, activePatient, offlineOnly, apiKey).collect { partialText ->
+                aiEngine.streamChatReply(
+                    userMessage = trimmed,
+                    history = historySnapshot,
+                    activePatient = activePatient,
+                    language = prefs.language,
+                    offlineOnly = offlineOnly,
+                    apiKey = prefs.geminiApiKey
+                ).collect { partialText ->
                     val botMsg = ChatMessage(
                         id = streamingBotId,
                         isUser = false,
                         text = partialText,
-                        timestampLabel = if (offlineOnly || apiKey.isBlank()) "Clinical Engine" else "Gemini AI",
-                        tags = if (offlineOnly || apiKey.isBlank()) listOf("Clinical Engine") else listOf("Gemini 2.5 Flash")
+                        timestampLabel = if (offlineOnly) "Offline Mode" else "Gemini AI",
+                        tags = if (offlineOnly) listOf("Offline Mode") else listOf("Gemini 3.8 Flash")
                     )
-                    val currentList = _uiState.value.chatMessages
+                    val currentList = _rawState.value.chatMessages
                     val updatedList = if (!botAdded) {
                         botAdded = true
                         currentList + botMsg
                     } else {
                         currentList.map { if (it.id == streamingBotId) botMsg else it }
                     }
-                    _uiState.value = _uiState.value.copy(
+                    _rawState.value = _rawState.value.copy(
                         chatMessages = updatedList,
                         isChatTyping = false
                     )
@@ -223,7 +279,7 @@ class AiToolsViewModel @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Chat streaming failed", e)
-                _uiState.value = _uiState.value.copy(
+                _rawState.value = _rawState.value.copy(
                     isChatTyping = false,
                     aiErrorMessage = e.localizedMessage ?: "Gemini chat failed."
                 )
@@ -232,22 +288,24 @@ class AiToolsViewModel @Inject constructor(
     }
 
     fun analyzeImageSample(label: String, uri: Uri? = null) {
-        val offlineOnly = preferences.value.isOfflineOnlyMode
-        val apiKey = preferences.value.geminiApiKey
+        val prefs = preferences.value
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
+            _rawState.value = _rawState.value.copy(
                 isAnalyzingImage = true,
-                selectedImageUri = uri ?: _uiState.value.selectedImageUri,
+                selectedImageUri = uri,
+                rxAnalysisResult = null,
+                rxSavedBanner = null,
                 aiErrorMessage = null
             )
             try {
                 val result = aiEngine.analyzeClinicalImage(
                     scanLabel = label,
-                    imageUri = uri ?: _uiState.value.selectedImageUri,
-                    offlineOnly = offlineOnly,
-                    apiKey = apiKey
+                    imageUri = uri,
+                    language = prefs.language,
+                    offlineOnly = prefs.isOfflineOnlyMode,
+                    apiKey = prefs.geminiApiKey
                 )
-                _uiState.value = _uiState.value.copy(
+                _rawState.value = _rawState.value.copy(
                     isAnalyzingImage = false,
                     imageAnalysisResult = result
                 )
@@ -255,11 +313,59 @@ class AiToolsViewModel @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Image analysis failed", e)
-                _uiState.value = _uiState.value.copy(
+                _rawState.value = _rawState.value.copy(
                     isAnalyzingImage = false,
                     aiErrorMessage = e.localizedMessage ?: "Gemini image analysis failed."
                 )
             }
+        }
+    }
+
+    fun analyzePrescription(label: String, uri: Uri? = null) {
+        val prefs = preferences.value
+        val patient = patients.value.find { it.id == _rawState.value.selectedPatientId }
+        viewModelScope.launch {
+            _rawState.value = _rawState.value.copy(
+                isAnalyzingImage = true,
+                selectedImageUri = uri ?: _rawState.value.selectedImageUri,
+                imageAnalysisResult = null,
+                rxSavedBanner = null,
+                aiErrorMessage = null
+            )
+            try {
+                val result = aiEngine.analyzePrescriptionStructured(
+                    scanLabel = label,
+                    imageUri = uri ?: _rawState.value.selectedImageUri,
+                    patient = patient,
+                    language = prefs.language,
+                    offlineOnly = prefs.isOfflineOnlyMode
+                )
+                _rawState.value = _rawState.value.copy(
+                    isAnalyzingImage = false,
+                    rxAnalysisResult = result
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Rx structured analysis failed", e)
+                _rawState.value = _rawState.value.copy(
+                    isAnalyzingImage = false,
+                    aiErrorMessage = e.localizedMessage ?: "Gemini Rx OCR failed."
+                )
+            }
+        }
+    }
+
+    fun saveRxToPatient(patientId: String) {
+        val rx = _rawState.value.rxAnalysisResult ?: return
+        if (rx.medications.isEmpty()) return
+        viewModelScope.launch {
+            val patient = repository.getPatientOnce(patientId) ?: return@launch
+            repository.saveRxMedicationsAndReminders(patient, rx.medications)
+            _rawState.value = _rawState.value.copy(
+                selectedPatientId = patientId,
+                rxSavedBanner = "Saved ${rx.medications.size} medicine(s) & dose reminder for ${patient.fullName}."
+            )
         }
     }
 }

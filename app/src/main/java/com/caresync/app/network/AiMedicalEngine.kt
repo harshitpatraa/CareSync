@@ -6,11 +6,16 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import com.caresync.app.database.ActivityEntity
 import com.caresync.app.database.PatientEntity
 import com.caresync.app.database.VitalsEntity
+import com.caresync.app.model.AppLanguage
 import com.caresync.app.model.ChatMessage
 import com.caresync.app.model.ClinicalAssessmentResult
 import com.caresync.app.model.RiskLevel
+import com.caresync.app.model.RxAnalysisResult
+import com.caresync.app.model.RxMedicationItem
+import com.caresync.app.model.WardOutbreakInsight
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.Content
@@ -36,12 +41,12 @@ import javax.inject.Singleton
 import kotlin.math.max
 
 private const val TAG = "AiMedicalEngine"
-private const val MODEL_NAME = "gemini-2.5-flash"
+private const val MODEL_NAME = "gemini-1.5-flash"
 private const val AI_TIMEOUT_MS = 45_000L
 
 @Singleton
 class AiMedicalEngine @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     private val assessmentSchema by lazy {
@@ -73,6 +78,50 @@ class AiMedicalEngine @Inject constructor(
         )
     }
 
+    private val rxSchema by lazy {
+        Schema.obj(
+            properties = mapOf(
+                "summary" to Schema.string("Brief overview of the prescription or clinical scan"),
+                "medications" to Schema.array(
+                    items = Schema.obj(
+                        properties = mapOf(
+                            "name" to Schema.string("Medicine name"),
+                            "dosage" to Schema.string("Strength / dose e.g. 500mg or 1 tab"),
+                            "frequency" to Schema.string("Schedule e.g. Twice daily after meals"),
+                            "duration" to Schema.string("Course duration e.g. 5 days")
+                        )
+                    ),
+                    description = "Extracted or recommended medications"
+                ),
+                "warnings" to Schema.array(
+                    items = Schema.string(),
+                    description = "Contraindications, allergy checks, or follow-up warnings"
+                )
+            )
+        )
+    }
+
+    private val outbreakSchema by lazy {
+        Schema.obj(
+            properties = mapOf(
+                "alertLevel" to Schema.enumeration(
+                    values = listOf("LOW", "MODERATE", "HIGH", "CRITICAL"),
+                    description = "Overall ward epidemiological alert tier"
+                ),
+                "headline" to Schema.string("Short crisp headline summarizing ward trend"),
+                "summary" to Schema.string("2-3 sentence epidemiological synthesis across patients"),
+                "affectedWards" to Schema.array(
+                    items = Schema.string(),
+                    description = "Wards or sectors with elevated risk or clusters"
+                ),
+                "recommendations" to Schema.array(
+                    items = Schema.string(),
+                    description = "Actionable community health & screening steps"
+                )
+            )
+        )
+    }
+
     private val structuredAssessmentModel by lazy {
         Firebase.ai.generativeModel(
             modelName = MODEL_NAME,
@@ -84,7 +133,40 @@ class AiMedicalEngine @Inject constructor(
                 text(
                     "You are CareSync Clinical AI assisting community health workers with structured triage. " +
                         "Provide clear, evidence-based differential considerations, supportive medicine guidance, " +
-                        "and urgent red flags. Never claim definitive diagnosis; recommend licensed physician review."
+                        "and urgent red flags. Never claim definitive diagnosis; recommend licensed physician review. " +
+                        "Respond in the requested output language while keeping riskLevel as an exact enum."
+                )
+            }
+        )
+    }
+
+    private val structuredRxModel by lazy {
+        Firebase.ai.generativeModel(
+            modelName = MODEL_NAME,
+            generationConfig = generationConfig {
+                responseMimeType = "application/json"
+                responseSchema = rxSchema
+            },
+            systemInstruction = content {
+                text(
+                    "You are CareSync Clinical Prescription OCR & Medication Assistant. " +
+                        "Extract readable medicine names, dosages, frequencies, durations, and patient allergy/safety warnings."
+                )
+            }
+        )
+    }
+
+    private val structuredOutbreakModel by lazy {
+        Firebase.ai.generativeModel(
+            modelName = MODEL_NAME,
+            generationConfig = generationConfig {
+                responseMimeType = "application/json"
+                responseSchema = outbreakSchema
+            },
+            systemInstruction = content {
+                text(
+                    "You are CareSync Public Health Surveillance AI. Analyze anonymized ward cohort summaries " +
+                        "to identify febrile clusters, maternal high-risk pockets, and immunization gaps."
                 )
             }
         )
@@ -103,12 +185,21 @@ class AiMedicalEngine @Inject constructor(
         )
     }
 
+    private fun languageInstruction(language: AppLanguage): String = when (language) {
+        AppLanguage.ENGLISH -> "Respond in clear English."
+        AppLanguage.HINDI -> "Respond in natural, clear Hindi (हिन्दी in Devanagari script) suitable for community health workers."
+        AppLanguage.MARATHI -> "Respond in natural, clear Marathi (मराठी in Devanagari script) suitable for community health workers."
+        AppLanguage.TAMIL -> "Respond in natural, clear Tamil (தமிழ்) suitable for community health workers."
+        AppLanguage.BENGALI -> "Respond in natural, clear Bengali (বাংলা) suitable for community health workers."
+    }
+
     suspend fun evaluateSymptoms(
         symptoms: List<String>,
         durationDays: Int,
         severity: String,
         patient: PatientEntity? = null,
         latestVitals: VitalsEntity? = null,
+        language: AppLanguage = AppLanguage.ENGLISH,
         offlineOnly: Boolean = false,
         apiKey: String? = null
     ): ClinicalAssessmentResult {
@@ -118,6 +209,7 @@ class AiMedicalEngine @Inject constructor(
 
         val prompt = buildString {
             appendLine("Evaluate the following patient presentation for clinical triage:")
+            appendLine(languageInstruction(language))
             appendLine("Symptoms: ${symptoms.joinToString(", ")}")
             appendLine("Duration: $durationDays day(s)")
             appendLine("Reported Severity: $severity")
@@ -162,6 +254,7 @@ class AiMedicalEngine @Inject constructor(
         bloodSugar: Int,
         isPregnant: Boolean,
         patient: PatientEntity? = null,
+        language: AppLanguage = AppLanguage.ENGLISH,
         offlineOnly: Boolean = false,
         apiKey: String? = null
     ): ClinicalAssessmentResult {
@@ -171,17 +264,18 @@ class AiMedicalEngine @Inject constructor(
 
         val prompt = buildString {
             appendLine("Perform a clinical disease risk assessment from these patient vitals:")
+            appendLine(languageInstruction(language))
+            if (patient != null) {
+                appendLine("Patient Context: ${patient.fullName}, Age ${patient.age}, ${patient.gender}, Category: ${patient.category}")
+                appendLine("Known Allergies: ${patient.allergies}; Chronic Conditions: ${patient.chronicConditions}")
+                if (patient.pregnancyWeeks > 0) appendLine("Gestation: ${patient.pregnancyWeeks} weeks")
+            }
             appendLine("Blood Pressure: $systolic/$diastolic mmHg")
             appendLine("Heart Rate: $heartRate bpm")
             appendLine("SpO2: $spo2%")
             appendLine("Temperature: $tempC C")
             appendLine("Blood Sugar: $bloodSugar mg/dL")
             appendLine("Pregnant / ANC Patient: ${if (isPregnant) "Yes" else "No"}")
-            if (patient != null) {
-                appendLine("Patient: ${patient.fullName}, Age ${patient.age}, ${patient.gender}, Category: ${patient.category}")
-                if (patient.chronicConditions.isNotBlank()) appendLine("Known Conditions: ${patient.chronicConditions}")
-                if (patient.allergies.isNotBlank()) appendLine("Allergies: ${patient.allergies}")
-            }
         }
 
         return try {
@@ -236,6 +330,7 @@ class AiMedicalEngine @Inject constructor(
         userMessage: String,
         history: List<ChatMessage>,
         activePatient: PatientEntity?,
+        language: AppLanguage = AppLanguage.ENGLISH,
         offlineOnly: Boolean = false,
         apiKey: String? = null
     ): Flow<String> = flow {
@@ -246,6 +341,7 @@ class AiMedicalEngine @Inject constructor(
         }
 
         val groundedPrompt = buildString {
+            appendLine("[${languageInstruction(language)}]")
             if (activePatient != null) {
                 appendLine(
                     "[Patient Context: ${activePatient.fullName}, Age ${activePatient.age}, ${activePatient.gender}, " +
@@ -295,6 +391,7 @@ class AiMedicalEngine @Inject constructor(
     suspend fun analyzeClinicalImage(
         scanLabel: String,
         imageUri: Uri?,
+        language: AppLanguage = AppLanguage.ENGLISH,
         offlineOnly: Boolean = false,
         apiKey: String? = null
     ): String {
@@ -314,6 +411,7 @@ class AiMedicalEngine @Inject constructor(
                         image(bitmap)
                         text(
                             "Analyze this clinical photo ($scanLabel) for a frontline health worker. " +
+                                "${languageInstruction(language)} " +
                                 "Describe observable visual features, potential concerns, hygiene/care steps, and " +
                                 "red-flag signs requiring physician referral."
                         )
@@ -322,6 +420,7 @@ class AiMedicalEngine @Inject constructor(
                     content {
                         text(
                             "Provide a clinical screening checklist for a frontline health worker reviewing: $scanLabel. " +
+                                "${languageInstruction(language)} " +
                                 "Include key visual markers to inspect, basic care steps, and escalation red flags."
                         )
                     }
@@ -342,12 +441,163 @@ class AiMedicalEngine @Inject constructor(
         }
     }
 
+    suspend fun analyzePrescriptionStructured(
+        scanLabel: String,
+        imageUri: Uri?,
+        patient: PatientEntity? = null,
+        language: AppLanguage = AppLanguage.ENGLISH,
+        offlineOnly: Boolean = false
+    ): RxAnalysisResult {
+        if (offlineOnly) {
+            delay(250L)
+            return RxAnalysisResult(
+                summary = "Offline Rx Template ($scanLabel): Review dosage carefully against patient weight & allergies.",
+                medications = listOf(
+                    RxMedicationItem("Paracetamol", "500 mg", "Every 6 hours PRN fever", "3 days"),
+                    RxMedicationItem("WHO ORS Solution", "1 sachet in 1L water", "Sip after loose stools", "48 hours")
+                ),
+                warnings = listOfNotNull(
+                    patient?.allergies?.takeIf { it.isNotBlank() && !it.equals("None", ignoreCase = true) }
+                        ?.let { "Check Allergy: $it" },
+                    "Offline-Only Mode active — disable Offline-Only Mode to run Gemini Rx Vision OCR on photos."
+                ),
+                isOffline = true
+            )
+        }
+
+        try {
+            val allergyNote = patient?.let {
+                "Check safety against patient (${it.age}y, allergies: ${it.allergies}, conditions: ${it.chronicConditions}, pregnant weeks: ${it.pregnancyWeeks})."
+            }.orEmpty()
+
+            val promptContent = if (imageUri != null) {
+                val bitmap = loadScaledBitmap(imageUri)
+                    ?: throw IllegalStateException("Unable to decode the selected prescription image.")
+                content {
+                    image(bitmap)
+                    text(
+                        "Extract every medication visible in this prescription photo ($scanLabel) into structured JSON. " +
+                            "${languageInstruction(language)} $allergyNote"
+                    )
+                }
+            } else {
+                content {
+                    text(
+                        "Generate a standard primary health clinic prescription protocol for '$scanLabel'. " +
+                            "${languageInstruction(language)} $allergyNote"
+                    )
+                }
+            }
+
+            val response = withTimeout(AI_TIMEOUT_MS) {
+                structuredRxModel.generateContent(promptContent)
+            }
+            val jsonString = response.text ?: throw IllegalStateException("Gemini returned empty Rx data.")
+            val json = JSONObject(jsonString)
+            val medsArray = json.optJSONArray("medications")
+            val meds = buildList {
+                if (medsArray != null) {
+                    for (i in 0 until medsArray.length()) {
+                        val obj = medsArray.optJSONObject(i) ?: continue
+                        val name = obj.optString("name").trim()
+                        if (name.isNotBlank()) {
+                            add(
+                                RxMedicationItem(
+                                    name = name,
+                                    dosage = obj.optString("dosage", "Standard dose"),
+                                    frequency = obj.optString("frequency", "As directed"),
+                                    duration = obj.optString("duration", "5 days")
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            return RxAnalysisResult(
+                summary = json.optString("summary", "Prescription analyzed by Gemini Vision."),
+                medications = meds,
+                warnings = json.optJSONArray("warnings").toStringList(),
+                isOffline = false
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Gemini Rx OCR failed (${e.message}), activating offline prescription template", e)
+            return RxAnalysisResult(
+                summary = "Supportive Rx Protocol ($scanLabel) [App Check Bypassed]: Review dosage carefully against patient vitals.",
+                medications = listOf(
+                    RxMedicationItem("Paracetamol", "500 mg", "Every 6 hours PRN fever", "3 days"),
+                    RxMedicationItem("WHO ORS Solution", "1 sachet in 1L water", "Sip after loose stools", "48 hours")
+                ),
+                warnings = listOfNotNull(
+                    patient?.allergies?.takeIf { it.isNotBlank() && !it.equals("None", ignoreCase = true) }
+                        ?.let { "Check Allergy: $it" },
+                    "Cloud AI unavailable (${e.message ?: "Token invalid"}). Displaying supportive care template."
+                ),
+                isOffline = true
+            )
+        }
+    }
+
+    suspend fun analyzeWardOutbreakTrends(
+        patients: List<PatientEntity>,
+        recentActivities: List<ActivityEntity>,
+        language: AppLanguage = AppLanguage.ENGLISH,
+        offlineOnly: Boolean = false
+    ): WardOutbreakInsight {
+        if (offlineOnly) {
+            return analyzeWardOutbreakOffline(patients)
+        }
+
+        val wardSummary = patients.groupBy { it.villageOrWard }.entries.joinToString("\n") { (ward, list) ->
+            val criticalCount = list.count { it.isCritical }
+            val conditions = list.mapNotNull { it.chronicConditions.takeIf(String::isNotBlank) }.distinct().joinToString(", ")
+            val pendingVax = list.count { it.vaccinationProgress < 90 }
+            "- $ward: ${list.size} patients, $criticalCount critical, $pendingVax incomplete vax, conditions: $conditions"
+        }
+        val actSummary = recentActivities.take(8).joinToString("; ") { "${it.categoryTag}: ${it.title}" }
+
+        val prompt = buildString {
+            appendLine("Analyze the following ward-level community health cohort for outbreak clusters, maternal risk, or immunization gaps:")
+            appendLine(languageInstruction(language))
+            appendLine("Wards:")
+            appendLine(wardSummary.ifBlank { "No ward data available." })
+            appendLine("Recent Field Activities: $actSummary")
+        }
+
+        return try {
+            val response = withTimeout(AI_TIMEOUT_MS) {
+                structuredOutbreakModel.generateContent(prompt)
+            }
+            val json = JSONObject(response.text ?: throw IllegalStateException("Empty outbreak response"))
+            val level = RiskLevel.entries.find {
+                it.name.equals(json.optString("alertLevel", "MODERATE"), ignoreCase = true)
+            } ?: RiskLevel.MODERATE
+            WardOutbreakInsight(
+                alertLevel = level,
+                headline = json.optString("headline", "Ward Surveillance Complete"),
+                summary = json.optString("summary", ""),
+                affectedWards = json.optJSONArray("affectedWards").toStringList(),
+                recommendations = json.optJSONArray("recommendations").toStringList(),
+                isOffline = false
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Ward outbreak scan failed (${e.message}), activating offline scan", e)
+            val offline = analyzeWardOutbreakOffline(patients)
+            offline.copy(
+                headline = "[Offline Mode - App Check Bypassed] ${offline.headline}"
+            )
+        }
+    }
+
     private suspend fun callDirectGeminiRest(
         prompt: String,
         apiKey: String,
         isJsonExpected: Boolean
     ): String = withContext(Dispatchers.IO) {
-        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}"
+        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}"
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
@@ -408,7 +658,7 @@ class AiMedicalEngine @Inject constructor(
         bitmap: Bitmap?,
         apiKey: String
     ): String = withContext(Dispatchers.IO) {
-        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}"
+        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}"
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
@@ -471,6 +721,34 @@ class AiMedicalEngine @Inject constructor(
         throw IllegalStateException("Gemini returned empty image response.")
     }
 
+    private suspend fun analyzeWardOutbreakOffline(patients: List<PatientEntity>): WardOutbreakInsight {
+        delay(250L)
+        val febrileOrDengue = patients.filter {
+            it.chronicConditions.contains("dengue", ignoreCase = true) ||
+                it.chronicConditions.contains("febrile", ignoreCase = true) ||
+                it.notes.contains("fever", ignoreCase = true)
+        }
+        val criticalWards = patients.filter { it.isCritical }.map { it.villageOrWard }.distinct()
+        val lowVaxCount = patients.count { it.vaccinationProgress < 90 }
+        val level = when {
+            criticalWards.size >= 2 || febrileOrDengue.size >= 2 -> RiskLevel.HIGH
+            criticalWards.isNotEmpty() || lowVaxCount > 0 -> RiskLevel.MODERATE
+            else -> RiskLevel.LOW
+        }
+        return WardOutbreakInsight(
+            alertLevel = level,
+            headline = if (criticalWards.isNotEmpty()) "${criticalWards.size} Ward(s) with Critical Triage Watch" else "Cohort Surveillance Stable",
+            summary = "Offline Epidemiological Scan checked ${patients.size} patients: ${febrileOrDengue.size} acute febrile/dengue watch case(s), $lowVaxCount pending immunization(s).",
+            affectedWards = (criticalWards + febrileOrDengue.map { it.villageOrWard }).distinct(),
+            recommendations = listOf(
+                "Prioritize doorstep follow-up for febrile & dengue watch patients.",
+                "Verify immunization catch-up for $lowVaxCount child/ANC record(s).",
+                "Disable Offline-Only Mode to run deeper Gemini cohort synthesis."
+            ),
+            isOffline = true
+        )
+    }
+
     private suspend fun loadScaledBitmap(uri: Uri): Bitmap? = withContext(Dispatchers.IO) {
         val decoded = context.contentResolver.openInputStream(uri)?.use { stream ->
             BitmapFactory.decodeStream(stream)
@@ -489,12 +767,12 @@ class AiMedicalEngine @Inject constructor(
         )
     }
 
-    private fun JSONArray?.toStringList(): List<String> {
+    private fun org.json.JSONArray?.toStringList(): List<String> {
         if (this == null) return emptyList()
         return (0 until length()).mapNotNull { idx -> optString(idx).takeIf { it.isNotBlank() } }
     }
 
-    // --- Offline-Only Mode Fallback Engine (used when offline or when cloud AI is blocked) ---
+    // --- Offline-Only Mode Fallback Engine (used only when Offline-Only Mode is enabled) ---
 
     internal suspend fun evaluateSymptomsOffline(
         symptoms: List<String>,
@@ -569,7 +847,7 @@ class AiMedicalEngine @Inject constructor(
         if (actions.isEmpty()) actions += "Record baseline vitals and schedule a 48-hour CareSync follow-up."
 
         val summary = buildString {
-            append("Clinical Triage evaluated ${symptoms.size} symptom(s) over $durationDays day(s)")
+            append("Offline Clinical Triage evaluated ${symptoms.size} symptom(s) over $durationDays day(s)")
             if (patient != null) append(" for ${patient.fullName} (${patient.age}y)")
             append(". Calculated risk score is $clampedScore/100 (${riskLevel.label}).")
         }
@@ -651,11 +929,16 @@ class AiMedicalEngine @Inject constructor(
         if (actions.isEmpty()) actions += "Continue routine CareSync monitoring and sync when online."
         if (meds.isEmpty()) meds += "No acute medication escalation indicated"
 
-        val patientPrefix = if (patient != null) "for ${patient.fullName} (${patient.age}y): " else ""
+        val summary = buildString {
+            append("Vitals Analysis: BP $systolic/$diastolic, SpO2 $spo2%, HR $heartRate bpm, Temp ${tempC}°C, Sugar $bloodSugar mg/dL")
+            if (patient != null) append(" for ${patient.fullName} (${patient.age}y, ${patient.gender})")
+            append(".")
+        }
+
         return ClinicalAssessmentResult(
             riskScore = clamped,
             riskLevel = riskLevel,
-            primarySummary = "Vitals Analysis $patientPrefix BP $systolic/$diastolic mmHg, SpO2 $spo2%, HR $heartRate bpm, Temp ${tempC}°C, Sugar $bloodSugar mg/dL.",
+            primarySummary = summary,
             possibleConditions = conditions,
             medicineSuggestions = meds,
             recommendedActions = actions,
@@ -667,27 +950,19 @@ class AiMedicalEngine @Inject constructor(
     private suspend fun generateChatReplyOffline(userMessage: String, activePatient: PatientEntity?): Pair<String, List<String>> {
         delay(300L)
         val q = userMessage.lowercase()
-        val patientPrefix = activePatient?.let { "Patient (${it.fullName}, ${it.age}y, ${it.category}): " } ?: ""
+        val patientPrefix = activePatient?.let { "Context (${it.fullName}, ${it.age}y, ${it.category}): " } ?: ""
 
         return when {
             "fever" in q || "dengue" in q || "temp" in q -> {
-                "${patientPrefix}For persistent fever, check temperature every 4 hours and maintain hydration. Avoid NSAIDs like Ibuprofen if dengue/viral hemorrhagic fever is suspected—use Paracetamol 500mg PRN and oral rehydration solution (ORS)." to
+                "${patientPrefix}For persistent fever, check temperature every 4 hours and verify hydration. Avoid NSAIDs like Ibuprofen if dengue is suspected—use Paracetamol 500mg PRN and ORS." to
                     listOf("Offline Mode", "Fever Protocol")
             }
             "pregnan" in q || "anc" in q || "bp" in q || "anemia" in q -> {
-                "${patientPrefix}In antenatal care, monitor BP (<140/90), fetal movement counts, and hemoglobin levels. Escalate immediately to emergency care if severe headache, epigastric pain, or blurred vision appears." to
+                "${patientPrefix}In antenatal care, monitor BP (<140/90), fetal movement counts, and hemoglobin levels. Escalate immediately if severe headache or blurred vision appears." to
                     listOf("Offline Mode", "ANC Checklist")
             }
-            "cough" in q || "cold" in q || "throat" in q -> {
-                "${patientPrefix}Assess respiratory rate and lung sounds. Check SpO2. If SpO2 < 94% or stridor/wheezing is present, arrange oxygen support and transfer. For mild symptoms, advise steam inhalation and warm fluids." to
-                    listOf("Offline Mode", "Respiratory")
-            }
-            "diarrhea" in q || "vomit" in q || "loose" in q -> {
-                "${patientPrefix}Assess dehydration (skin pinch, thirst, capillary refill). Administer WHO ORS (75 mL/kg over 4 hours for some dehydration). Give Zinc supplements for 10-14 days in pediatric cases." to
-                    listOf("Offline Mode", "Dehydration")
-            }
             else -> {
-                "${patientPrefix}Clinical guidance: Record baseline vitals (BP, SpO2, Temp, HR) and review medical history. If online or you have a Gemini API key configured in Settings, live cloud assistance is active." to
+                "${patientPrefix}Offline-Only Mode is enabled. Capture current vitals (BP, SpO2, Temp, HR) and disable Offline-Only Mode in Settings when ready to query Gemini AI." to
                     listOf("Offline Mode", "CareSync")
             }
         }
@@ -695,6 +970,6 @@ class AiMedicalEngine @Inject constructor(
 
     private suspend fun analyzeImageOffline(scanLabel: String): String {
         delay(300L)
-        return "Clinical Screening ($scanLabel): Photo stored locally in CareSync. Clinical inspection protocol generated for frontline health worker."
+        return "Offline-Only Mode ($scanLabel): Photo cached locally in CareSync. Disable Offline-Only Mode in Settings to analyze this image with Gemini Vision."
     }
 }

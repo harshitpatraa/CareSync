@@ -85,7 +85,9 @@ data class NearbyHealthCenter(
     val type: String,
     val distanceKm: String,
     val availability: String,
-    val phone: String
+    val phone: String,
+    val latitude: Double = 28.6139,
+    val longitude: Double = 77.2090
 )
 
 data class EmergencyInstruction(
@@ -104,3 +106,27 @@ data class UserProfile(
     val phone: String,
     val email: String
 )
+
+data class RxMedicationItem(
+    val name: String,
+    val dosage: String,
+    val frequency: String,
+    val duration: String
+)
+
+data class RxAnalysisResult(
+    val summary: String,
+    val medications: List<RxMedicationItem>,
+    val warnings: List<String>,
+    val isOffline: Boolean = false
+)
+
+data class WardOutbreakInsight(
+    val alertLevel: RiskLevel,
+    val headline: String,
+    val summary: String,
+    val affectedWards: List<String>,
+    val recommendations: List<String>,
+    val isOffline: Boolean = false
+)
+

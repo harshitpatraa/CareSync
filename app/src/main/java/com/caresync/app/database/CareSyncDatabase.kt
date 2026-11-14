@@ -22,4 +22,13 @@ abstract class CareSyncDatabase : RoomDatabase() {
     abstract fun syncQueueDao(): SyncQueueDao
     abstract fun notificationDao(): NotificationDao
     abstract fun activityDao(): ActivityDao
+
+    suspend fun clearAllLocalData() {
+        syncQueueDao().clearAll()
+        vitalsDao().clearAll()
+        healthRecordDao().clearAll()
+        notificationDao().clearAll()
+        activityDao().clearAll()
+        patientDao().clearAll()
+    }
 }

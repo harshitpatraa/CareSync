@@ -24,6 +24,7 @@ enum class PatientFilter(val label: String) {
     CRITICAL("Critical"),
     PREGNANCY("Pregnancy"),
     CHILD("Child Care"),
+    PENDING_VISIT("Pending Visits"),
     PENDING_SYNC("Pending Sync"),
     TODAY("Today")
 }
@@ -32,6 +33,7 @@ data class PatientsUiState(
     val searchQuery: String = "",
     val activeFilter: PatientFilter = PatientFilter.ALL,
     val patients: List<PatientEntity> = emptyList(),
+    val allPatientsUnfiltered: List<PatientEntity> = emptyList(),
     val allRecords: List<HealthRecordEntity> = emptyList(),
     val totalCount: Int = 0
 )
@@ -62,6 +64,7 @@ class PatientsViewModel @Inject constructor(
                 PatientFilter.CRITICAL -> p.isCritical
                 PatientFilter.PREGNANCY -> p.category == PatientCategory.PREGNANCY.name
                 PatientFilter.CHILD -> p.category == PatientCategory.CHILD.name
+                PatientFilter.PENDING_VISIT -> p.isPendingVisit
                 PatientFilter.PENDING_SYNC -> p.syncStatus != SyncStatus.SYNCED.name
                 PatientFilter.TODAY -> p.isTodayVisit
             }
@@ -71,6 +74,7 @@ class PatientsViewModel @Inject constructor(
             searchQuery = query,
             activeFilter = filter,
             patients = filtered,
+            allPatientsUnfiltered = patients,
             allRecords = records,
             totalCount = patients.size
         )
@@ -100,7 +104,17 @@ class PatientsViewModel @Inject constructor(
         }
     }
 
-    fun registerPatientOffline(
+    suspend fun getPatientForEdit(patientId: String): PatientEntity? =
+        repository.getPatientOnce(patientId)
+
+    fun patientExists(patientId: String): Boolean =
+        uiState.value.allPatientsUnfiltered.any { it.id.equals(patientId, ignoreCase = true) }
+
+    fun findCanonicalPatientId(rawId: String): String? =
+        uiState.value.allPatientsUnfiltered.firstOrNull { it.id.equals(rawId, ignoreCase = true) }?.id
+
+    fun savePatientOffline(
+        editingPatientId: String?,
         fullName: String,
         age: Int,
         gender: String,
@@ -125,30 +139,40 @@ class PatientsViewModel @Inject constructor(
         onSaved: (String) -> Unit
     ) {
         viewModelScope.launch {
-            val id = "PT-${(1009..9999).random()}"
+            val existing = editingPatientId?.let { repository.getPatientOnce(it) }
+            val isNew = existing == null
+            val id = existing?.id ?: "PT-${UUID.randomUUID().toString().take(6).uppercase()}"
             val now = System.currentTimeMillis()
+            val vitalsCritical = repository.isCriticalVitalsThreshold(
+                systolic = systolicBp,
+                diastolic = diastolicBp,
+                spo2 = spo2,
+                tempC = tempC,
+                heartRate = heartRate,
+                bloodSugar = 104
+            )
             val riskLevel = when {
-                isCritical || spo2 < 92 || systolicBp >= 160 -> RiskLevel.CRITICAL
+                isCritical || (isNew && vitalsCritical) -> RiskLevel.CRITICAL
                 category == PatientCategory.PREGNANCY && systolicBp >= 135 -> RiskLevel.HIGH
                 tempC >= 38.0f -> RiskLevel.MODERATE
-                else -> RiskLevel.LOW
+                else -> existing?.let { RiskLevel.entries.find { r -> r.name == it.riskLevel } } ?: RiskLevel.LOW
             }
             val patient = PatientEntity(
                 id = id,
                 fullName = fullName.trim(),
                 age = age,
                 gender = gender,
-                phone = phone.trim().ifBlank { "+91 98000 00000" },
+                phone = phone.trim(),
                 villageOrWard = villageOrWard.trim().ifBlank { "Ward 4 · Community Hub" },
                 bloodGroup = bloodGroup.ifBlank { "O+" },
                 category = category.name,
                 riskLevel = riskLevel.name,
                 isCritical = isCritical || riskLevel == RiskLevel.CRITICAL,
-                isTodayVisit = true,
-                isPendingVisit = false,
+                isTodayVisit = existing?.isTodayVisit ?: true,
+                isPendingVisit = existing?.isPendingVisit ?: false,
                 syncStatus = SyncStatus.PENDING_UPLOAD.name,
-                lastVisitLabel = "Just now",
-                nextFollowUpDate = "21 Nov 2026",
+                lastVisitLabel = existing?.lastVisitLabel ?: "Just now",
+                nextFollowUpDate = existing?.nextFollowUpDate ?: "21 Nov 2026",
                 allergies = allergies.ifBlank { "None reported" },
                 chronicConditions = chronicConditions.ifBlank { "None" },
                 familyHeadName = familyHeadName.ifBlank { fullName.trim() },
@@ -156,26 +180,30 @@ class PatientsViewModel @Inject constructor(
                 pregnancyWeeks = pregnancyWeeks,
                 expectedDueDate = expectedDueDate,
                 childWeightKg = childWeightKg,
-                vaccinationProgress = if (category == PatientCategory.CHILD) 80 else 100,
+                vaccinationProgress = existing?.vaccinationProgress ?: if (category == PatientCategory.CHILD) 80 else 100,
                 notes = notes.ifBlank { "Registered offline via CareSync mobile field kit." },
                 updatedAt = now
             )
-            val vitals = VitalsEntity(
-                id = "VT-${UUID.randomUUID().toString().take(6)}",
-                patientId = id,
-                systolicBp = systolicBp,
-                diastolicBp = diastolicBp,
-                heartRate = heartRate,
-                temperatureC = tempC,
-                spo2Percent = spo2,
-                respiratoryRate = 18,
-                bloodSugarMgDl = 104,
-                weightKg = if (childWeightKg > 0f) childWeightKg else 62f,
-                recordedAtLabel = "Just now",
-                recordedAtMillis = now,
-                syncStatus = SyncStatus.PENDING_UPLOAD.name
-            )
-            repository.savePatientOffline(patient, vitals, isNew = true)
+            val initialVitals = if (isNew) {
+                VitalsEntity(
+                    id = "VT-${UUID.randomUUID().toString().take(6)}",
+                    patientId = id,
+                    systolicBp = systolicBp,
+                    diastolicBp = diastolicBp,
+                    heartRate = heartRate,
+                    temperatureC = tempC,
+                    spo2Percent = spo2,
+                    respiratoryRate = 18,
+                    bloodSugarMgDl = 104,
+                    weightKg = if (childWeightKg > 0f) childWeightKg else 62f,
+                    recordedAtLabel = "Just now",
+                    recordedAtMillis = now,
+                    syncStatus = SyncStatus.PENDING_UPLOAD.name
+                )
+            } else {
+                null
+            }
+            repository.savePatientOffline(patient, initialVitals, isNew = isNew)
             onSaved(id)
         }
     }

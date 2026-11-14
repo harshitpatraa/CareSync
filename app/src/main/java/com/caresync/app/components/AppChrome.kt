@@ -69,6 +69,8 @@ import com.caresync.app.theme.CareSyncCyan
 import com.caresync.app.theme.CareSyncGreen
 import com.caresync.app.theme.CriticalRed
 import com.caresync.app.theme.PendingOrange
+import com.caresync.app.utils.CareSyncStrings
+import com.caresync.app.utils.LocalCareSyncStrings
 
 data class BottomNavDestination(
     val id: String,
@@ -77,12 +79,12 @@ data class BottomNavDestination(
     val testTag: String
 )
 
-val careSyncTopLevelTabs = listOf(
-    BottomNavDestination("dashboard", "Home", Icons.Rounded.Dashboard, "nav_home"),
-    BottomNavDestination("patients", "Patients", Icons.Rounded.People, "nav_patients"),
-    BottomNavDestination("ai", "AI Care", Icons.Rounded.AutoAwesome, "nav_ai"),
-    BottomNavDestination("alerts", "Alerts", Icons.Rounded.Notifications, "nav_alerts"),
-    BottomNavDestination("emergency", "SOS", Icons.Rounded.Emergency, "nav_emergency")
+private fun localizedTopLevelTabs(strings: CareSyncStrings): List<BottomNavDestination> = listOf(
+    BottomNavDestination("dashboard", strings.navHome, Icons.Rounded.Dashboard, "nav_home"),
+    BottomNavDestination("patients", strings.navPatients, Icons.Rounded.People, "nav_patients"),
+    BottomNavDestination("ai", strings.navAiCare, Icons.Rounded.AutoAwesome, "nav_ai"),
+    BottomNavDestination("alerts", strings.navAlerts, Icons.Rounded.Notifications, "nav_alerts"),
+    BottomNavDestination("emergency", strings.navSos, Icons.Rounded.Emergency, "nav_emergency")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,12 +196,14 @@ fun CareSyncBottomBar(
     unreadAlertsCount: Int,
     onSelectTab: (String) -> Unit
 ) {
+    val strings = LocalCareSyncStrings.current
+    val tabs = localizedTopLevelTabs(strings)
     NavigationBar(
         modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 3.dp
     ) {
-        careSyncTopLevelTabs.forEach { tab ->
+        tabs.forEach { tab ->
             val selected = activeTabId == tab.id
             val isSos = tab.id == "emergency"
             NavigationBarItem(
@@ -244,13 +248,15 @@ fun CareSyncNavigationRail(
     unreadAlertsCount: Int,
     onSelectTab: (String) -> Unit
 ) {
+    val strings = LocalCareSyncStrings.current
+    val tabs = localizedTopLevelTabs(strings)
     NavigationRail(
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         Spacer(modifier = Modifier.height(12.dp))
         CareSyncLogo(size = 38.dp, animateNodes = false)
         Spacer(modifier = Modifier.height(20.dp))
-        careSyncTopLevelTabs.forEach { tab ->
+        tabs.forEach { tab ->
             val selected = activeTabId == tab.id
             val isSos = tab.id == "emergency"
             NavigationRailItem(
@@ -289,6 +295,7 @@ fun CareSyncDrawerContent(
     pendingSyncCount: Int,
     onNavigate: (String) -> Unit
 ) {
+    val strings = LocalCareSyncStrings.current
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surface
     ) {
@@ -353,14 +360,14 @@ fun CareSyncDrawerContent(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            DrawerItem("Home Dashboard", Icons.Rounded.Dashboard, "drawer_dashboard") { onNavigate("dashboard") }
-            DrawerItem("Patients Directory", Icons.Rounded.People, "drawer_patients") { onNavigate("patients") }
+            DrawerItem(strings.navHome, Icons.Rounded.Dashboard, "drawer_dashboard") { onNavigate("dashboard") }
+            DrawerItem(strings.navPatients, Icons.Rounded.People, "drawer_patients") { onNavigate("patients") }
             DrawerItem("Health Records", Icons.Rounded.FolderShared, "drawer_records") { onNavigate("records") }
             DrawerItem("Symptom Checker", Icons.Rounded.MedicalServices, "drawer_symptom") { onNavigate("symptom") }
             DrawerItem("AI Chat Assistant", Icons.Rounded.SmartToy, "drawer_chat") { onNavigate("chat") }
             DrawerItem("Medical Assessment", Icons.Rounded.MonitorHeart, "drawer_assessment") { onNavigate("assessment") }
-            DrawerItem("Emergency SOS", Icons.Rounded.Emergency, "drawer_emergency", CriticalRed) { onNavigate("emergency") }
-            DrawerItem("Notifications", Icons.Rounded.Notifications, "drawer_notifications") { onNavigate("notifications") }
+            DrawerItem(strings.emergencyDispatch, Icons.Rounded.Emergency, "drawer_emergency", CriticalRed) { onNavigate("emergency") }
+            DrawerItem(strings.navAlerts, Icons.Rounded.Notifications, "drawer_notifications") { onNavigate("notifications") }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
 

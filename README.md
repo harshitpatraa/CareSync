@@ -1,48 +1,22 @@
-# CareSync 
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-CareSync is an offline-first Android healthcare application built with Kotlin, Jetpack Compose, Room, Hilt, and Gemini AI. It empowers healthcare workers and patients with offline-first synchronization, clinical triage, symptom analysis, emergency SOS response, and secure health data management.
+# Run and deploy your AI Studio app
 
-## Key Features
+This contains everything you need to run your app locally.
 
-- Offline-First Synchronization: Built-in SQLite/Room local database with a robust sync engine and conflict handling when connectivity is restored.
-- AI Clinical Assistant & Symptom Checker: Powered by Gemini AI for rapid clinical triage, conversational health guidance, and diagnostic support.
-- Patient Management: Complete record keeping, maternal/child care tracking, vitals history, and visit logs.
-- Emergency SOS Response: Rapid distress dispatch with offline caching and emergency workflows.
-- Health Records & Analytics: Track vitals, prescriptions, lab results, and patient health progress.
-- Modern Jetpack Compose UI: Accessible, responsive Material 3 design system with dark and light theme support.
+View your app in AI Studio: https://ai.studio/apps/8b4c73d0-f203-4da3-9980-071a973495b7
 
-## Tech Stack & Architecture
+## Run Locally
 
-- Language: Kotlin 2.x
-- UI Framework: Jetpack Compose with Material 3
-- Dependency Injection: Dagger Hilt
-- Local Persistence: Room Database (SQLite)
-- AI Integration: Google Gemini AI & Firebase AI Logic
-- Architecture: MVVM + Clean Architecture (UI -> ViewModel -> Repository -> Local/Remote Data Sources)
-- Networking & Serialization: Kotlinx Serialization
+**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
 
-## Getting Started
 
-### Prerequisites
-
-- [Android Studio Ladybug or newer](https://developer.android.com/studio)
-- JDK 17 or higher
-- Android SDK (targetSdk 36, minSdk 24)
-
-### Run Locally
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/harshitpatraa/CareSync.git
-   cd CareSync
-   ```
-2. Open the project in Android Studio.
-3. Configure environment settings if needed (see `.env.example`).
-4. Allow Gradle to sync dependencies and build the project.
-5. In `app/build.gradle.kts`, ensure signing configs match your local debug setup (or remove `signingConfig = signingConfigs.getByName("debugConfig")` if needed).
-6. Run the app on an Android emulator (API 24+) or physical Android device.
-
-## License
-
-This project is made by Team Innovix.
-Team Members- Gulshan Gautam, Harshit Patra.
+1. Open Android Studio
+2. Select **Open** and choose the directory containing this project
+3. Allow Android Studio to fix any incompatibilities as it imports the project.
+4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
+5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
+6. Run the app on an emulator or physical device
+7. If you have already published your app in AI Studio, please [request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756#zippy=%2Crequest-an-upload-key-reset) in Google Play Console.

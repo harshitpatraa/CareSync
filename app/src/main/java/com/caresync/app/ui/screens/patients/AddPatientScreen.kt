@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,14 +39,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.caresync.app.database.PatientEntity
 import com.caresync.app.model.PatientCategory
 import com.caresync.app.theme.CareSyncBlue
 import com.caresync.app.theme.CareSyncButtonShape
 import com.caresync.app.theme.CareSyncCardShape
 import com.caresync.app.theme.CareSyncGreen
+import com.caresync.app.utils.FormatUtils
+import com.caresync.app.utils.LocalCareSyncStrings
 
 @Composable
 fun AddPatientScreen(
+    existingPatient: PatientEntity? = null,
     onSavePatientOffline: (
         fullName: String,
         age: Int,
@@ -70,6 +75,9 @@ fun AddPatientScreen(
         tempC: Float
     ) -> Unit
 ) {
+    val strings = LocalCareSyncStrings.current
+    val isEditMode = existingPatient != null
+
     var fullName by remember { mutableStateOf("") }
     var ageText by remember { mutableStateOf("28") }
     var gender by remember { mutableStateOf("Female") }
@@ -95,6 +103,33 @@ fun AddPatientScreen(
     var tempC by remember { mutableStateOf("36.8") }
     var formError by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(existingPatient?.id) {
+        if (existingPatient != null) {
+            fullName = existingPatient.fullName
+            ageText = existingPatient.age.toString()
+            gender = existingPatient.gender
+            phone = existingPatient.phone
+            ward = existingPatient.villageOrWard
+            bloodGroup = existingPatient.bloodGroup
+            category = FormatUtils.parseCategory(existingPatient.category)
+            isCritical = existingPatient.isCritical
+            allergies = existingPatient.allergies
+            chronic = existingPatient.chronicConditions
+            familyHead = existingPatient.familyHeadName
+            familyCount = existingPatient.familyMembersCount.toString()
+            if (existingPatient.pregnancyWeeks > 0) {
+                pregnancyWeeks = existingPatient.pregnancyWeeks.toString()
+            }
+            if (existingPatient.expectedDueDate.isNotBlank()) {
+                dueDate = existingPatient.expectedDueDate
+            }
+            if (existingPatient.childWeightKg > 0f) {
+                childWeight = existingPatient.childWeightKg.toString()
+            }
+            notes = existingPatient.notes
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,7 +149,11 @@ fun AddPatientScreen(
             ) {
                 Icon(Icons.Rounded.CloudOff, contentDescription = null, tint = CareSyncGreen)
                 Text(
-                    text = "Offline-First Registration: Saves immediately to local Room storage and queues for CareSync upload.",
+                    text = if (isEditMode) {
+                        "Editing ${existingPatient?.id}: Updates save locally first and sync automatically when connected."
+                    } else {
+                        "Offline-First Registration: Saves immediately to local Room storage and queues for CareSync upload."
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = CareSyncGreen,
                     fontWeight = FontWeight.Medium
@@ -235,55 +274,57 @@ fun AddPatientScreen(
             }
         }
 
-        Card(
-            shape = CareSyncCardShape,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Baseline Vitals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = systolic,
-                        onValueChange = { systolic = it.filter { c -> c.isDigit() } },
-                        label = { Text("Systolic BP") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        shape = CareSyncButtonShape
-                    )
-                    OutlinedTextField(
-                        value = diastolic,
-                        onValueChange = { diastolic = it.filter { c -> c.isDigit() } },
-                        label = { Text("Diastolic BP") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        shape = CareSyncButtonShape
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = spo2,
-                        onValueChange = { spo2 = it.filter { c -> c.isDigit() } },
-                        label = { Text("SpO2 %") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        shape = CareSyncButtonShape
-                    )
-                    OutlinedTextField(
-                        value = heartRate,
-                        onValueChange = { heartRate = it.filter { c -> c.isDigit() } },
-                        label = { Text("Heart Rate") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        shape = CareSyncButtonShape
-                    )
-                    OutlinedTextField(
-                        value = tempC,
-                        onValueChange = { tempC = it },
-                        label = { Text("Temp °C") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f),
-                        shape = CareSyncButtonShape
-                    )
+        if (!isEditMode) {
+            Card(
+                shape = CareSyncCardShape,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Baseline Vitals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(
+                            value = systolic,
+                            onValueChange = { systolic = it.filter { c -> c.isDigit() } },
+                            label = { Text("Systolic BP") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            shape = CareSyncButtonShape
+                        )
+                        OutlinedTextField(
+                            value = diastolic,
+                            onValueChange = { diastolic = it.filter { c -> c.isDigit() } },
+                            label = { Text("Diastolic BP") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            shape = CareSyncButtonShape
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(
+                            value = spo2,
+                            onValueChange = { spo2 = it.filter { c -> c.isDigit() } },
+                            label = { Text("SpO2 %") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            shape = CareSyncButtonShape
+                        )
+                        OutlinedTextField(
+                            value = heartRate,
+                            onValueChange = { heartRate = it.filter { c -> c.isDigit() } },
+                            label = { Text("Heart Rate") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            shape = CareSyncButtonShape
+                        )
+                        OutlinedTextField(
+                            value = tempC,
+                            onValueChange = { tempC = it },
+                            label = { Text("Temp °C") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.weight(1f),
+                            shape = CareSyncButtonShape
+                        )
+                    }
                 }
             }
         }
@@ -379,7 +420,7 @@ fun AddPatientScreen(
         ) {
             Icon(Icons.Rounded.Save, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Save Patient Offline", fontWeight = FontWeight.Bold)
+            Text(if (isEditMode) "Update Patient Offline" else strings.registerPatient, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(16.dp))
     }

@@ -1,5 +1,8 @@
 package com.caresync.app.ui.screens.patients
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,21 +18,31 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FamilyRestroom
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.Medication
 import androidx.compose.material.icons.rounded.MonitorHeart
+import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.PregnantWoman
+import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Vaccines
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,9 +57,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +73,7 @@ import com.caresync.app.components.CareSyncEmptyState
 import com.caresync.app.components.PatientAvatar
 import com.caresync.app.components.RiskLevelBadge
 import com.caresync.app.components.SyncStatusBadge
+import com.caresync.app.components.VitalsTrendChartCard
 import com.caresync.app.database.HealthRecordEntity
 import com.caresync.app.database.VitalsEntity
 import com.caresync.app.model.RecordType
@@ -66,7 +84,10 @@ import com.caresync.app.theme.CareSyncCyan
 import com.caresync.app.theme.CareSyncGreen
 import com.caresync.app.theme.CriticalRed
 import com.caresync.app.utils.FormatUtils
+import com.caresync.app.utils.PdfReferralGenerator
+import com.caresync.app.utils.QrUtils
 import com.caresync.app.viewmodel.PatientDetailUiState
+import kotlinx.coroutines.launch
 
 @Composable
 fun PatientDetailScreen(
@@ -74,7 +95,14 @@ fun PatientDetailScreen(
     onToggleCritical: () -> Unit,
     onLogVitals: (Int, Int, Int, Float, Int, Int) -> Unit,
     onAddRecord: (RecordType, String, String, String, String) -> Unit,
-    onOpenAssessment: (String) -> Unit
+    onOpenAssessment: (String) -> Unit,
+    onDismissCriticalBanner: () -> Unit,
+    onOpenEmergency: () -> Unit,
+    onEditPatient: (String) -> Unit,
+    onDeletePatient: () -> Unit,
+    onShareReferralPdf: () -> Unit,
+    onSpeakBrief: () -> Unit,
+    onStopSpeaking: () -> Unit
 ) {
     val patient = state.patient
     if (patient == null) {
@@ -87,13 +115,45 @@ fun PatientDetailScreen(
     }
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var selectedTab by remember { mutableIntStateOf(0) }
     var showVitalsDialog by remember { mutableStateOf(false) }
     var showAddRecordDialog by remember { mutableStateOf(false) }
+    var showQrCardDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     val tabs = listOf("Vitals & Overview", "Timeline & History", "Meds & Vaccines", "Family & Docs")
 
     Column(modifier = Modifier.fillMaxSize()) {
+        // Auto-Triage Critical Vitals Alert Banner
+        AnimatedVisibility(visible = state.criticalVitalsDetected) {
+            Surface(
+                color = CriticalRed,
+                shape = CareSyncButtonShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Rounded.Warning, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Critical Vitals Detected!", style = MaterialTheme.typography.labelLarge, color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Patient auto-flagged Critical & emergency alert logged.", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.9f))
+                    }
+                    TextButton(onClick = onOpenEmergency) {
+                        Text("Open SOS", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                    TextButton(onClick = onDismissCriticalBanner) {
+                        Text("OK", color = Color.White)
+                    }
+                }
+            }
+        }
+
         // Patient Identity Header Card
         Card(
             shape = CareSyncCardShape,
@@ -123,6 +183,16 @@ fun PatientDetailScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                    IconButton(
+                        onClick = { if (state.isSpeaking) onStopSpeaking() else onSpeakBrief() },
+                        modifier = Modifier.testTag("detail_tts_button")
+                    ) {
+                        Icon(
+                            imageVector = if (state.isSpeaking) Icons.Rounded.Stop else Icons.AutoMirrored.Rounded.VolumeUp,
+                            contentDescription = if (state.isSpeaking) "Stop brief" else "Speak patient brief",
+                            tint = CareSyncBlue
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -138,20 +208,20 @@ fun PatientDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = { FormatUtils.dialPhone(context, patient.phone) },
-                        shape = CareSyncButtonShape,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Rounded.Call, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Call", softWrap = false)
+                    if (patient.phone.isNotBlank()) {
+                        OutlinedButton(
+                            onClick = { FormatUtils.dialPhone(context, patient.phone) },
+                            shape = CareSyncButtonShape,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Rounded.Call, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Call")
+                        }
                     }
                     OutlinedButton(
                         onClick = onToggleCritical,
                         shape = CareSyncButtonShape,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                         modifier = Modifier.weight(1f).testTag("detail_toggle_critical")
                     ) {
                         Icon(
@@ -161,18 +231,53 @@ fun PatientDetailScreen(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(if (patient.isCritical) "Unflag" else "Critical", softWrap = false)
+                        Text(if (patient.isCritical) "Unflag" else "Critical")
                     }
                     Button(
                         onClick = { onOpenAssessment(patient.id) },
                         shape = CareSyncButtonShape,
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f).testTag("detail_risk_ai_button")
                     ) {
                         Icon(Icons.Rounded.MonitorHeart, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Risk AI", softWrap = false)
+                        Text("Risk AI")
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilledTonalButton(
+                        onClick = { showQrCardDialog = true },
+                        shape = CareSyncButtonShape,
+                        modifier = Modifier.weight(1f).testTag("detail_qr_button")
+                    ) {
+                        Icon(Icons.Rounded.QrCode2, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("QR Card")
+                    }
+                    FilledTonalButton(
+                        onClick = onShareReferralPdf,
+                        shape = CareSyncButtonShape,
+                        modifier = Modifier.weight(1f).testTag("detail_pdf_button")
+                    ) {
+                        Icon(Icons.Rounded.PictureAsPdf, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Referral PDF")
+                    }
+                    IconButton(
+                        onClick = { onEditPatient(patient.id) },
+                        modifier = Modifier.testTag("detail_edit_button")
+                    ) {
+                        Icon(Icons.Rounded.Edit, contentDescription = "Edit patient", tint = CareSyncBlue)
+                    }
+                    IconButton(
+                        onClick = { showDeleteConfirm = true },
+                        modifier = Modifier.testTag("detail_delete_button")
+                    ) {
+                        Icon(Icons.Rounded.Delete, contentDescription = "Delete patient", tint = CriticalRed)
                     }
                 }
             }
@@ -215,6 +320,11 @@ fun PatientDetailScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Log Vitals")
                             }
+                        }
+                    }
+                    if (state.vitalsHistory.isNotEmpty()) {
+                        item {
+                            VitalsTrendChartCard(vitals = state.vitalsHistory)
                         }
                     }
                     if (state.vitalsHistory.isEmpty()) {
@@ -327,7 +437,7 @@ fun PatientDetailScreen(
                                 }
                                 Text("Head of Household: ${patient.familyHeadName}", style = MaterialTheme.typography.bodyMedium)
                                 Text("Household Members: ${patient.familyMembersCount}", style = MaterialTheme.typography.bodySmall)
-                                Text("Contact Phone: ${patient.phone}", style = MaterialTheme.typography.bodySmall)
+                                Text("Contact Phone: ${patient.phone.ifBlank { "Not recorded" }}", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
@@ -340,6 +450,82 @@ fun PatientDetailScreen(
                 }
             }
         }
+    }
+
+    if (showQrCardDialog) {
+        val qrBitmap = remember(patient.id, patient.updatedAt) {
+            QrUtils.generateQrBitmap(QrUtils.buildPatientQrPayload(patient), 512)
+        }
+        AlertDialog(
+            onDismissRequest = { showQrCardDialog = false },
+            title = { Text("CareSync Patient QR Card") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Image(
+                        bitmap = qrBitmap.asImageBitmap(),
+                        contentDescription = "Patient QR code",
+                        modifier = Modifier
+                            .size(210.dp)
+                            .clip(CareSyncButtonShape)
+                            .background(Color.White)
+                            .padding(8.dp)
+                    )
+                    Text("${patient.fullName} · ${patient.id}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                    Text("Blood: ${patient.bloodGroup} · Allergies: ${patient.allergies}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val uri = PdfReferralGenerator.saveBitmapToCacheUri(context, qrBitmap, "CareSync_QR_${patient.id}.png")
+                            PdfReferralGenerator.shareUri(
+                                context = context,
+                                uri = uri,
+                                mimeType = "image/png",
+                                subject = "CareSync QR Card - ${patient.fullName}",
+                                text = "CareSync Offline Patient QR Card for ${patient.fullName} (${patient.id})."
+                            )
+                        }
+                    }
+                ) {
+                    Icon(Icons.Rounded.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Share QR")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showQrCardDialog = false }) { Text("Close") }
+            }
+        )
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete Patient Record?") },
+            text = {
+                Text("This permanently removes ${patient.fullName} (${patient.id}) along with their local vitals, timeline records, and pending sync items.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteConfirm = false
+                        onDeletePatient()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = CriticalRed)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+            }
+        )
     }
 
     if (showVitalsDialog) {
