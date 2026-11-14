@@ -161,11 +161,12 @@ class AiMedicalEngine @Inject constructor(
         tempC: Float,
         bloodSugar: Int,
         isPregnant: Boolean,
+        patient: PatientEntity? = null,
         offlineOnly: Boolean = false,
         apiKey: String? = null
     ): ClinicalAssessmentResult {
         if (offlineOnly) {
-            return evaluateVitalsRiskOffline(systolic, diastolic, heartRate, spo2, tempC, bloodSugar, isPregnant)
+            return evaluateVitalsRiskOffline(systolic, diastolic, heartRate, spo2, tempC, bloodSugar, isPregnant, patient)
         }
 
         val prompt = buildString {
@@ -176,6 +177,11 @@ class AiMedicalEngine @Inject constructor(
             appendLine("Temperature: $tempC C")
             appendLine("Blood Sugar: $bloodSugar mg/dL")
             appendLine("Pregnant / ANC Patient: ${if (isPregnant) "Yes" else "No"}")
+            if (patient != null) {
+                appendLine("Patient: ${patient.fullName}, Age ${patient.age}, ${patient.gender}, Category: ${patient.category}")
+                if (patient.chronicConditions.isNotBlank()) appendLine("Known Conditions: ${patient.chronicConditions}")
+                if (patient.allergies.isNotBlank()) appendLine("Allergies: ${patient.allergies}")
+            }
         }
 
         return try {
@@ -190,7 +196,7 @@ class AiMedicalEngine @Inject constructor(
             throw e
         } catch (e: Exception) {
             Log.w(TAG, "Cloud vitals risk assessment unavailable (${e.message}), activating offline clinical engine", e)
-            val fallback = evaluateVitalsRiskOffline(systolic, diastolic, heartRate, spo2, tempC, bloodSugar, isPregnant)
+            val fallback = evaluateVitalsRiskOffline(systolic, diastolic, heartRate, spo2, tempC, bloodSugar, isPregnant, patient)
             fallback.copy(
                 primarySummary = "[Offline Clinical Engine - App Check Bypassed] ${fallback.primarySummary}"
             )
@@ -587,7 +593,8 @@ class AiMedicalEngine @Inject constructor(
         spo2: Int,
         tempC: Float,
         bloodSugar: Int,
-        isPregnant: Boolean
+        isPregnant: Boolean,
+        patient: PatientEntity? = null
     ): ClinicalAssessmentResult {
         delay(300L)
         var score = 12
@@ -644,10 +651,11 @@ class AiMedicalEngine @Inject constructor(
         if (actions.isEmpty()) actions += "Continue routine CareSync monitoring and sync when online."
         if (meds.isEmpty()) meds += "No acute medication escalation indicated"
 
+        val patientPrefix = if (patient != null) "for ${patient.fullName} (${patient.age}y): " else ""
         return ClinicalAssessmentResult(
             riskScore = clamped,
             riskLevel = riskLevel,
-            primarySummary = "Vitals Analysis: BP $systolic/$diastolic, SpO2 $spo2%, HR $heartRate bpm, Temp ${tempC}°C, Sugar $bloodSugar mg/dL.",
+            primarySummary = "Vitals Analysis $patientPrefix BP $systolic/$diastolic mmHg, SpO2 $spo2%, HR $heartRate bpm, Temp ${tempC}°C, Sugar $bloodSugar mg/dL.",
             possibleConditions = conditions,
             medicineSuggestions = meds,
             recommendedActions = actions,

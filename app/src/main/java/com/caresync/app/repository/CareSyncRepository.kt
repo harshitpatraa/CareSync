@@ -48,7 +48,9 @@ data class AppPreferences(
     val userEmail: String = "priya.kulkarni@caresync.org",
     val workerId: String = "CS-CHW-409",
     val clinicName: String = "CareSync Community Health Hub · Ward 4",
-    val geminiApiKey: String = ""
+    val geminiApiKey: String = "",
+    val firebaseProjectId: String = "",
+    val firebaseAppId: String = ""
 )
 
 @Singleton
@@ -72,6 +74,8 @@ class CareSyncRepository @Inject constructor(
         val USER_NAME = stringPreferencesKey("user_name")
         val USER_EMAIL = stringPreferencesKey("user_email")
         val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
+        val FIREBASE_PROJECT_ID = stringPreferencesKey("firebase_project_id")
+        val FIREBASE_APP_ID = stringPreferencesKey("firebase_app_id")
     }
 
     val preferencesFlow: Flow<AppPreferences> = dataStore.data.map { prefs ->
@@ -83,7 +87,9 @@ class CareSyncRepository @Inject constructor(
             language = AppLanguage.entries.find { it.code == prefs[Keys.LANGUAGE] } ?: AppLanguage.ENGLISH,
             userName = prefs[Keys.USER_NAME] ?: "Dr. Priya Kulkarni",
             userEmail = prefs[Keys.USER_EMAIL] ?: "priya.kulkarni@caresync.org",
-            geminiApiKey = prefs[Keys.GEMINI_API_KEY] ?: ""
+            geminiApiKey = prefs[Keys.GEMINI_API_KEY] ?: "",
+            firebaseProjectId = prefs[Keys.FIREBASE_PROJECT_ID] ?: "",
+            firebaseAppId = prefs[Keys.FIREBASE_APP_ID] ?: ""
         )
     }
 
@@ -121,6 +127,16 @@ class CareSyncRepository @Inject constructor(
 
     suspend fun setGeminiApiKey(apiKey: String) {
         dataStore.edit { it[Keys.GEMINI_API_KEY] = apiKey.trim() }
+    }
+
+    suspend fun setFirebaseCredentials(projectId: String, appId: String, apiKey: String) {
+        dataStore.edit { prefs ->
+            prefs[Keys.FIREBASE_PROJECT_ID] = projectId.trim()
+            prefs[Keys.FIREBASE_APP_ID] = appId.trim()
+            if (apiKey.isNotBlank()) {
+                prefs[Keys.GEMINI_API_KEY] = apiKey.trim()
+            }
+        }
     }
 
     suspend fun login(email: String, name: String? = null) {

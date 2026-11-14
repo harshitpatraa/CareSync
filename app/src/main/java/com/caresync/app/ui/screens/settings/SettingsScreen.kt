@@ -32,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -65,6 +66,7 @@ fun SettingsScreen(
     onToggleSecurityLock: (Boolean) -> Unit,
     onSelectLanguage: (AppLanguage) -> Unit,
     onUpdateApiKey: (String) -> Unit = {},
+    onUpdateFirebaseConfig: (String, String, String) -> Unit = { _, _, _ -> },
     onSyncNow: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -74,6 +76,7 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showApiKeyDialog by remember { mutableStateOf(false) }
+    var showFirebaseDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -185,6 +188,36 @@ fun SettingsScreen(
                     else
                         "Tap to paste Google Gemini API Key from Google AI Studio",
                     onClick = { showApiKeyDialog = true }
+                )
+            }
+        }
+
+        // Firebase Cloud Connection
+        Card(
+            shape = CareSyncCardShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Firebase Cloud Connection", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, softWrap = true)
+                Text(
+                    text = if (state.preferences.firebaseProjectId.isNotBlank())
+                        "Linked: ${state.preferences.firebaseProjectId} (Custom Firebase Project)"
+                    else
+                        "Default: gen-lang-client-0413618590 (Google AI Studio Cloud)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    softWrap = true
+                )
+                HorizontalDivider()
+                SettingsNavRow(
+                    icon = Icons.Rounded.CloudSync,
+                    title = "Connect My Firebase",
+                    subtitle = if (state.preferences.firebaseProjectId.isNotBlank())
+                        "Linked to ${state.preferences.firebaseProjectId} · Tap to update"
+                    else
+                        "Tap to connect your personal Firebase project & credentials",
+                    onClick = { showFirebaseDialog = true }
                 )
             }
         }
@@ -321,12 +354,89 @@ fun SettingsScreen(
                     shape = CareSyncButtonShape,
                     colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue)
                 ) {
-                    Text("Save")
+                    Text("Save", softWrap = false)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showApiKeyDialog = false }) {
-                    Text("Cancel")
+                    Text("Cancel", softWrap = false)
+                }
+            }
+        )
+    }
+
+    if (showFirebaseDialog) {
+        var projectIdInput by remember { mutableStateOf(state.preferences.firebaseProjectId) }
+        var appIdInput by remember { mutableStateOf(state.preferences.firebaseAppId) }
+        var apiKeyInput by remember { mutableStateOf(state.preferences.geminiApiKey) }
+
+        AlertDialog(
+            onDismissRequest = { showFirebaseDialog = false },
+            title = { Text("Connect Your Firebase Project", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, softWrap = true) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "Connect your personal Firebase backend to CareSync. You can find these in Firebase Console -> Project Settings -> General -> Your Apps, or place your downloaded google-services.json directly into the project's app/ directory.",
+                        style = MaterialTheme.typography.bodySmall,
+                        softWrap = true
+                    )
+                    OutlinedTextField(
+                        value = projectIdInput,
+                        onValueChange = { projectIdInput = it },
+                        label = { Text("Firebase Project ID", softWrap = true) },
+                        placeholder = { Text("e.g. caresync-healthcare") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = appIdInput,
+                        onValueChange = { appIdInput = it },
+                        label = { Text("Firebase App ID", softWrap = true) },
+                        placeholder = { Text("1:879174369515:android:...") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = apiKeyInput,
+                        onValueChange = { apiKeyInput = it },
+                        label = { Text("API Key (Firebase / Gemini)", softWrap = true) },
+                        placeholder = { Text("AIzaSy...") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (projectIdInput.isNotBlank() || appIdInput.isNotBlank()) {
+                        TextButton(
+                            onClick = {
+                                projectIdInput = ""
+                                appIdInput = ""
+                                apiKeyInput = ""
+                                onUpdateFirebaseConfig("", "", "")
+                                showFirebaseDialog = false
+                            }
+                        ) {
+                            Text("Reset to Default AI Studio Project", color = CriticalRed, softWrap = true)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onUpdateFirebaseConfig(projectIdInput.trim(), appIdInput.trim(), apiKeyInput.trim())
+                        showFirebaseDialog = false
+                    },
+                    shape = CareSyncButtonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue)
+                ) {
+                    Text("Save & Connect", softWrap = false)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFirebaseDialog = false }) {
+                    Text("Cancel", softWrap = false)
                 }
             }
         )
@@ -349,8 +459,8 @@ private fun SettingsToggleRow(
         Icon(icon, contentDescription = null, tint = CareSyncBlue, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, softWrap = true)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = true)
         }
         Switch(
             checked = checked,
@@ -377,8 +487,8 @@ private fun SettingsNavRow(
         Icon(icon, contentDescription = null, tint = CareSyncBlue, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, softWrap = true)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = true)
         }
         Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }

@@ -298,9 +298,18 @@ fun CareSyncNavHost(
                                     patientIdFilter = route.patientId
                                 )
                             }
-                            composable<MedicalAssessmentRoute> {
+                            composable<MedicalAssessmentRoute> { entry ->
+                                val route = entry.toRoute<MedicalAssessmentRoute>()
+                                LaunchedEffect(route.patientId) {
+                                    if (!route.patientId.isNullOrBlank()) {
+                                        aiToolsViewModel.selectPatient(route.patientId)
+                                    }
+                                }
                                 MedicalAssessmentScreen(
                                     state = aiState,
+                                    patients = patientsState.patients,
+                                    selectedPatientId = aiState.selectedPatientId ?: route.patientId,
+                                    onSelectPatient = aiToolsViewModel::selectPatient,
                                     onRunRiskAssessment = aiToolsViewModel::runDiseaseRiskAssessment,
                                     onAnalyzeImageSample = aiToolsViewModel::analyzeImageSample,
                                     onOpenSymptomChecker = { navController.navigate(SymptomCheckerRoute) }
@@ -367,6 +376,7 @@ fun CareSyncNavHost(
                                     onToggleSecurityLock = operationsViewModel::toggleSecurityLock,
                                     onSelectLanguage = operationsViewModel::setLanguage,
                                     onUpdateApiKey = operationsViewModel::updateGeminiApiKey,
+                                    onUpdateFirebaseConfig = operationsViewModel::updateFirebaseConfig,
                                     onSyncNow = operationsViewModel::syncNow,
                                     onOpenProfile = { navController.navigate(ProfileRoute) },
                                     onOpenAbout = { navController.navigate(AboutRoute) },

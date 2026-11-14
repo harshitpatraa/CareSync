@@ -175,6 +175,8 @@ private fun PatientListCard(
                             text = patient.fullName,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -185,7 +187,8 @@ private fun PatientListCard(
                     Text(
                         text = "${patient.id} · ${patient.age}y ${patient.gender} · $categoryLabel",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        softWrap = true
                     )
                 }
             }
@@ -210,7 +213,9 @@ private fun PatientListCard(
                     Text(
                         text = patient.villageOrWard,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 }
 

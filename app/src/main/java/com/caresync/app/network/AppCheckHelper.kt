@@ -62,3 +62,21 @@ fun configureAppCheck(context: Context, intent: Intent?) {
         Log.e(TAG, "Failed to initialize Firebase App Check", e)
     }
 }
+
+fun initCustomFirebaseIfPresent(context: Context, projectId: String, appId: String, apiKey: String) {
+    if (projectId.isNotBlank() && appId.isNotBlank() && apiKey.isNotBlank()) {
+        try {
+            val options = com.google.firebase.FirebaseOptions.Builder()
+                .setProjectId(projectId)
+                .setApplicationId(appId)
+                .setApiKey(apiKey)
+                .build()
+            val existing = FirebaseApp.getApps(context).find { it.name == "custom_firebase" }
+            existing?.delete()
+            FirebaseApp.initializeApp(context, options, "custom_firebase")
+            Log.d(TAG, "Custom Firebase project initialized: $projectId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize custom Firebase options", e)
+        }
+    }
+}

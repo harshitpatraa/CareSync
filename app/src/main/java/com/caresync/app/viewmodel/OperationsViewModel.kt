@@ -162,6 +162,10 @@ class OperationsViewModel @Inject constructor(
         viewModelScope.launch { repository.setGeminiApiKey(apiKey) }
     }
 
+    fun updateFirebaseConfig(projectId: String, appId: String, apiKey: String) {
+        viewModelScope.launch { repository.setFirebaseCredentials(projectId, appId, apiKey) }
+    }
+
     fun syncNow() {
         viewModelScope.launch {
             val res = repository.syncPendingQueue()

@@ -1,11 +1,13 @@
 package com.caresync.app
 
 import android.app.Application
+import com.caresync.app.network.initCustomFirebaseIfPresent
 import com.caresync.app.repository.CareSyncRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +22,17 @@ class CareSyncApplication : Application() {
         super.onCreate()
         appScope.launch {
             repository.ensureSeeded()
+            try {
+                val prefs = repository.preferencesFlow.first()
+                if (prefs.firebaseProjectId.isNotBlank() && prefs.firebaseAppId.isNotBlank()) {
+                    initCustomFirebaseIfPresent(
+                        this@CareSyncApplication,
+                        prefs.firebaseProjectId,
+                        prefs.firebaseAppId,
+                        prefs.geminiApiKey
+                    )
+                }
+            } catch (ignored: Exception) {}
         }
     }
 }

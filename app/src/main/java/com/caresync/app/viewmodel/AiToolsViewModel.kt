@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.caresync.app.database.PatientEntity
+import com.caresync.app.database.VitalsEntity
 import com.caresync.app.model.ChatMessage
 import com.caresync.app.model.ClinicalAssessmentResult
 import com.caresync.app.network.AiMedicalEngine
@@ -28,6 +29,7 @@ data class AiToolsUiState(
     val durationDays: Int = 2,
     val severity: String = "Moderate",
     val selectedPatientId: String? = null,
+    val prefillVitals: VitalsEntity? = null,
     val isEvaluating: Boolean = false,
     val symptomResult: ClinicalAssessmentResult? = null,
     val riskResult: ClinicalAssessmentResult? = null,
@@ -59,6 +61,12 @@ class AiToolsViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
+    val allVitals: StateFlow<List<VitalsEntity>> = repository.allVitalsFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
     private val preferences: StateFlow<AppPreferences> = repository.preferencesFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -83,7 +91,13 @@ class AiToolsViewModel @Inject constructor(
     }
 
     fun selectPatient(patientId: String?) {
-        _uiState.value = _uiState.value.copy(selectedPatientId = patientId)
+        val latestVitals = patientId?.let { id ->
+            allVitals.value.filter { it.patientId == id }.maxByOrNull { it.recordedAtMillis }
+        }
+        _uiState.value = _uiState.value.copy(
+            selectedPatientId = patientId,
+            prefillVitals = latestVitals
+        )
     }
 
     fun clearError() {
@@ -129,6 +143,7 @@ class AiToolsViewModel @Inject constructor(
         bloodSugar: Int,
         isPregnant: Boolean
     ) {
+        val patient = patients.value.find { it.id == _uiState.value.selectedPatientId }
         val offlineOnly = preferences.value.isOfflineOnlyMode
         val apiKey = preferences.value.geminiApiKey
         viewModelScope.launch {
@@ -142,6 +157,7 @@ class AiToolsViewModel @Inject constructor(
                     tempC = tempC,
                     bloodSugar = bloodSugar,
                     isPregnant = isPregnant,
+                    patient = patient,
                     offlineOnly = offlineOnly,
                     apiKey = apiKey
                 )

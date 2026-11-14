@@ -141,15 +141,17 @@ fun PatientDetailScreen(
                     OutlinedButton(
                         onClick = { FormatUtils.dialPhone(context, patient.phone) },
                         shape = CareSyncButtonShape,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Rounded.Call, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Call")
+                        Text("Call", softWrap = false)
                     }
                     OutlinedButton(
                         onClick = onToggleCritical,
                         shape = CareSyncButtonShape,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                         modifier = Modifier.weight(1f).testTag("detail_toggle_critical")
                     ) {
                         Icon(
@@ -159,17 +161,18 @@ fun PatientDetailScreen(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(if (patient.isCritical) "Unflag" else "Critical")
+                        Text(if (patient.isCritical) "Unflag" else "Critical", softWrap = false)
                     }
                     Button(
                         onClick = { onOpenAssessment(patient.id) },
                         shape = CareSyncButtonShape,
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue),
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Rounded.MonitorHeart, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Risk AI")
+                        Text("Risk AI", softWrap = false)
                     }
                 }
             }
