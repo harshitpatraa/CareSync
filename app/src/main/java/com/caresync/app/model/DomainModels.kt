@@ -52,6 +52,13 @@ enum class AppLanguage(val displayName: String, val code: String) {
     BENGALI("বাংলা (Bengali)", "bn")
 }
 
+data class DiseaseRiskItem(
+    val diseaseName: String,
+    val riskPercentage: Int,
+    val riskCategory: String = "Moderate",
+    val clinicalContext: String = ""
+)
+
 data class ClinicalAssessmentResult(
     val riskScore: Int,
     val riskLevel: RiskLevel,
@@ -60,6 +67,7 @@ data class ClinicalAssessmentResult(
     val medicineSuggestions: List<String>,
     val recommendedActions: List<String>,
     val redFlags: List<String>,
+    val diseaseRisksWithPercentage: List<DiseaseRiskItem> = emptyList(),
     val isOfflinePrediction: Boolean = true
 )
 

@@ -51,6 +51,22 @@ class CareSyncUnitTest {
     }
 
     @Test
+    fun offlineAiEngine_evaluatesQuestionsRiskAccurately() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val engine = AiMedicalEngine(context)
+        val answers = mapOf(
+            "fever" to "Yes",
+            "mosquito_exposure" to "Yes",
+            "sugar_thirst" to "No",
+            "chest_pain" to "No"
+        )
+        val result = engine.evaluateQuestionsRiskOffline(answers)
+        assertTrue(result.diseaseRisksWithPercentage.isNotEmpty())
+        val dengue = result.diseaseRisksWithPercentage.find { it.diseaseName.contains("Dengue", ignoreCase = true) }
+        assertTrue(dengue != null && dengue.riskPercentage >= 70)
+    }
+
+    @Test
     fun qrUtils_extractsPatientIdFromStructuredAndRawPayloads() {
         assertEquals("PT-1001", QrUtils.extractPatientIdFromQr("CARESYNC|PT-1001|Meera Devi|BG:O+|ALLERGY:None|RISK:HIGH"))
         assertEquals("PT-A1B2C3", QrUtils.extractPatientIdFromQr("Patient ID: PT-A1B2C3"))

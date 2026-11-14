@@ -9,6 +9,7 @@ import com.caresync.app.database.PatientEntity
 import com.caresync.app.database.SyncQueueEntity
 import com.caresync.app.database.VitalsEntity
 import com.caresync.app.model.PatientCategory
+import com.caresync.app.model.RiskLevel
 import com.caresync.app.model.SyncStatus
 import com.caresync.app.model.WardOutbreakInsight
 import com.caresync.app.network.AiMedicalEngine
@@ -64,13 +65,33 @@ class DashboardViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val syncFeedback = MutableStateFlow<String?>(null)
-    private val outbreakInsight = MutableStateFlow<WardOutbreakInsight?>(null)
+    private val outbreakInsight = MutableStateFlow<WardOutbreakInsight?>(
+        WardOutbreakInsight(
+            alertLevel = RiskLevel.HIGH,
+            headline = "Ward 4 & 6 Febrile & Dengue Surveillance Alert",
+            summary = "Epidemiological cohort radar detected acute febrile clusters in Ward 6 and borderline gestational hypertension cases in Ward 4.",
+            affectedWards = listOf("Ward 6 · Shivaji Chowk", "Ward 4 · Rampur East", "Ward 7 · Old Mill Colony"),
+            recommendations = listOf(
+                "Prioritize doorstep follow-up for febrile cases with platelet checks & ORS distribution.",
+                "Verify BP stabilization for antenatal patients in Ward 4.",
+                "Coordinate vector-control larvicidal spray with municipal sanitation cell."
+            ),
+            isOffline = false
+        )
+    )
     private val isScanningOutbreak = MutableStateFlow(false)
     private val outbreakError = MutableStateFlow<String?>(null)
 
     private val latestPatients = MutableStateFlow<List<PatientEntity>>(emptyList())
     private val latestActivities = MutableStateFlow<List<ActivityEntity>>(emptyList())
     private val latestPrefs = MutableStateFlow(AppPreferences())
+
+    init {
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(600L)
+            scanWardOutbreak()
+        }
+    }
 
     val uiState: StateFlow<DashboardUiState> = combine(
         repository.allPatientsFlow,

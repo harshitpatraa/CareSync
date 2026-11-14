@@ -40,9 +40,9 @@ data class AiToolsUiState(
         ChatMessage(
             id = "msg-welcome",
             isUser = false,
-            text = "Hello! I am CareSync Clinical Assistant powered by Gemini. Ask about symptom triage, maternal/pediatric guidance, medicine precautions, or sync workflows.",
-            timestampLabel = "Gemini AI",
-            tags = listOf("Gemini 3.8 Flash", "Streaming")
+            text = "Namaste! I am Sehat Setu, your advanced AI clinical and medical assistant powered by Gemini. Ask me any health question, disease symptoms, maternal & pediatric care guidance, or medication precautions.",
+            timestampLabel = "Sehat Setu",
+            tags = listOf("Sehat Setu", "Gemini AI")
         )
     ),
     val isChatTyping: Boolean = false,
@@ -217,7 +217,33 @@ class AiToolsViewModel @Inject constructor(
                 Log.e(TAG, "Disease risk assessment failed", e)
                 _rawState.value = _rawState.value.copy(
                     isEvaluating = false,
-                    aiErrorMessage = e.localizedMessage ?: "Gemini risk assessment failed."
+                    aiErrorMessage = e.localizedMessage ?: "Sehat Setu risk assessment failed."
+                )
+            }
+        }
+    }
+
+    fun runQuestionnaireRiskAssessment(answers: Map<String, String>) {
+        val prefs = preferences.value
+        val patient = patients.value.find { it.id == _rawState.value.selectedPatientId }
+        viewModelScope.launch {
+            _rawState.value = _rawState.value.copy(isEvaluating = true, aiErrorMessage = null)
+            try {
+                val result = aiEngine.evaluateQuestionsRisk(
+                    answers = answers,
+                    patient = patient,
+                    language = prefs.language,
+                    offlineOnly = prefs.isOfflineOnlyMode,
+                    apiKey = prefs.geminiApiKey
+                )
+                _rawState.value = _rawState.value.copy(isEvaluating = false, riskResult = result)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Questionnaire risk assessment failed", e)
+                _rawState.value = _rawState.value.copy(
+                    isEvaluating = false,
+                    aiErrorMessage = e.localizedMessage ?: "Sehat Setu risk assessment failed."
                 )
             }
         }
@@ -260,8 +286,8 @@ class AiToolsViewModel @Inject constructor(
                         id = streamingBotId,
                         isUser = false,
                         text = partialText,
-                        timestampLabel = if (offlineOnly) "Offline Mode" else "Gemini AI",
-                        tags = if (offlineOnly) listOf("Offline Mode") else listOf("Gemini 3.8 Flash")
+                        timestampLabel = if (offlineOnly) "Sehat Setu (Offline)" else "Sehat Setu",
+                        tags = if (offlineOnly) listOf("Sehat Setu", "Offline Knowledge") else listOf("Sehat Setu", "Gemini AI")
                     )
                     val currentList = _rawState.value.chatMessages
                     val updatedList = if (!botAdded) {
@@ -338,7 +364,8 @@ class AiToolsViewModel @Inject constructor(
                     imageUri = uri ?: _rawState.value.selectedImageUri,
                     patient = patient,
                     language = prefs.language,
-                    offlineOnly = prefs.isOfflineOnlyMode
+                    offlineOnly = prefs.isOfflineOnlyMode,
+                    apiKey = prefs.geminiApiKey
                 )
                 _rawState.value = _rawState.value.copy(
                     isAnalyzingImage = false,

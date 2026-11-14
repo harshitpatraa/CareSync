@@ -58,7 +58,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class AppPreferences(
-    val isDarkMode: Boolean = false,
+    val isDarkMode: Boolean = true,
     val isOfflineOnlyMode: Boolean = false,
     val isLoggedIn: Boolean = false,
     val isSecurityLockEnabled: Boolean = false,
@@ -113,7 +113,7 @@ class CareSyncRepository @Inject constructor(
 
     val preferencesFlow: Flow<AppPreferences> = dataStore.data.map { prefs ->
         AppPreferences(
-            isDarkMode = prefs[Keys.DARK_MODE] ?: false,
+            isDarkMode = prefs[Keys.DARK_MODE] ?: true,
             isOfflineOnlyMode = prefs[Keys.OFFLINE_ONLY] ?: false,
             isLoggedIn = prefs[Keys.LOGGED_IN] ?: false,
             isSecurityLockEnabled = prefs[Keys.SECURITY_LOCK] ?: false,

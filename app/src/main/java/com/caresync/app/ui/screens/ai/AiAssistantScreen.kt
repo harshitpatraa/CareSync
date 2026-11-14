@@ -93,9 +93,10 @@ fun AiAssistantScreen(
     val quickPrompts = listOf(
         "Fever & dengue watch protocol",
         "ANC high BP warning signs",
+        "Type 2 diabetes meal plan",
+        "Chest pain emergency triage",
         "Child MMR vaccination guide",
-        "Low SpO2 emergency steps",
-        "How does offline sync work?"
+        "First aid for burns & wounds"
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -146,9 +147,9 @@ fun AiAssistantScreen(
                     ) {
                         Text(
                             text = if (state.isOfflineOnlyMode) {
-                                "CareSync AI is thinking offline..."
+                                "Sehat Setu is thinking offline..."
                             } else {
-                                "CareSync AI is thinking..."
+                                "Sehat Setu is thinking..."
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -230,7 +231,7 @@ fun AiAssistantScreen(
                 OutlinedTextField(
                     value = inputText,
                     onValueChange = { inputText = it },
-                    placeholder = { Text("Ask CareSync clinical assistant...") },
+                    placeholder = { Text("Ask Sehat Setu clinical assistant...") },
                     singleLine = true,
                     shape = CareSyncButtonShape,
                     modifier = Modifier
@@ -287,9 +288,9 @@ private fun ChatBubble(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Rounded.SmartToy, contentDescription = null, tint = CareSyncBlue, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Rounded.SmartToy, contentDescription = null, tint = CareSyncCyan, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("CareSync AI", style = MaterialTheme.typography.labelMedium, color = CareSyncBlue, fontWeight = FontWeight.Bold)
+                            Text("Sehat Setu", style = MaterialTheme.typography.labelMedium, color = CareSyncCyan, fontWeight = FontWeight.Bold)
                         }
                         IconButton(
                             onClick = { if (isSpeaking) onStopSpeaking() else onSpeak() },

@@ -86,10 +86,7 @@ fun CareSyncNavHost(
     if (user == null) {
         LoginScreen(
             uiState = authState,
-            onAttemptSilentSignIn = { ctx -> authViewModel.attemptSilentSignIn(ctx) },
-            onGoogleSignInClick = { ctx -> authViewModel.signInWithGoogle(ctx) },
             onOfflineClinicianClick = { name, email -> authViewModel.signInAsOfflineClinician(name, email) },
-            onAnonymousSignInClick = { authViewModel.signInAnonymously() },
             onEmailSignInClick = { email, pass -> authViewModel.signInWithEmail(email, pass) },
             onEmailSignUpClick = { email, pass, name -> authViewModel.signUpWithEmail(email, pass, name) },
             onClearMessages = { authViewModel.clearMessages() }
@@ -385,12 +382,14 @@ private fun AuthenticatedCareSyncShell(
                                         patients = patientsState.allPatientsUnfiltered,
                                         onSelectPatient = aiToolsViewModel::selectPatient,
                                         onRunRiskAssessment = aiToolsViewModel::runDiseaseRiskAssessment,
+                                        onRunQuestionnaireAssessment = aiToolsViewModel::runQuestionnaireRiskAssessment,
                                         onAnalyzeImageSample = aiToolsViewModel::analyzeImageSample,
                                         onAnalyzePrescription = aiToolsViewModel::analyzePrescription,
                                         onSaveRxToPatient = aiToolsViewModel::saveRxToPatient,
                                         onSpeakText = aiToolsViewModel::speakText,
                                         onStopSpeaking = aiToolsViewModel::stopSpeaking,
-                                        onOpenSymptomChecker = { navController.navigate(SymptomCheckerRoute) }
+                                        onOpenSymptomChecker = { navController.navigate(SymptomCheckerRoute) },
+                                        onOpenChat = { navController.navigate(AiAssistantRoute) }
                                     )
                                 }
                                 composable<SymptomCheckerRoute> {

@@ -15,11 +15,11 @@ private val LightColorScheme = lightColorScheme(
     secondary = CareSyncGreen,
     onSecondary = Color.White,
     secondaryContainer = CareSyncGreenLight,
-    onSecondaryContainer = Color(0xFF14532D),
+    onSecondaryContainer = Color(0xFF065F46),
     tertiary = CareSyncCyan,
     onTertiary = Color.White,
     tertiaryContainer = CareSyncCyanLight,
-    onTertiaryContainer = Color(0xFF0E4D58),
+    onTertiaryContainer = Color(0xFF155E75),
     background = CareSyncBackgroundLight,
     onBackground = CareSyncTextPrimaryLight,
     surface = CareSyncSurfaceLight,
@@ -30,22 +30,22 @@ private val LightColorScheme = lightColorScheme(
     error = CriticalRed,
     onError = Color.White,
     errorContainer = CriticalRedSoft,
-    onErrorContainer = Color(0xFF7F1D1D)
+    onErrorContainer = Color(0xFF991B1B)
 )
 
 private val DarkColorScheme = darkColorScheme(
     primary = CareSyncBlueOnDark,
-    onPrimary = Color(0xFF08204A),
+    onPrimary = Color(0xFF0F172A),
     primaryContainer = CareSyncBlueContainerDark,
-    onPrimaryContainer = CareSyncBlueLight,
+    onPrimaryContainer = Color(0xFFBFDBFE),
     secondary = CareSyncGreenOnDark,
-    onSecondary = Color(0xFF0B2E13),
+    onSecondary = Color(0xFF022C22),
     secondaryContainer = CareSyncGreenContainerDark,
-    onSecondaryContainer = CareSyncGreenLight,
+    onSecondaryContainer = Color(0xFFA7F3D0),
     tertiary = CareSyncCyanOnDark,
-    onTertiary = Color(0xFF062930),
+    onTertiary = Color(0xFF083344),
     tertiaryContainer = CareSyncCyanContainerDark,
-    onTertiaryContainer = CareSyncCyanLight,
+    onTertiaryContainer = Color(0xFFA5F3FC),
     background = CareSyncBackgroundDark,
     onBackground = CareSyncTextPrimaryDark,
     surface = CareSyncSurfaceDark,
@@ -61,7 +61,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun CareSyncTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // Default to true for the requested classy dark theme
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
