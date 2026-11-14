@@ -117,7 +117,7 @@ fun SymptomCheckerScreen(
             ) {
                 Icon(Icons.Rounded.AutoAwesome, contentDescription = null, tint = CareSyncBlue)
                 Text(
-                    text = "Sehat Setu AI Symptom Checker & Medicine Suggestions — powered by Gemini.",
+                    text = "Sehat Setu Offline Symptom Checker & Triage — powered by local MoHFW guidelines.",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium
                 )
@@ -211,7 +211,7 @@ fun SymptomCheckerScreen(
                     } else {
                         Icon(Icons.Rounded.MedicalServices, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Analyze with Gemini AI", fontWeight = FontWeight.Bold)
+                        Text("Analyze with Sehat Setu AI", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -426,7 +426,7 @@ fun MedicalAssessmentScreen(
                     }
                     Surface(shape = CareSyncButtonShape, color = CareSyncGreen.copy(alpha = 0.14f)) {
                         Text(
-                            text = if (state.isOfflineOnlyMode) "Sehat Setu Offline" else "Sehat Setu Gemini AI",
+                            text = "Sehat Setu Offline Engine",
                             style = MaterialTheme.typography.labelSmall,
                             color = CareSyncGreen,
                             fontWeight = FontWeight.Bold,
@@ -692,7 +692,7 @@ fun MedicalAssessmentScreen(
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Clinical Vision & Prescription OCR", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "Capture or pick a wound, skin rash, or handwritten prescription photo for structured Gemini Vision extraction.",
+                    text = "Capture or pick a wound, skin rash, or prescription photo for 100% on-device OCR extraction & medicine matching.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -889,7 +889,7 @@ fun AssessmentResultCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Overall Clinical Risk Index: ${result.riskScore}/100", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
-                        text = if (result.isOfflinePrediction) "Sehat Setu Offline Engine" else "Sehat Setu · Gemini 1.5 Flash AI",
+                        text = "Sehat Setu Offline Engine",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

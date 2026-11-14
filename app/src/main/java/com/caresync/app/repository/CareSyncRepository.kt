@@ -674,7 +674,7 @@ class CareSyncRepository @Inject constructor(
                 recordType = RecordType.MEDICINE.name,
                 title = "${med.name} ${med.dosage}".trim(),
                 subtitle = med.frequency.ifBlank { "As directed" },
-                detail = "Duration: ${med.duration.ifBlank { "5 days" }} · Extracted via Gemini Rx OCR",
+                detail = "Duration: ${med.duration.ifBlank { "5 days" }} · Extracted via Offline Rx OCR",
                 dateLabel = "Just now",
                 statusBadge = "Rx Active",
                 syncStatus = SyncStatus.PENDING_UPLOAD.name,

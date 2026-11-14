@@ -378,7 +378,7 @@ fun HomeDashboardScreen(
                             Column {
                                 Text(strings.outbreakRadarTitle, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                                 Text(
-                                    text = if (state.isOfflineOnly) "Offline Cohort Mode" else "Gemini 3.8 Flash Surveillance",
+                                    text = "Offline Cohort Intelligence",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

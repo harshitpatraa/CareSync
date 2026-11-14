@@ -386,7 +386,7 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = apiKeyInput,
                         onValueChange = { apiKeyInput = it },
-                        label = { Text("API Key (Firebase / Gemini)", softWrap = true) },
+                        label = { Text("Firebase Web API Key", softWrap = true) },
                         placeholder = { Text("AIzaSy...") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()

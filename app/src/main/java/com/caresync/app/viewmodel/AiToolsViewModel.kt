@@ -40,9 +40,9 @@ data class AiToolsUiState(
         ChatMessage(
             id = "msg-welcome",
             isUser = false,
-            text = "Namaste! I am Sehat Setu, your advanced AI clinical and medical assistant powered by Gemini. Ask me any health question, disease symptoms, maternal & pediatric care guidance, or medication precautions.",
+            text = "Namaste! I am Sehat Setu, your dedicated offline ASHA clinical and maternal-child health assistant based on official MoHFW & National Health Mission guidelines. Ask me any question in English, Hindi, or Hinglish regarding pregnancy (ANC/PNC), newborn care (HBNC), universal immunization, nutrition, anemia, family planning, or emergency danger signs.",
             timestampLabel = "Sehat Setu",
-            tags = listOf("Sehat Setu", "Gemini AI")
+            tags = listOf("Sehat Setu", "Offline MoHFW Engine")
         )
     ),
     val isChatTyping: Boolean = false,
@@ -308,8 +308,8 @@ class AiToolsViewModel @Inject constructor(
                         id = streamingBotId,
                         isUser = false,
                         text = partialText,
-                        timestampLabel = if (offlineOnly) "Sehat Setu (Offline)" else "Sehat Setu",
-                        tags = if (offlineOnly) listOf("Sehat Setu", "Offline Knowledge") else listOf("Sehat Setu", "Gemini AI")
+                        timestampLabel = "Sehat Setu (Offline)",
+                        tags = listOf("Sehat Setu", "MoHFW Guidelines")
                     )
                     val currentList = _rawState.value.chatMessages
                     val updatedList = if (!botAdded) {
