@@ -57,6 +57,7 @@ import com.caresync.app.ui.screens.patients.PatientListScreen
 import com.caresync.app.ui.screens.profile.ProfileScreen
 import com.caresync.app.ui.screens.records.HealthRecordsScreen
 import com.caresync.app.ui.screens.settings.SettingsScreen
+import com.caresync.app.model.ClinicianUser
 import com.caresync.app.utils.PdfReferralGenerator
 import com.caresync.app.viewmodel.AiToolsViewModel
 import com.caresync.app.viewmodel.AuthViewModel
@@ -64,7 +65,6 @@ import com.caresync.app.viewmodel.DashboardViewModel
 import com.caresync.app.viewmodel.OperationsViewModel
 import com.caresync.app.viewmodel.PatientDetailViewModel
 import com.caresync.app.viewmodel.PatientsViewModel
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
 @Composable
@@ -88,6 +88,10 @@ fun CareSyncNavHost(
             uiState = authState,
             onAttemptSilentSignIn = { ctx -> authViewModel.attemptSilentSignIn(ctx) },
             onGoogleSignInClick = { ctx -> authViewModel.signInWithGoogle(ctx) },
+            onOfflineClinicianClick = { name, email -> authViewModel.signInAsOfflineClinician(name, email) },
+            onAnonymousSignInClick = { authViewModel.signInAnonymously() },
+            onEmailSignInClick = { email, pass -> authViewModel.signInWithEmail(email, pass) },
+            onEmailSignUpClick = { email, pass, name -> authViewModel.signUpWithEmail(email, pass, name) },
             onClearMessages = { authViewModel.clearMessages() }
         )
     } else {
@@ -102,7 +106,7 @@ fun CareSyncNavHost(
 
 @Composable
 private fun AuthenticatedCareSyncShell(
-    currentUser: FirebaseUser,
+    currentUser: ClinicianUser,
     authViewModel: AuthViewModel,
     dashboardViewModel: DashboardViewModel = hiltViewModel(key = currentUser.uid),
     patientsViewModel: PatientsViewModel = hiltViewModel(key = currentUser.uid),
@@ -120,7 +124,9 @@ private fun AuthenticatedCareSyncShell(
 
     LaunchedEffect(currentUser.uid) {
         authViewModel.onSessionAuthenticated(currentUser)
-        authViewModel.startCloudSyncObserver(currentUser.uid)
+        if (!currentUser.isOfflineOnly) {
+            authViewModel.startCloudSyncObserver(currentUser.uid)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {

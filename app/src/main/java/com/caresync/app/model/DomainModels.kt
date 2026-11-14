@@ -130,3 +130,11 @@ data class WardOutbreakInsight(
     val isOffline: Boolean = false
 )
 
+data class ClinicianUser(
+    val uid: String,
+    val displayName: String,
+    val email: String? = null,
+    val isOfflineOnly: Boolean = false
+)
+
+

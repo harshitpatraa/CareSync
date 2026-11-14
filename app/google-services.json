@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "879174369515-6qfhfn5oesksi0a210g924phq9cgbdt2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caresync.app",
+            "certificate_hash": "5c3b1a9557ba1e12060c39369eed780da957ebc8"
+          }
+        },
+        {
           "client_id": "879174369515-3r8qs9202jh6ne0l5gctp0emf8s5u81s.apps.googleusercontent.com",
           "client_type": 3
         }

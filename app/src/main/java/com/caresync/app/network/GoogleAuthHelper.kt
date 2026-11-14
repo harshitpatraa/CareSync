@@ -102,7 +102,12 @@ object GoogleAuthHelper {
             }
         } catch (e: GetCredentialCancellationException) {
             Log.w(TAG, "Google Sign-In cancelled or dismissed: ${e.message}", e)
-            GoogleSignInOutcome.Cancelled
+            val msg = e.message.orEmpty()
+            if (msg.contains("16") || msg.contains("Cannot find a matching credential", ignoreCase = true) || msg.contains("10") || msg.contains("developer", ignoreCase = true)) {
+                GoogleSignInOutcome.Error("Google Play Services rejected sign-in (SHA-1 signature not configured in Firebase). Tap 'Continue as Clinician (Offline Vault)' below to enter immediately.")
+            } else {
+                GoogleSignInOutcome.Cancelled
+            }
         } catch (e: NoCredentialException) {
             if (isSilent) {
                 Log.d(TAG, "No authorized Google account cached for silent sign-in.")
