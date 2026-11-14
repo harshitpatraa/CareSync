@@ -366,6 +366,7 @@ fun CareSyncNavHost(
                                     onToggleOfflineOnly = operationsViewModel::toggleOfflineOnly,
                                     onToggleSecurityLock = operationsViewModel::toggleSecurityLock,
                                     onSelectLanguage = operationsViewModel::setLanguage,
+                                    onUpdateApiKey = operationsViewModel::updateGeminiApiKey,
                                     onSyncNow = operationsViewModel::syncNow,
                                     onOpenProfile = { navController.navigate(ProfileRoute) },
                                     onOpenAbout = { navController.navigate(AboutRoute) },

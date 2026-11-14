@@ -158,6 +158,10 @@ class OperationsViewModel @Inject constructor(
         viewModelScope.launch { repository.setLanguage(language) }
     }
 
+    fun updateGeminiApiKey(apiKey: String) {
+        viewModelScope.launch { repository.setGeminiApiKey(apiKey) }
+    }
+
     fun syncNow() {
         viewModelScope.launch {
             val res = repository.syncPendingQueue()

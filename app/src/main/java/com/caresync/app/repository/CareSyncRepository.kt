@@ -47,7 +47,8 @@ data class AppPreferences(
     val userName: String = "Dr. Priya Kulkarni",
     val userEmail: String = "priya.kulkarni@caresync.org",
     val workerId: String = "CS-CHW-409",
-    val clinicName: String = "CareSync Community Health Hub · Ward 4"
+    val clinicName: String = "CareSync Community Health Hub · Ward 4",
+    val geminiApiKey: String = ""
 )
 
 @Singleton
@@ -70,6 +71,7 @@ class CareSyncRepository @Inject constructor(
         val LANGUAGE = stringPreferencesKey("language")
         val USER_NAME = stringPreferencesKey("user_name")
         val USER_EMAIL = stringPreferencesKey("user_email")
+        val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
     }
 
     val preferencesFlow: Flow<AppPreferences> = dataStore.data.map { prefs ->
@@ -80,7 +82,8 @@ class CareSyncRepository @Inject constructor(
             isSecurityLockEnabled = prefs[Keys.SECURITY_LOCK] ?: true,
             language = AppLanguage.entries.find { it.code == prefs[Keys.LANGUAGE] } ?: AppLanguage.ENGLISH,
             userName = prefs[Keys.USER_NAME] ?: "Dr. Priya Kulkarni",
-            userEmail = prefs[Keys.USER_EMAIL] ?: "priya.kulkarni@caresync.org"
+            userEmail = prefs[Keys.USER_EMAIL] ?: "priya.kulkarni@caresync.org",
+            geminiApiKey = prefs[Keys.GEMINI_API_KEY] ?: ""
         )
     }
 
@@ -114,6 +117,10 @@ class CareSyncRepository @Inject constructor(
 
     suspend fun setLanguage(language: AppLanguage) {
         dataStore.edit { it[Keys.LANGUAGE] = language.code }
+    }
+
+    suspend fun setGeminiApiKey(apiKey: String) {
+        dataStore.edit { it[Keys.GEMINI_API_KEY] = apiKey.trim() }
     }
 
     suspend fun login(email: String, name: String? = null) {

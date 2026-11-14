@@ -64,6 +64,7 @@ fun SettingsScreen(
     onToggleOfflineOnly: (Boolean) -> Unit,
     onToggleSecurityLock: (Boolean) -> Unit,
     onSelectLanguage: (AppLanguage) -> Unit,
+    onUpdateApiKey: (String) -> Unit = {},
     onSyncNow: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -72,6 +73,7 @@ fun SettingsScreen(
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showPrivacyDialog by remember { mutableStateOf(false) }
+    var showApiKeyDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -155,6 +157,35 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+        }
+
+        // Gemini AI & Clinical Engine
+        Card(
+            shape = CareSyncCardShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Gemini AI Engine", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = if (state.preferences.geminiApiKey.isNotBlank())
+                        "Status: Live Gemini 2.5 Flash active with personal API key."
+                    else
+                        "Status: Built-in Clinical Intelligence active (Bypasses Firebase App Check).",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+                HorizontalDivider()
+                SettingsNavRow(
+                    icon = Icons.Rounded.Lock,
+                    title = "Gemini API Key (Optional)",
+                    subtitle = if (state.preferences.geminiApiKey.isNotBlank())
+                        "Configured (••••••••" + state.preferences.geminiApiKey.takeLast(4) + ")"
+                    else
+                        "Tap to paste Google Gemini API Key from Google AI Studio",
+                    onClick = { showApiKeyDialog = true }
+                )
             }
         }
 
@@ -247,6 +278,56 @@ fun SettingsScreen(
             },
             confirmButton = {
                 Button(onClick = { showPrivacyDialog = false }) { Text("Understood") }
+            }
+        )
+    }
+
+    if (showApiKeyDialog) {
+        var keyInput by remember { mutableStateOf(state.preferences.geminiApiKey) }
+        AlertDialog(
+            onDismissRequest = { showApiKeyDialog = false },
+            title = { Text("Configure Gemini API Key") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Enter your Gemini API key from Google AI Studio (aistudio.google.com). This connects directly via official Google REST API, completely bypassing Firebase App Check.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    androidx.compose.material3.OutlinedTextField(
+                        value = keyInput,
+                        onValueChange = { keyInput = it },
+                        label = { Text("Gemini API Key") },
+                        placeholder = { Text("AIzaSy...") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (keyInput.isNotBlank()) {
+                        TextButton(onClick = {
+                            keyInput = ""
+                            onUpdateApiKey("")
+                            showApiKeyDialog = false
+                        }) {
+                            Text("Clear Key (Use Offline Engine)", color = CriticalRed)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onUpdateApiKey(keyInput.trim())
+                        showApiKeyDialog = false
+                    },
+                    shape = CareSyncButtonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue)
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showApiKeyDialog = false }) {
+                    Text("Cancel")
+                }
             }
         )
     }

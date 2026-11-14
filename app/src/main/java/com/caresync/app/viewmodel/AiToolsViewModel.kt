@@ -95,6 +95,7 @@ class AiToolsViewModel @Inject constructor(
         if (state.selectedSymptoms.isEmpty()) return
         val patient = patients.value.find { it.id == state.selectedPatientId }
         val offlineOnly = preferences.value.isOfflineOnlyMode
+        val apiKey = preferences.value.geminiApiKey
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isEvaluating = true, aiErrorMessage = null)
             try {
@@ -103,7 +104,8 @@ class AiToolsViewModel @Inject constructor(
                     durationDays = state.durationDays,
                     severity = state.severity,
                     patient = patient,
-                    offlineOnly = offlineOnly
+                    offlineOnly = offlineOnly,
+                    apiKey = apiKey
                 )
                 _uiState.value = _uiState.value.copy(isEvaluating = false, symptomResult = result)
             } catch (e: CancellationException) {
@@ -128,6 +130,7 @@ class AiToolsViewModel @Inject constructor(
         isPregnant: Boolean
     ) {
         val offlineOnly = preferences.value.isOfflineOnlyMode
+        val apiKey = preferences.value.geminiApiKey
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isEvaluating = true, aiErrorMessage = null)
             try {
@@ -139,7 +142,8 @@ class AiToolsViewModel @Inject constructor(
                     tempC = tempC,
                     bloodSugar = bloodSugar,
                     isPregnant = isPregnant,
-                    offlineOnly = offlineOnly
+                    offlineOnly = offlineOnly,
+                    apiKey = apiKey
                 )
                 _uiState.value = _uiState.value.copy(isEvaluating = false, riskResult = result)
             } catch (e: CancellationException) {
@@ -159,6 +163,7 @@ class AiToolsViewModel @Inject constructor(
         if (trimmed.isBlank()) return
         val activePatient = patients.value.find { it.id == _uiState.value.selectedPatientId }
         val offlineOnly = preferences.value.isOfflineOnlyMode
+        val apiKey = preferences.value.geminiApiKey
         val historySnapshot = _uiState.value.chatMessages
 
         val userMsg = ChatMessage(
@@ -178,13 +183,13 @@ class AiToolsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 var botAdded = false
-                aiEngine.streamChatReply(trimmed, historySnapshot, activePatient, offlineOnly).collect { partialText ->
+                aiEngine.streamChatReply(trimmed, historySnapshot, activePatient, offlineOnly, apiKey).collect { partialText ->
                     val botMsg = ChatMessage(
                         id = streamingBotId,
                         isUser = false,
                         text = partialText,
-                        timestampLabel = if (offlineOnly) "Offline Mode" else "Gemini AI",
-                        tags = if (offlineOnly) listOf("Offline Mode") else listOf("Gemini 3.8 Flash")
+                        timestampLabel = if (offlineOnly || apiKey.isBlank()) "Clinical Engine" else "Gemini AI",
+                        tags = if (offlineOnly || apiKey.isBlank()) listOf("Clinical Engine") else listOf("Gemini 2.5 Flash")
                     )
                     val currentList = _uiState.value.chatMessages
                     val updatedList = if (!botAdded) {
@@ -212,6 +217,7 @@ class AiToolsViewModel @Inject constructor(
 
     fun analyzeImageSample(label: String, uri: Uri? = null) {
         val offlineOnly = preferences.value.isOfflineOnlyMode
+        val apiKey = preferences.value.geminiApiKey
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isAnalyzingImage = true,
@@ -222,7 +228,8 @@ class AiToolsViewModel @Inject constructor(
                 val result = aiEngine.analyzeClinicalImage(
                     scanLabel = label,
                     imageUri = uri ?: _uiState.value.selectedImageUri,
-                    offlineOnly = offlineOnly
+                    offlineOnly = offlineOnly,
+                    apiKey = apiKey
                 )
                 _uiState.value = _uiState.value.copy(
                     isAnalyzingImage = false,
