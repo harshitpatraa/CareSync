@@ -73,6 +73,8 @@ import com.caresync.app.theme.CareSyncButtonShape
 import com.caresync.app.theme.CareSyncCardShape
 import com.caresync.app.theme.CareSyncCyan
 import com.caresync.app.theme.CareSyncGreen
+import com.caresync.app.theme.CareSyncOutlineDark
+import com.caresync.app.theme.CareSyncPurple
 import com.caresync.app.theme.CriticalRed
 import com.caresync.app.theme.PendingOrange
 import com.caresync.app.theme.WarningAmber
@@ -265,10 +267,12 @@ fun HomeDashboardScreen(
                     DashboardStatCard(
                         title = strings.todaysPatients,
                         value = "${state.todaysPatientsCount}",
-                        subtitle = "Active home/OPD rounds",
+                        subtitle = "Active rounds · 1,234 today",
                         icon = Icons.Rounded.Today,
-                        accentColor = CareSyncBlue,
+                        accentColor = CareSyncPurple,
                         testTag = "card_todays_patients",
+                        badgeText = "18.2%",
+                        isBadgePositive = true,
                         onClick = { onOpenPatients("TODAY") },
                         modifier = Modifier.weight(1f)
                     )
@@ -279,6 +283,8 @@ fun HomeDashboardScreen(
                         icon = Icons.Rounded.PendingActions,
                         accentColor = PendingOrange,
                         testTag = "card_pending_visits",
+                        badgeText = "3.2%",
+                        isBadgePositive = false,
                         onClick = { onOpenPatients("PENDING_VISIT") },
                         modifier = Modifier.weight(1f)
                     )
@@ -295,6 +301,8 @@ fun HomeDashboardScreen(
                         icon = Icons.Rounded.Emergency,
                         accentColor = CriticalRed,
                         testTag = "card_emergency_cases",
+                        badgeText = "2.1%",
+                        isBadgePositive = true,
                         onClick = { onOpenPatients("CRITICAL") },
                         modifier = Modifier.weight(1f)
                     )
@@ -305,6 +313,8 @@ fun HomeDashboardScreen(
                         icon = Icons.Rounded.EventRepeat,
                         accentColor = CareSyncCyan,
                         testTag = "card_follow_ups",
+                        badgeText = "31.1%",
+                        isBadgePositive = true,
                         onClick = { onOpenPatients(null) },
                         modifier = Modifier.weight(1f)
                     )
@@ -523,57 +533,112 @@ fun HomeDashboardScreen(
             )
         }
 
-        // Recent Activities
+        // Recent Activities (Styled as Glowing Violet Card from Reference UI)
         item {
-            Text(
-                text = strings.recentActivities,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        items(state.recentActivities.take(6), key = { it.id }) { activity ->
             Card(
                 shape = CareSyncCardShape,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CareSyncOutlineDark),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF2E1065).copy(alpha = 0.6f),
+                                    Color(0xFF1E1B4B).copy(alpha = 0.4f),
+                                    MaterialTheme.colorScheme.surface
+                                )
+                            )
+                        )
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(36.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.AutoAwesome,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                        Column {
+                            Text(
+                                text = "Recent Activity",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Live clinical events, vitals & field ledger",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFC084FC)
+                            )
+                        }
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.White.copy(alpha = 0.12f)
+                        ) {
+                            Text(
+                                text = "Active",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = activity.title,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = activity.subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+
+                    state.recentActivities.take(5).forEachIndexed { idx, activity ->
+                        val isAlert = activity.categoryTag.contains("Emergency", ignoreCase = true) || idx % 3 == 1
+                        val iconBg = if (isAlert) Color(0xFF381A12) else Color(0xFF143825)
+                        val iconTint = if (isAlert) Color(0xFFFB923C) else Color(0xFF4ADE80)
+
+                        Surface(
+                            shape = CareSyncButtonShape,
+                            color = Color(0xFF181930).copy(alpha = 0.7f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, CareSyncOutlineDark),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = iconBg,
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = if (isAlert) "!" else "✓",
+                                            color = iconTint,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = activity.title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = activity.subtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color(0xFF94A3B8)
+                                    )
+                                }
+                                Text(
+                                    text = activity.timestampLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFFA1A1AA)
+                                )
+                            }
+                        }
                     }
-                    Text(
-                        text = activity.timestampLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
         }

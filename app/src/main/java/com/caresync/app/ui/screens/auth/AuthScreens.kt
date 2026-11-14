@@ -69,6 +69,7 @@ import com.caresync.app.theme.CareSyncButtonShape
 import com.caresync.app.theme.CareSyncCardShape
 import com.caresync.app.theme.CareSyncCyan
 import com.caresync.app.theme.CareSyncGreen
+import com.caresync.app.theme.CareSyncPurple
 import com.caresync.app.viewmodel.AuthUiState
 import kotlinx.coroutines.delay
 
@@ -165,10 +166,9 @@ fun LoginScreen(
     onEmailSignUpClick: (email: String, pass: String, name: String) -> Unit,
     onClearMessages: () -> Unit
 ) {
-    var emailInput by remember { mutableStateOf("priya.kulkarni@caresync.org") }
-    var passwordInput by remember { mutableStateOf("CareSync2026") }
     var nameInput by remember { mutableStateOf("Dr. Priya Kulkarni") }
-    var isSignUpMode by remember { mutableStateOf(false) }
+    var emailInput by remember { mutableStateOf("priya.kulkarni@gmail.com") }
+    var passwordInput by remember { mutableStateOf("CareSync2026") }
 
     Box(
         modifier = Modifier
@@ -218,7 +218,7 @@ fun LoginScreen(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "CareSync Cloud + Offline Vault",
+                        text = "CareSync Local Vault + Cloud Ready",
                         style = MaterialTheme.typography.labelMedium,
                         color = CareSyncGreen,
                         fontWeight = FontWeight.SemiBold
@@ -239,7 +239,7 @@ fun LoginScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text(
-                        text = "Clinician Workspace Sign-In",
+                        text = "Clinician Sign-In",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -251,117 +251,31 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Rounded.Lock,
                             contentDescription = null,
-                            tint = CareSyncBlue,
+                            tint = CareSyncPurple,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "Patient records and vitals are encrypted and stored locally in Room.",
+                            text = "Enter your details to sign in immediately. No cloud account verification required.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Sync,
-                            contentDescription = null,
-                            tint = CareSyncCyan,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = "Works 100% offline. Syncs with cloud ledger when network is available.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    if (uiState.errorMessage != null) {
-                        Surface(
-                            shape = CareSyncButtonShape,
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = uiState.errorMessage,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
-                    }
-
-                    if (uiState.statusMessage != null) {
-                        Surface(
-                            shape = CareSyncButtonShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = uiState.statusMessage,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
-                    }
-
-                    // PRIMARY OPTION 1: Continue as Clinician (Offline Vault) - 1-Click Access
-                    Button(
-                        onClick = {
-                            onClearMessages()
-                            onOfflineClinicianClick("Dr. Priya Kulkarni", "priya.kulkarni@caresync.org")
-                        },
-                        enabled = !uiState.isLoading,
-                        shape = CareSyncButtonShape,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("offline_clinician_button"),
-                        colors = ButtonDefaults.buttonColors(containerColor = CareSyncGreen)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.CloudDone,
-                            contentDescription = "Offline Vault Access",
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text("Continue as Clinician (Offline Vault)", fontWeight = FontWeight.Bold)
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        HorizontalDivider(modifier = Modifier.weight(1f))
-                        Text(
-                            text = "  OR SIGN IN WITH EMAIL  ",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                        HorizontalDivider(modifier = Modifier.weight(1f))
-                    }
-
-                    // OPTION 2: Email & Password Authentication
-                    if (isSignUpMode) {
-                        OutlinedTextField(
-                            value = nameInput,
-                            onValueChange = { nameInput = it },
-                            label = { Text("Clinician Full Name") },
-                            leadingIcon = { Icon(Icons.Rounded.Person, contentDescription = null) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = CareSyncButtonShape
                         )
                     }
 
                     OutlinedTextField(
+                        value = nameInput,
+                        onValueChange = { nameInput = it },
+                        label = { Text("Clinician Name") },
+                        leadingIcon = { Icon(Icons.Rounded.Person, contentDescription = null, tint = CareSyncPurple) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = CareSyncButtonShape
+                    )
+
+                    OutlinedTextField(
                         value = emailInput,
                         onValueChange = { emailInput = it },
-                        label = { Text("Email Address") },
-                        leadingIcon = { Icon(Icons.Rounded.Email, contentDescription = null) },
+                        label = { Text("Gmail / Email Address") },
+                        leadingIcon = { Icon(Icons.Rounded.Email, contentDescription = null, tint = CareSyncPurple) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -372,7 +286,7 @@ fun LoginScreen(
                         value = passwordInput,
                         onValueChange = { passwordInput = it },
                         label = { Text("Password") },
-                        leadingIcon = { Icon(Icons.Rounded.Lock, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Rounded.Lock, contentDescription = null, tint = CareSyncPurple) },
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
@@ -380,55 +294,45 @@ fun LoginScreen(
                         shape = CareSyncButtonShape
                     )
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    // Single Direct Sign In Button (no new vs existing check, guaranteed sign in)
+                    Button(
+                        onClick = {
+                            onClearMessages()
+                            val cleanName = nameInput.ifBlank { "Dr. Priya Kulkarni" }
+                            val cleanEmail = emailInput.ifBlank { "priya.kulkarni@gmail.com" }
+                            onOfflineClinicianClick(cleanName, cleanEmail)
+                        },
+                        enabled = !uiState.isLoading,
+                        shape = CareSyncButtonShape,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .testTag("offline_clinician_button"),
+                        colors = ButtonDefaults.buttonColors(containerColor = CareSyncPurple)
                     ) {
-                        Button(
-                            onClick = {
-                                onClearMessages()
-                                if (isSignUpMode) {
-                                    onEmailSignUpClick(emailInput, passwordInput, nameInput)
-                                } else {
-                                    onEmailSignInClick(emailInput, passwordInput)
-                                }
-                            },
-                            enabled = !uiState.isLoading,
-                            shape = CareSyncButtonShape,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue)
-                        ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                            } else {
-                                Text(if (isSignUpMode) "Register" else "Sign In", fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        TextButton(
-                            onClick = { isSignUpMode = !isSignUpMode },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(if (isSignUpMode) "Existing User? Sign In" else "New Clinician? Register")
-                        }
+                        Icon(
+                            imageVector = Icons.Rounded.CloudDone,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("Sign In as Clinician", fontWeight = FontWeight.Bold)
                     }
 
-                    // OPTION 3: 1-Tap Quick Demo Sign-In
+                    // 1-Tap Quick Demo Sign-In
                     OutlinedButton(
                         onClick = {
                             onClearMessages()
-                            onOfflineClinicianClick("Dr. Priya Kulkarni", "priya.kulkarni@caresync.org")
+                            onOfflineClinicianClick("Dr. Priya Kulkarni", "priya.kulkarni@gmail.com")
                         },
                         shape = CareSyncButtonShape,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(44.dp)
+                            .height(46.dp)
                     ) {
-                        Icon(Icons.Rounded.Bolt, contentDescription = null, tint = CareSyncCyan, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Rounded.Bolt, contentDescription = null, tint = CareSyncPurple, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Quick Demo Login (Dr. Priya Kulkarni)")
+                        Text("⚡ 1-Tap Quick Demo Access")
                     }
                 }
             }

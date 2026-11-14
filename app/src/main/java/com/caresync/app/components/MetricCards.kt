@@ -55,7 +55,9 @@ fun DashboardStatCard(
     accentColor: Color,
     testTag: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    badgeText: String? = null,
+    isBadgePositive: Boolean = true
 ) {
     Card(
         modifier = modifier
@@ -98,13 +100,37 @@ fun DashboardStatCard(
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (badgeText != null) {
+                    val badgeColor = if (isBadgePositive) Color(0xFF4ADE80) else Color(0xFFFB923C)
+                    val badgeBg = if (isBadgePositive) Color(0xFF143825) else Color(0xFF381A12)
+                    Surface(
+                        shape = CircleShape,
+                        color = badgeBg,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, badgeColor.copy(alpha = 0.35f))
+                    ) {
+                        Text(
+                            text = (if (isBadgePositive) "↗ " else "↘ ") + badgeText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = badgeColor,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,

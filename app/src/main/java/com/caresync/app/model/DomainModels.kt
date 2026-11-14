@@ -145,4 +145,24 @@ data class ClinicianUser(
     val isOfflineOnly: Boolean = false
 )
 
+data class NearbyClinician(
+    val id: String,
+    val name: String,
+    val role: String,
+    val healthCentre: String,
+    val distanceKm: Float,
+    val phone: String,
+    val etaMinutes: Int,
+    val isAvailable: Boolean = true
+)
+
+data class EmergencySosDispatch(
+    val dispatchId: String,
+    val timestampLabel: String,
+    val patientName: String,
+    val assignedClinician: NearbyClinician,
+    val gpsCoordinates: String,
+    val status: String
+)
+
 

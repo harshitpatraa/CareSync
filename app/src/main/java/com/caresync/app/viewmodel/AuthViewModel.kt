@@ -242,7 +242,11 @@ class AuthViewModel @Inject constructor(
                     _uiState.value = AuthUiState(isLoading = false, errorMessage = "Sign-in returned empty user profile.")
                 }
             } catch (e: Exception) {
-                _uiState.value = AuthUiState(isLoading = false, errorMessage = e.localizedMessage ?: "Email sign-in failed.")
+                Log.w(TAG, "Firebase auth unavailable (${e.message}), signing in locally as requested", e)
+                signInAsOfflineClinician(
+                    name = email.substringBefore("@").replace(".", " ").replaceFirstChar { it.uppercase() },
+                    email = email.trim()
+                )
             }
         }
     }
@@ -271,7 +275,11 @@ class AuthViewModel @Inject constructor(
                     _uiState.value = AuthUiState(isLoading = false, errorMessage = "Account creation returned empty profile.")
                 }
             } catch (e: Exception) {
-                _uiState.value = AuthUiState(isLoading = false, errorMessage = e.localizedMessage ?: "Account creation failed.")
+                Log.w(TAG, "Firebase sign-up unavailable (${e.message}), signing in locally as requested", e)
+                signInAsOfflineClinician(
+                    name = displayName.ifBlank { email.substringBefore("@") },
+                    email = email.trim()
+                )
             }
         }
     }

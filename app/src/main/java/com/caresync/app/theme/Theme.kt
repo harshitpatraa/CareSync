@@ -34,18 +34,18 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = CareSyncBlueOnDark,
-    onPrimary = Color(0xFF0F172A),
+    primary = CareSyncPurple,
+    onPrimary = Color.White,
     primaryContainer = CareSyncBlueContainerDark,
-    onPrimaryContainer = Color(0xFFBFDBFE),
+    onPrimaryContainer = Color(0xFFE9D5FF),
     secondary = CareSyncGreenOnDark,
     onSecondary = Color(0xFF022C22),
     secondaryContainer = CareSyncGreenContainerDark,
     onSecondaryContainer = Color(0xFFA7F3D0),
     tertiary = CareSyncCyanOnDark,
-    onTertiary = Color(0xFF083344),
+    onTertiary = Color.White,
     tertiaryContainer = CareSyncCyanContainerDark,
-    onTertiaryContainer = Color(0xFFA5F3FC),
+    onTertiaryContainer = Color(0xFFF3E8FF),
     background = CareSyncBackgroundDark,
     onBackground = CareSyncTextPrimaryDark,
     surface = CareSyncSurfaceDark,
@@ -54,7 +54,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = CareSyncTextSecondaryDark,
     outline = CareSyncOutlineDark,
     error = Color(0xFFF87171),
-    onError = Color(0xFF450A0A),
+    onError = Color.White,
     errorContainer = Color(0xFF5C1616),
     onErrorContainer = Color(0xFFFECACA)
 )

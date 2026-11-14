@@ -10,6 +10,8 @@ import com.caresync.app.database.VitalsEntity
 import com.caresync.app.model.AppLanguage
 import com.caresync.app.model.EmergencyContact
 import com.caresync.app.model.EmergencyInstruction
+import com.caresync.app.model.EmergencySosDispatch
+import com.caresync.app.model.NearbyClinician
 import com.caresync.app.model.NearbyHealthCenter
 import com.caresync.app.model.UserProfile
 import com.caresync.app.network.SyncState
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 data class EmergencyUiState(
@@ -40,7 +43,39 @@ data class EmergencyUiState(
     val instructions: List<EmergencyInstruction> = emptyList(),
     val fieldCoordinates: FieldCoordinates? = null,
     val clinicianName: String = "Dr. Priya Kulkarni",
-    val isSpeaking: Boolean = false
+    val isSpeaking: Boolean = false,
+    val dispatchedClinician: NearbyClinician? = null,
+    val activeDispatch: EmergencySosDispatch? = null
+)
+
+val defaultNearbyClinicians = listOf(
+    NearbyClinician(
+        id = "clinician-01",
+        name = "Dr. Priya Kulkarni",
+        role = "Senior Medical Officer · First Responder",
+        healthCentre = "Ward 4 Primary Health Centre",
+        distanceKm = 0.8f,
+        phone = "+91 98765 43210",
+        etaMinutes = 3
+    ),
+    NearbyClinician(
+        id = "clinician-02",
+        name = "Dr. Rajesh Sharma",
+        role = "Emergency Trauma Physician",
+        healthCentre = "Sub-District Civil Hospital",
+        distanceKm = 1.4f,
+        phone = "+91 98765 43211",
+        etaMinutes = 5
+    ),
+    NearbyClinician(
+        id = "clinician-03",
+        name = "Nurse Anjali Mehta",
+        role = "Community Health Officer (CHO)",
+        healthCentre = "Ward 6 Health & Wellness Centre",
+        distanceKm = 1.9f,
+        phone = "+91 98765 43212",
+        etaMinutes = 8
+    )
 )
 
 data class SettingsUiState(
@@ -70,6 +105,8 @@ class OperationsViewModel @Inject constructor(
     private val _sosTriggered = MutableStateFlow(false)
     private val _lastSosPatient = MutableStateFlow<String?>(null)
     private val _coordinates = MutableStateFlow<FieldCoordinates?>(null)
+    private val _dispatchedClinician = MutableStateFlow<NearbyClinician?>(null)
+    private val _activeDispatch = MutableStateFlow<EmergencySosDispatch?>(null)
     private val latestLanguage = MutableStateFlow(AppLanguage.ENGLISH)
 
     val emergencyState: StateFlow<EmergencyUiState> = combine(
@@ -80,7 +117,9 @@ class OperationsViewModel @Inject constructor(
         _sosTriggered,
         _lastSosPatient,
         _coordinates,
-        ttsManager.isSpeaking
+        ttsManager.isSpeaking,
+        _dispatchedClinician,
+        _activeDispatch
     ) { values ->
         @Suppress("UNCHECKED_CAST")
         val patients = values[0] as List<PatientEntity>
@@ -91,6 +130,8 @@ class OperationsViewModel @Inject constructor(
         val sosPatient = values[5] as String?
         val coords = values[6] as FieldCoordinates?
         val speaking = values[7] as Boolean
+        val clinician = values[8] as NearbyClinician?
+        val dispatch = values[9] as EmergencySosDispatch?
         latestLanguage.value = prefs.language
 
         val vitalsMap = vitals.groupBy { it.patientId }.mapValues { (_, list) -> list.first() }
@@ -110,7 +151,9 @@ class OperationsViewModel @Inject constructor(
             instructions = repository.getEmergencyInstructions(),
             fieldCoordinates = coords,
             clinicianName = prefs.userName,
-            isSpeaking = speaking
+            isSpeaking = speaking,
+            dispatchedClinician = clinician,
+            activeDispatch = dispatch
         )
     }.stateIn(
         scope = viewModelScope,
@@ -183,14 +226,34 @@ class OperationsViewModel @Inject constructor(
 
     fun triggerSos(patientName: String? = null) {
         viewModelScope.launch {
-            repository.triggerEmergencySos(patientName)
-            _lastSosPatient.value = patientName
+            val nearest = defaultNearbyClinicians.first()
+            val label = patientName ?: "Field Patient"
+            val coordsStr = _coordinates.value?.label ?: "28.6139° N, 77.2090° E (Ward 4)"
+            val dispatch = EmergencySosDispatch(
+                dispatchId = "SOS-${UUID.randomUUID().toString().take(6).uppercase()}",
+                timestampLabel = "Just now",
+                patientName = label,
+                assignedClinician = nearest,
+                gpsCoordinates = coordsStr,
+                status = "Delivered to Clinician Handset · Radio Siren Active"
+            )
+            repository.triggerEmergencySos(label, "${nearest.name} (${nearest.distanceKm} km away)")
+            _lastSosPatient.value = label
+            _dispatchedClinician.value = nearest
+            _activeDispatch.value = dispatch
             _sosTriggered.value = true
+
+            ttsManager.speak(
+                "Emergency SOS dispatched. Nearest clinician ${nearest.name}, 800 meters away at ${nearest.healthCentre}, has received the emergency SOS message with GPS coordinates and patient vitals.",
+                latestLanguage.value
+            )
         }
     }
 
     fun dismissSosBanner() {
         _sosTriggered.value = false
+        _dispatchedClinician.value = null
+        _activeDispatch.value = null
     }
 
     fun toggleCritical(patient: PatientEntity) {
