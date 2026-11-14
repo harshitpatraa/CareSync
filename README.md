@@ -1,8 +1,8 @@
-# CareSync 🏥
+# CareSync 
 
 CareSync is an offline-first Android healthcare application built with Kotlin, Jetpack Compose, Room, Hilt, and Gemini AI. It empowers healthcare workers and patients with offline-first synchronization, clinical triage, symptom analysis, emergency SOS response, and secure health data management.
 
-## ✨ Key Features
+## Key Features
 
 - Offline-First Synchronization: Built-in SQLite/Room local database with a robust sync engine and conflict handling when connectivity is restored.
 - AI Clinical Assistant & Symptom Checker: Powered by Gemini AI for rapid clinical triage, conversational health guidance, and diagnostic support.
@@ -11,7 +11,7 @@ CareSync is an offline-first Android healthcare application built with Kotlin, J
 - Health Records & Analytics: Track vitals, prescriptions, lab results, and patient health progress.
 - Modern Jetpack Compose UI: Accessible, responsive Material 3 design system with dark and light theme support.
 
-## 🛠 Tech Stack & Architecture
+## Tech Stack & Architecture
 
 - Language: Kotlin 2.x
 - UI Framework: Jetpack Compose with Material 3
@@ -21,7 +21,7 @@ CareSync is an offline-first Android healthcare application built with Kotlin, J
 - Architecture: MVVM + Clean Architecture (UI -> ViewModel -> Repository -> Local/Remote Data Sources)
 - Networking & Serialization: Kotlinx Serialization
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -42,7 +42,7 @@ CareSync is an offline-first Android healthcare application built with Kotlin, J
 5. In `app/build.gradle.kts`, ensure signing configs match your local debug setup (or remove `signingConfig = signingConfigs.getByName("debugConfig")` if needed).
 6. Run the app on an Android emulator (API 24+) or physical Android device.
 
-## 📄 License
+## License
 
 This project is made by Team Innovix.
 Team Members- Gulshan Gautam, Harshit Patra.
