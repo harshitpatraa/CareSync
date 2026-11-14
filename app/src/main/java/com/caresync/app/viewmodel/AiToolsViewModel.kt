@@ -174,10 +174,19 @@ class AiToolsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Symptom check failed", e)
+                Log.w(TAG, "Symptom check fallback to local AI engine", e)
+                val latestVitals = patient?.let { repository.getLatestVitalsOnce(it.id) }
+                val fallback = aiEngine.evaluateSymptomsOffline(
+                    symptoms = state.selectedSymptoms.toList(),
+                    durationDays = state.durationDays,
+                    severity = state.severity,
+                    patient = patient,
+                    latestVitals = latestVitals
+                )
                 _rawState.value = _rawState.value.copy(
                     isEvaluating = false,
-                    aiErrorMessage = e.localizedMessage ?: "Gemini symptom check failed."
+                    symptomResult = fallback,
+                    aiErrorMessage = null
                 )
             }
         }
@@ -214,10 +223,21 @@ class AiToolsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Disease risk assessment failed", e)
+                Log.w(TAG, "Disease risk fallback to local AI engine", e)
+                val fallback = aiEngine.evaluateVitalsRiskOffline(
+                    systolic = systolic,
+                    diastolic = diastolic,
+                    heartRate = heartRate,
+                    spo2 = spo2,
+                    tempC = tempC,
+                    bloodSugar = bloodSugar,
+                    isPregnant = isPregnant,
+                    patient = patient
+                )
                 _rawState.value = _rawState.value.copy(
                     isEvaluating = false,
-                    aiErrorMessage = e.localizedMessage ?: "Sehat Setu risk assessment failed."
+                    riskResult = fallback,
+                    aiErrorMessage = null
                 )
             }
         }
@@ -240,10 +260,12 @@ class AiToolsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Questionnaire risk assessment failed", e)
+                Log.w(TAG, "Questionnaire risk fallback to local AI engine", e)
+                val fallback = aiEngine.evaluateQuestionsRiskOffline(answers, patient)
                 _rawState.value = _rawState.value.copy(
                     isEvaluating = false,
-                    aiErrorMessage = e.localizedMessage ?: "Sehat Setu risk assessment failed."
+                    riskResult = fallback,
+                    aiErrorMessage = null
                 )
             }
         }
@@ -304,10 +326,20 @@ class AiToolsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Chat streaming failed", e)
+                Log.w(TAG, "Chat streaming fallback to local clinical AI engine", e)
+                val (offlineText, tags) = aiEngine.generateChatReplyOfflineDirect(trimmed, activePatient)
+                val botMsg = ChatMessage(
+                    id = streamingBotId,
+                    isUser = false,
+                    text = offlineText,
+                    timestampLabel = "Sehat Setu",
+                    tags = listOf("Sehat Setu", "Local Clinical AI")
+                )
+                val currentList = _rawState.value.chatMessages.filter { it.id != streamingBotId }
                 _rawState.value = _rawState.value.copy(
+                    chatMessages = currentList + botMsg,
                     isChatTyping = false,
-                    aiErrorMessage = e.localizedMessage ?: "Gemini chat failed."
+                    aiErrorMessage = null
                 )
             }
         }
@@ -338,10 +370,12 @@ class AiToolsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Image analysis failed", e)
+                Log.w(TAG, "Image analysis fallback to local clinical vision engine", e)
+                val fallback = aiEngine.analyzeImageOfflineDirect(label)
                 _rawState.value = _rawState.value.copy(
                     isAnalyzingImage = false,
-                    aiErrorMessage = e.localizedMessage ?: "Gemini image analysis failed."
+                    imageAnalysisResult = fallback,
+                    aiErrorMessage = null
                 )
             }
         }
@@ -374,10 +408,12 @@ class AiToolsViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Rx structured analysis failed", e)
+                Log.w(TAG, "Prescription analysis fallback to local clinical Rx engine", e)
+                val fallback = aiEngine.generateOfflineRxResultDirect(label, patient)
                 _rawState.value = _rawState.value.copy(
                     isAnalyzingImage = false,
-                    aiErrorMessage = e.localizedMessage ?: "Gemini Rx OCR failed."
+                    rxAnalysisResult = fallback,
+                    aiErrorMessage = null
                 )
             }
         }

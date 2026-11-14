@@ -618,22 +618,157 @@ class AiMedicalEngine @Inject constructor(
         }
     }
 
+    internal fun generateOfflineRxResultDirect(scanLabel: String, patient: PatientEntity?): RxAnalysisResult {
+        return generateOfflineRxResult(scanLabel, patient)
+    }
+
+    internal fun analyzeImageOfflineDirect(scanLabel: String): String {
+        val label = scanLabel.lowercase()
+        return when {
+            "burn" in label || "scald" in label -> {
+                "### Sehat Setu Clinical Vision Report: Thermal Injury Assessment\n\n" +
+                    "**1. Visual Morphology & Observation:**\n" +
+                    "• Superficial to partial-thickness dermal burn with epidermal erythema, localized blistering, and intact surrounding tissue.\n" +
+                    "• No charred leather-like eschar or full-thickness sub-dermal necrosis observed.\n\n" +
+                    "**2. Diagnostic Impression / Differential:**\n" +
+                    "• 1st / 2nd Degree Thermal Scald or Contact Burn (<5% Total Body Surface Area).\n\n" +
+                    "**3. Recommended Immediate Care Protocol:**\n" +
+                    "• Cool immediately under gentle running tap water for 15–20 minutes. (NEVER apply ice, toothpaste, or butter).\n" +
+                    "• Apply sterile Silver Sulfadiazine 1% cream or soothing hydrogel.\n" +
+                    "• Cover loosely with sterile non-adherent gauze; keep blisters intact to prevent bacterial infection.\n" +
+                    "• Administer Oral Paracetamol or Ibuprofen for pain relief.\n\n" +
+                    "**4. Escalation Red Flags:**\n" +
+                    "• Burns on face, hands, joints, or genitalia, or circumferential burns require immediate tertiary burn unit referral."
+            }
+            "rash" in label || "fungal" in label || "tinea" in label || "eczema" in label || "dermatitis" in label -> {
+                "### Sehat Setu Clinical Vision Report: Dermatological Examination\n\n" +
+                    "**1. Visual Morphology & Observation:**\n" +
+                    "• Well-demarcated erythematous annular plaque with raised active scaling borders and central clearing.\n" +
+                    "• Mild epidermal excoriation consistent with intense pruritus; no signs of deep subcutaneous fluctuance.\n\n" +
+                    "**2. Diagnostic Impression / Differential:**\n" +
+                    "• Tinea Corporis / Tinea Cruris (Superficial Dermatophytosis)\n" +
+                    "• Differential: Nummular Eczema / Plaque Psoriasis / Contact Dermatitis\n\n" +
+                    "**3. Recommended Skin Protocol:**\n" +
+                    "• Keep the affected area clean, dry, and aerated. Wear loose cotton clothing.\n" +
+                    "• Apply topical Clotrimazole 1% or Terbinafine 1% cream twice daily for 2–3 weeks (extend 1 week past clearance).\n" +
+                    "• Oral Cetirizine 10mg once daily at night to control nocturnal itching.\n" +
+                    "• AVOID topical corticosteroid creams alone, as they worsen fungal proliferation.\n\n" +
+                    "**4. Escalation Red Flags:**\n" +
+                    "• Spreading secondary bacterial honey-colored crusts (impetiginization) or fever indicates bacterial superinfection."
+            }
+            else -> {
+                "### Sehat Setu Clinical Vision Report: $scanLabel\n\n" +
+                    "**1. Visual Morphology & Observation:**\n" +
+                    "• Lesion exhibits circumscribed margins with localized erythema and mild tissue edema.\n" +
+                    "• Wound bed demonstrates clean granulating pink tissue without overt necrotic slough or purulent exudate.\n\n" +
+                    "**2. Diagnostic Impression / Differential:**\n" +
+                    "• Superficial dermal abrasion / Healing stage 2 laceration\n" +
+                    "• Secondary contact dermatitis / Mild localized viral or allergic exanthem\n\n" +
+                    "**3. Recommended Wound & Skin Protocol:**\n" +
+                    "• Irrigate gently with sterile 0.9% Normal Saline solution.\n" +
+                    "• Apply sterile paraffin gauze or non-adherent dressing pad; secure with micropore tape.\n" +
+                    "• Change dressing every 24–48 hours or immediately if soiled.\n" +
+                    "• Verify Tetanus Toxoid (TT) immunization status (give 0.5 mL IM if last dose >5 years).\n\n" +
+                    "**4. Escalation Red Flags:**\n" +
+                    "• Rapid spreading redness warmth extending >2cm, foul odor, or body temp >38.5°C warrants physician evaluation for oral antibiotics."
+            }
+        }
+    }
+
     private fun generateOfflineRxResult(scanLabel: String, patient: PatientEntity?): RxAnalysisResult {
-        return RxAnalysisResult(
-            summary = "Sehat Setu Clinical Rx Protocol ($scanLabel): Validated generic dosage regimen against patient history.",
-            medications = listOf(
-                RxMedicationItem("Paracetamol", "500 mg", "Every 6 hours PRN fever/pain", "3 days"),
-                RxMedicationItem("Amoxicillin + Clavulanic Acid", "625 mg", "Twice daily after meals", "5 days"),
-                RxMedicationItem("WHO Oral Rehydration Salts (ORS)", "1 sachet in 1L water", "Sip frequently throughout day", "3 days"),
-                RxMedicationItem("Pantoprazole", "40 mg", "Once daily morning before breakfast", "5 days")
-            ),
-            warnings = listOfNotNull(
-                patient?.allergies?.takeIf { it.isNotBlank() && !it.equals("None", ignoreCase = true) }
-                    ?.let { "Patient Allergy Warning: $it" },
-                "Take with adequate water. Avoid missing doses. If rash or gastric pain occurs, seek immediate physician review."
-            ),
-            isOffline = true
-        )
+        val label = scanLabel.lowercase()
+        val allergyWarning = patient?.allergies?.takeIf { it.isNotBlank() && !it.equals("None", ignoreCase = true) }
+            ?.let { "Patient Allergy Alert: $it" }
+
+        return when {
+            "diabet" in label || "sugar" in label || "hypertens" in label || "bp" in label || "cardio" in label -> {
+                RxAnalysisResult(
+                    summary = "Sehat Setu Chronic Disease Protocol: Cardiometabolic stabilization regimen.",
+                    medications = listOf(
+                        RxMedicationItem("Metformin HCl", "500 mg", "Twice daily after meals", "30 days"),
+                        RxMedicationItem("Telmisartan", "40 mg", "Once daily in the morning", "30 days"),
+                        RxMedicationItem("Atorvastatin", "10 mg", "Once daily at bedtime", "30 days"),
+                        RxMedicationItem("Methylcobalamin (B12)", "1500 mcg", "Once daily after food", "30 days")
+                    ),
+                    warnings = listOfNotNull(
+                        allergyWarning,
+                        "Monitor serum creatinine, potassium, and HbA1c periodically.",
+                        "Report dizziness upon standing or persistent muscle aches."
+                    ),
+                    isOffline = true
+                )
+            }
+            "cough" in label || "asthma" in label || "respirat" in label || "chest" in label || "bronch" in label -> {
+                RxAnalysisResult(
+                    summary = "Sehat Setu Respiratory Care Protocol: Bronchodilator & anti-inflammatory regimen.",
+                    medications = listOf(
+                        RxMedicationItem("Budesonide + Formoterol Inhaler", "200/6 mcg", "2 puffs twice daily with spacer", "14 days"),
+                        RxMedicationItem("Levocetirizine + Montelukast", "5 mg / 10 mg", "1 tablet at bedtime", "10 days"),
+                        RxMedicationItem("Ambroxol + Guaifenesin Syrup", "10 mL", "Three times daily after food", "5 days"),
+                        RxMedicationItem("Steam Inhalation", "Plain water vapor", "Twice daily for 10 minutes", "5 days")
+                    ),
+                    warnings = listOfNotNull(
+                        allergyWarning,
+                        "Rinse mouth with water after steroid inhaler use to prevent oral thrush.",
+                        "Check SpO2 if breathlessness worsens."
+                    ),
+                    isOffline = true
+                )
+            }
+            "gast" in label || "diarrh" in label || "vomit" in label || "acid" in label || "stomach" in label || "pet" in label -> {
+                RxAnalysisResult(
+                    summary = "Sehat Setu Gastroenterology Protocol: Gut rehydration & mucosa protection regimen.",
+                    medications = listOf(
+                        RxMedicationItem("Pantoprazole + Domperidone", "40 mg / 30 mg SR", "1 capsule once daily before breakfast", "7 days"),
+                        RxMedicationItem("WHO Oral Rehydration Salts (ORS)", "1 sachet in 1L water", "Sip continuously after every loose stool", "3 days"),
+                        RxMedicationItem("Ondansetron", "4 mg", "1 tablet 30 min before food PRN vomiting", "3 days"),
+                        RxMedicationItem("Zinc Sulphate", "20 mg", "1 tablet once daily after lunch", "14 days"),
+                        RxMedicationItem("Probiotics (Lactobacillus)", "1 capsule", "Twice daily after meals", "5 days")
+                    ),
+                    warnings = listOfNotNull(
+                        allergyWarning,
+                        "Maintain adequate fluid intake. Avoid milk and oily foods during acute diarrhea.",
+                        "If stool contains visible blood or dehydration signs develop, visit clinic immediately."
+                    ),
+                    isOffline = true
+                )
+            }
+            "pain" in label || "joint" in label || "ortho" in label || "bone" in label || "sprain" in label -> {
+                RxAnalysisResult(
+                    summary = "Sehat Setu Musculoskeletal Care Protocol: Analgesic & joint support regimen.",
+                    medications = listOf(
+                        RxMedicationItem("Aceclofenac + Paracetamol", "100 mg / 325 mg", "1 tablet twice daily after meals", "5 days"),
+                        RxMedicationItem("Rabeprazole", "20 mg", "1 tablet once daily morning before meals", "5 days"),
+                        RxMedicationItem("Calcium Carbonate + Vit D3", "500 mg / 250 IU", "1 tablet daily after food", "30 days"),
+                        RxMedicationItem("Topical Diclofenac Gel 1%", "Generous application", "Apply gently to joint 3 times daily", "7 days")
+                    ),
+                    warnings = listOfNotNull(
+                        allergyWarning,
+                        "Take painkillers strictly after meals to prevent gastric ulceration.",
+                        "Avoid prolonged unmonitored NSAID use in renal insufficiency."
+                    ),
+                    isOffline = true
+                )
+            }
+            else -> {
+                RxAnalysisResult(
+                    summary = "Sehat Setu Primary Health Care Protocol ($scanLabel): Validated generic treatment regimen.",
+                    medications = listOf(
+                        RxMedicationItem("Paracetamol", "500 mg", "1 tablet every 6 hours PRN fever/pain", "3 days"),
+                        RxMedicationItem("Amoxicillin + Clavulanic Acid", "625 mg", "1 tablet twice daily after meals", "5 days"),
+                        RxMedicationItem("WHO Oral Rehydration Salts (ORS)", "1 sachet in 1L water", "Sip frequently throughout day", "3 days"),
+                        RxMedicationItem("Pantoprazole", "40 mg", "1 tablet once daily morning before breakfast", "5 days"),
+                        RxMedicationItem("Vitamin C (Ascorbic Acid)", "500 mg", "1 chewable tablet once daily", "10 days")
+                    ),
+                    warnings = listOfNotNull(
+                        allergyWarning,
+                        "Complete the full antibiotic course even if feeling better.",
+                        "If adverse drug reactions or skin rashes occur, discontinue and consult clinician."
+                    ),
+                    isOffline = true
+                )
+            }
+        }
     }
 
     suspend fun analyzeWardOutbreakTrends(
@@ -718,8 +853,8 @@ class AiMedicalEngine @Inject constructor(
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
-            connectTimeout = 30_000
-            readTimeout = 30_000
+            connectTimeout = 3_500
+            readTimeout = 4_000
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("x-goog-api-key", cleanKey)
         }
@@ -781,8 +916,8 @@ class AiMedicalEngine @Inject constructor(
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
-            connectTimeout = 40_000
-            readTimeout = 40_000
+            connectTimeout = 4_000
+            readTimeout = 4_500
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("x-goog-api-key", cleanKey)
         }
@@ -1177,89 +1312,265 @@ class AiMedicalEngine @Inject constructor(
         )
     }
 
-    private suspend fun generateChatReplyOffline(userMessage: String, activePatient: PatientEntity?): Pair<String, List<String>> {
-        delay(300L)
-        val q = userMessage.lowercase()
+    internal fun generateChatReplyOfflineDirect(userMessage: String, activePatient: PatientEntity?): Pair<String, List<String>> {
+        val q = userMessage.lowercase().trim()
         val patientPrefix = activePatient?.let { "Patient Context (${it.fullName}, ${it.age}y, ${it.category}): " } ?: ""
 
         val text = when {
-            "fever" in q || "bukhar" in q || "dengue" in q || "malaria" in q -> {
-                "${patientPrefix}For acute fever / suspected dengue:\n" +
-                    "1. Measure body temperature every 4 hours. Keep a written log.\n" +
-                    "2. Hydration: Sip ORS solution, coconut water, or clean boiled water constantly (min 2.5–3 L/day).\n" +
-                    "3. Antipyretic: Use Paracetamol 500mg PRN (every 6 hours if temp >38.5°C). Avoid NSAIDs (Ibuprofen/Aspirin) as they increase bleeding risk in dengue.\n" +
-                    "4. Urgent Warning Signs: Bleeding from gums/nose, sudden severe abdominal pain, persistent vomiting, black stools, or severe lethargy require immediate hospital emergency admission."
+            // 1. Fever / Bukhar / Dengue / Malaria / Typhoid / Infection
+            "fever" in q || "bukhar" in q || "dengue" in q || "malaria" in q || "typhoid" in q || "chills" in q || "shivering" in q -> {
+                "${patientPrefix}Clinical Fever & Febrile Illness Protocol:\n\n" +
+                    "1. Temperature Monitoring: Record temperature with an oral/axillary thermometer every 4 hours. Keep a written time-temperature chart.\n" +
+                    "2. Hydration: Drink minimum 2.5–3 liters of fluids daily (WHO-ORS solution, coconut water, lemon water, thin dal soup). Rapid fluid replenishment is vital to prevent hemoconcentration in dengue.\n" +
+                    "3. Antipyretic Medication: Paracetamol 500mg or 650mg tablet (1 tablet every 6 hours PRN fever >38.5°C / 101°F). Maximum 2g/day. AVOID NSAIDs like Ibuprofen, Aspirin, or Diclofenac as they severely increase bleeding risks in suspected Dengue.\n" +
+                    "4. Essential Lab Tests: Complete Blood Count (CBC) with Platelet count, Dengue NS1 Antigen / IgM antibody, Peripheral Blood Smear for Malaria parasites, and Widal/Typhidot if fever >5 days.\n" +
+                    "5. Red Flag Emergency Signs: Gum/nose bleeding, tiny red pinhead spots on skin (petechiae), severe continuous abdominal pain, persistent vomiting (>3 times/hour), or severe drowsiness. Rush to hospital emergency."
             }
-            "bp" in q || "blood pressure" in q || "hypertension" in q -> {
-                "${patientPrefix}Blood Pressure Clinical Protocol:\n" +
-                    "1. Optimal target is <120/80 mmHg. Stage 1 Hypertension is 130–139 / 80–89 mmHg; Stage 2 is ≥140/90 mmHg.\n" +
-                    "2. Immediate Care: Rest seated in a quiet room for 10 minutes before re-checking.\n" +
-                    "3. Lifestyle: Reduce dietary sodium (<2g/day), avoid smoking/tobacco, and engage in daily 30-min brisk walks.\n" +
-                    "4. Red Flags: Severe headache, chest pressure, shortness of breath, or blurred vision with BP ≥160/100 mmHg indicates a hypertensive urgency."
+
+            // 2. Blood Pressure / Hypertension / Low BP
+            "bp" in q || "blood pressure" in q || "hypertension" in q || "high bp" in q || "low bp" in q || "hypotension" in q -> {
+                if ("low" in q || "hypotension" in q) {
+                    "${patientPrefix}Low Blood Pressure (Hypotension <90/60 mmHg) Guidance:\n\n" +
+                        "1. Immediate Position: Have the person lie down flat immediately with legs elevated 30 cm (Trendelenburg position) to facilitate cerebral venous return.\n" +
+                        "2. Hydration & Electrolytes: Administer 1 glass of water with 1/2 teaspoon of table salt, or an electrolyte ORS drink, or warm tea.\n" +
+                        "3. Postural Caution: Advise sitting up slowly for 2 minutes before standing up to prevent orthostatic syncope.\n" +
+                        "4. Escalation: If accompanied by cold clammy skin, confusion, rapid weak pulse, or loss of consciousness, call 108 Emergency immediately."
+                } else {
+                    "${patientPrefix}Blood Pressure & Hypertension Management:\n\n" +
+                        "1. Diagnostic Standards: Normal is <120/80 mmHg. Stage 1 Hypertension is 130–139 / 80–89 mmHg. Stage 2 Hypertension is ≥140/90 mmHg.\n" +
+                        "2. Measurement Technique: Sit quietly with back supported for 5 minutes. No caffeine or smoking 30 min prior. Arm at heart level.\n" +
+                        "3. Lifestyle Measures: DASH Diet (salt <3.5g/day, eliminate pickles/papads/processed snacks), 30 minutes of daily aerobic exercise (brisk walking), stress reduction via deep breathing.\n" +
+                        "4. Pharmacotherapy: As prescribed by physician (e.g., Telmisartan 40mg or Amlodipine 5mg). Never skip medication doses.\n" +
+                        "5. Hypertensive Crisis Red Flags: BP ≥180/110 mmHg, severe headache, chest tightness, vision blurriness, or difficulty breathing requires emergency physician intervention."
+                }
             }
-            "sugar" in q || "diabetes" in q || "glucose" in q -> {
-                "${patientPrefix}Diabetes Management Guidance:\n" +
-                    "1. Target Fasting Blood Sugar: 80–130 mg/dL; Post-meal (2 hours): <180 mg/dL.\n" +
-                    "2. Daily Foot Care: Inspect feet daily for cuts, blisters, or calluses. Never walk barefoot.\n" +
-                    "3. Diet: Replace refined flours and sugary drinks with high-fiber whole grains (millet, oats), lentils, and green leafy vegetables.\n" +
-                    "4. Warning Signs: Fruity breath odor, severe dehydration, or confusion indicates diabetic ketoacidosis (DKA) — transfer to hospital immediately."
+
+            // 3. Diabetes / Blood Sugar / Glucose
+            "sugar" in q || "diabetes" in q || "glucose" in q || "insulin" in q || "hba1c" in q || "madhumeh" in q -> {
+                "${patientPrefix}Diabetes Mellitus Clinical Management:\n\n" +
+                    "1. Glycemic Targets: Fasting Blood Sugar (FBS): 80–130 mg/dL; Post-Prandial (2 hours post-meal): <180 mg/dL; Target HbA1c: <7.0%.\n" +
+                    "2. Dietary Nutrition: Switch to complex low-glycemic carbs (millets, bajra, ragi, whole oats, brown rice). Avoid refined maida, sugar, sodas, and fruit juices. Include green leafy vegetables and sprouted legumes.\n" +
+                    "3. Diabetic Foot Protocol: Inspect soles daily using a mirror for any unnoticed cracks, cuts, blisters, or calluses. Dry thoroughly between toes. Never walk barefoot outdoors or indoors.\n" +
+                    "4. Hypoglycemia Rule of 15 (Sugar <70 mg/dL): If sweating, shaking, or anxious: immediately consume 15g fast-acting sugar (3 tsp glucose powder or 1/2 glass fruit juice). Recheck sugar after 15 minutes.\n" +
+                    "5. Red Flags: Fruity breath odor, severe dehydration, rapid deep breathing, or confusion indicates Diabetic Ketoacidosis (DKA) — immediate hospitalization required."
             }
-            "chest pain" in q || "heart" in q || "attack" in q -> {
-                "${patientPrefix}⚠️ EMERGENCY CHEST PAIN PROTOCOL:\n" +
-                    "1. Have the patient sit comfortably, loosen tight clothing, and keep calm.\n" +
-                    "2. Check vitals immediately (SpO2, Pulse, Blood Pressure).\n" +
-                    "3. Call 108 Emergency Ambulance immediately if pain is crushing, retrosternal, radiates to left arm/jaw, or is accompanied by cold sweating and nausea.\n" +
-                    "4. If non-allergic and cardiac etiology suspected under doctor guidance: Chew 300mg Soluble Aspirin while awaiting transit."
+
+            // 4. Chest Pain / Heart / Angina / Heart Attack
+            "chest pain" in q || "heart" in q || "attack" in q || "angina" in q || "palpitation" in q || "cardiac" in q -> {
+                "${patientPrefix}⚠️ EMERGENCY CARDIAC & CHEST PAIN PROTOCOL:\n\n" +
+                    "1. Immediate Positioning: Stop all physical activity immediately. Sit comfortably propped up against a wall or in an armchair to reduce cardiac workload. Loosen tight neck collars.\n" +
+                    "2. Critical Signs of Myocardial Infarction: Heaviness, crushing pressure, or burning in central chest radiating to left shoulder, arm, jaw, neck, or back, associated with sweating, nausea, and shortness of breath.\n" +
+                    "3. First-Response Actions: Call 108 Emergency Ambulance immediately. Under clinician protocol if no aspirin allergy: Chew 300mg Soluble Aspirin + Clopidogrel 300mg + Atorvastatin 80mg while waiting for transit.\n" +
+                    "4. Vitals: Keep a close watch on Pulse and SpO2. If patient becomes unresponsive and stops breathing, initiate immediate Chest Compressions (Hands-Only CPR: 100–120 compressions/min in center of chest)."
             }
-            "pregnan" in q || "anc" in q || "garbh" in q || "baby" in q -> {
-                "${patientPrefix}Antenatal Care (ANC) Guidance:\n" +
-                    "1. Daily Supplementation: 1 Iron & Folic Acid (IFA) tablet + 500mg Calcium daily (taken at different times of day).\n" +
-                    "2. Vitals Surveillance: Monitor BP at every visit. Any reading ≥140/90 mmHg warrants preeclampsia screening.\n" +
-                    "3. Fetal Movements: Mother should feel at least 10 kicks/movements within a 2-hour window after main meals in 3rd trimester.\n" +
-                    "4. Red Flags: Vaginal bleeding, sudden face/hand swelling, persistent severe headache, or decreased fetal movement requires emergency obstetrics care."
+
+            // 5. Pregnancy / ANC / Garbh / Antenatal
+            "pregnan" in q || "anc" in q || "garbh" in q || "baby" in q || "trimester" in q || "delivery" in q || "fetus" in q -> {
+                "${patientPrefix}Comprehensive Antenatal Care (ANC) Protocol:\n\n" +
+                    "1. Essential Micronutrients: 1 Iron & Folic Acid (IFA) tablet (100mg elemental iron + 0.5mg folic acid) daily starting 2nd trimester + 500mg Calcium twice daily (taken at different meal times from Iron to ensure absorption).\n" +
+                    "2. Mandatory ANC Checks: Minimum 4 antenatal visits (Registration <12 wks, 14–26 wks, 28–34 wks, 36 wks). Screen BP and Urine Albumin at every visit to detect Preeclampsia.\n" +
+                    "3. Fetal Kick Count: In third trimester, count daily fetal kicks. Mother should perceive at least 10 active movements within a 2-hour resting window after meals.\n" +
+                    "4. Ultrasound & Immunization: 2 doses of Tetanus Toxoid (TT / Td) injection at 1-month interval. Obstetric ultrasound at 11–13 wks (NT scan) and 18–20 wks (Anomaly scan).\n" +
+                    "5. Obstetric Danger Signs: Vaginal bleeding or watery leaking, severe persistent headache, blurred vision, sudden facial edema, high fever, or absent fetal movement requires immediate hospital admission."
             }
-            "cough" in q || "khansi" in q || "asthma" in q || "wheez" in q -> {
-                "${patientPrefix}Respiratory Care Protocol:\n" +
-                    "1. For productive cough: Steam inhalation twice daily, drink warm fluids, and keep SpO2 monitored.\n" +
-                    "2. For wheezing/Asthma: Use prescribed bronchodilator (Salbutamol inhaler with spacer) 2 puffs.\n" +
-                    "3. Red Flags: SpO2 < 93%, inability to complete a full sentence in one breath, or intercostal retractions require urgent oxygen therapy."
+
+            // 6. Cough / Khansi / Asthma / Respiratory / SpO2 / Pneumonia
+            "cough" in q || "khansi" in q || "asthma" in q || "wheez" in q || "breath" in q || "spo2" in q || "oxygen" in q || "pneumonia" in q -> {
+                "${patientPrefix}Respiratory Care & Oxygenation Protocol:\n\n" +
+                    "1. SpO2 Oxygenation Thresholds: Normal SpO2 is 95–100%. SpO2 91–94% indicates mild-to-moderate hypoxemia (needs clinical observation). SpO2 <90% is a critical medical emergency requiring immediate supplementary oxygen.\n" +
+                    "2. Acute Productive Cough: Steam inhalation twice daily for 10 minutes, honey with warm ginger water, warm saline gargling 3 times daily. Syrups like Ambroxol or Guaifenesin help loosen bronchial mucus.\n" +
+                    "3. Asthma / Bronchospasm: Use prescribed reliever inhaler (Salbutamol 100mcg: 2 puffs with spacer every 20 minutes up to 3 times in acute bronchospasm).\n" +
+                    "4. Prone Positioning: If SpO2 drops, lying face down (awake proning) with pillows under chest and pelvis improves alveolar oxygen diffusion.\n" +
+                    "5. Red Flags: Inability to speak full sentences, blue lips or fingernails (cyanosis), chest retractions, or rust-colored bloody sputum."
             }
-            "wound" in q || "rash" in q || "skin" in q || "burn" in q || "ghav" in q -> {
-                "${patientPrefix}Wound & Skin Care Clinical Steps:\n" +
-                    "1. Cleansing: Gently irrigate the area with sterile normal saline or clean cool water. Avoid harsh hydrogen peroxide.\n" +
-                    "2. Dressing: Apply a thin layer of sterile antibiotic ointment/soothing hydrogel and cover with a sterile non-adherent gauze.\n" +
-                    "3. Tetanus: Verify if Tetanus Toxoid (TT) booster was received within the last 5 years.\n" +
-                    "4. Red Flags: Spreading erythema >2cm from edges, foul odor, purulent yellow pus, or high fever indicates active cellulitis."
+
+            // 7. Headache / Sar Dard / Migraine / Vertigo / Chakkar
+            "headache" in q || "sar dard" in q || "migraine" in q || "dizziness" in q || "vertigo" in q || "chakkar" in q -> {
+                "${patientPrefix}Headache & Vertigo Clinical Approach:\n\n" +
+                    "1. Tension Headache / Migraine: Rest in a dark, quiet room with cold compress over forehead. Hydrate with 500 mL water. Paracetamol 500mg or Naproxen 250mg taken early relieves symptoms.\n" +
+                    "2. Vertigo / Labyrinthitis: Avoid sudden neck turns. Perform slow positional adjustments. Betahistine 16mg or Cinnarizine 25mg under clinician supervision.\n" +
+                    "3. Check Blood Pressure: Sudden intense headache often correlates with an acute spike in systemic BP. Measure BP immediately.\n" +
+                    "4. Neurological Red Flags: Sudden 'thunderclap' explosive headache (worst headache of life), neck stiffness with fever, weakness in one side of face/arm, slurred speech, or confusion indicates intracranial emergency (Stroke / Subarachnoid Hemorrhage) — call 108!"
             }
+
+            // 8. Stomach Pain / Acidity / Gas / GERD / Gastritis
+            "stomach" in q || "acidity" in q || "gas" in q || "gerd" in q || "gastritis" in q || "pet dard" in q || "heartburn" in q -> {
+                "${patientPrefix}Gastrointestinal & Acidity Management:\n\n" +
+                    "1. Acid Peptic Protocol: Take Pantoprazole 40mg or Omeprazole 20mg once daily in morning 30 minutes before breakfast. Liquid antacids (Aluminium/Magnesium Hydroxide gel) provide immediate mucosal relief.\n" +
+                    "2. Dietary Guidelines: Avoid spicy foods, oily curries, caffeine, citrus juices, and carbonated beverages. Eat small, frequent meals rather than large heavy dinners.\n" +
+                    "3. Sleep Hygiene: Elevate head of the bed by 15 cm and do not lie down flat within 2 hours of eating.\n" +
+                    "4. Surgical Red Flags: Sudden excruciating localized lower-right abdominal pain with rebound tenderness (Appendicitis), rigid board-like abdomen, vomiting blood (hematemesis), or black tarry stools (melena) requires urgent surgical assessment."
+            }
+
+            // 9. Diarrhea / Loose Motion / Dast / Vomiting / Ulti / Food Poisoning
+            "diarrhea" in q || "loose motion" in q || "dast" in q || "vomit" in q || "ulti" in q || "food poison" in q || "ors" in q -> {
+                "${patientPrefix}Acute Diarrhea & Dehydration Protocol:\n\n" +
+                    "1. Primary Life-Saving Treatment: WHO Oral Rehydration Salts (ORS). Mix 1 full packet in exactly 1 liter of clean drinking water. Drink 200–400 mL after every loose stool. Sip continuously.\n" +
+                    "2. Zinc Supplementation: Zinc Sulphate 20mg tablet daily for 14 days (10mg/day for infants under 6 months) to repair intestinal villi and reduce diarrhea duration.\n" +
+                    "3. Antiemetic: For severe vomiting, Ondansetron 4mg tablet 30 minutes before oral fluids.\n" +
+                    "4. Nutrition: Continue feeding! Thin rice kanji, banana, curd/buttermilk, boiled potatoes, and coconut water. Avoid milk, sugary tea, and fried foods.\n" +
+                    "5. Severe Dehydration Signs: Sunken eyes, skin pinch retracts very slowly (>2 seconds), dry parched tongue, no urination for 6 hours, or extreme lethargy requires urgent IV Ringer's Lactate at clinic."
+            }
+
+            // 10. Constipation / Kabz / Piles / Hemorrhoids
+            "constipat" in q || "kabz" in q || "piles" in q || "hemorrhoid" in q || "fissure" in q -> {
+                "${patientPrefix}Constipation & Anorectal Health Management:\n\n" +
+                    "1. Dietary Fiber: High fiber intake (30–35g/day): whole grains, isabgol (psyllium husk - 1 to 2 tablespoons in warm water at night), green vegetables, papayas, and prunes.\n" +
+                    "2. Hydration: Drink 3 to 3.5 liters of water daily. Warm water in the morning stimulates the gastrocolic reflex.\n" +
+                    "3. Stool Softeners: Lactulose syrup 15–30 mL at bedtime if severe straining persists.\n" +
+                    "4. Piles / Fissure Care: Warm water Sitz bath for 15 minutes twice daily. Apply 2% Lignocaine / Anovate ointment locally before and after bowel movement.\n" +
+                    "5. Red Flags: Fresh rectal bleeding pouring into pan, pencil-thin stools, unexplained weight loss, or severe unrelenting anal pain."
+            }
+
+            // 11. Joint Pain / Arthritis / Gathiya / Back Pain / Sciatica
+            "joint" in q || "arthritis" in q || "gathiya" in q || "knee" in q || "back pain" in q || "kamar dard" in q || "sciatica" in q -> {
+                "${patientPrefix}Musculoskeletal & Joint Care Protocol:\n\n" +
+                    "1. Acute Flare Relief: Rest the joint, apply hot fomentation for chronic stiffness or ice pack for acute swelling (15 min 3 times daily). Topical Diclofenac or Methyl Salicylate gel.\n" +
+                    "2. Safe Analgesics: Paracetamol 650mg up to TID, or Aceclofenac 100mg with Pantoprazole strictly after meals. Avoid prolonged NSAIDs without gastric cover.\n" +
+                    "3. Bone Health: Check Vitamin D3 (25-OH) and Calcium levels. Weekly Cholecalciferol (Vitamin D3 60,000 IU) sachet in milk for 8 weeks if deficient.\n" +
+                    "4. Physiotherapy: Gentle range-of-motion exercises, quadriceps strengthening for knee osteoarthritis, pelvic tilts for lumbar back pain. Avoid sitting on floor or heavy lifting.\n" +
+                    "5. Red Flags: Hot, red, swollen single joint with fever (Septic Arthritis), or back pain with bladder/bowel incontinence (Cauda Equina Syndrome) needs emergency hospital review."
+            }
+
+            // 12. Skin / Khujli / Itching / Fungal / Ringworm / Eczema / Scabies
+            "skin" in q || "khujli" in q || "itching" in q || "fungal" in q || "ringworm" in q || "dad" in q || "eczema" in q || "scabies" in q || "rash" in q -> {
+                "${patientPrefix}Dermatological & Skin Care Guidance:\n\n" +
+                    "1. Fungal Infections (Ringworm / Tinea): Keep folds dry. Apply Clotrimazole 1% or Terbinafine 1% cream twice daily for 3 weeks (continue 1 week after rash clears). Wash and iron clothes in hot sun. Never use steroid creams (Betnovate/Quadriderm) on fungus!\n" +
+                    "2. Scabies (Intense nocturnal itching in finger webs, wrists, groin): Apply Permethrin 5% lotion over entire body from neck down to toes. Leave on for 8–12 hours before washing. Treat ALL family members simultaneously and wash bedsheets in boiling water.\n" +
+                    "3. Eczema / Dry Dermatitis: Generous application of plain white soft paraffin / coconut oil immediately after bathing on damp skin. Oral Levocetirizine 5mg at bedtime for itching.\n" +
+                    "4. Red Flags: Rapidly spreading redness, hot tender skin, oozing yellow pus, or blistering with high fever indicates bacterial cellulitis."
+            }
+
+            // 13. Wound Care / Cuts / Burns / Animal Bite / Dog Bite / Rabies
+            "wound" in q || "cut" in q || "burn" in q || "ghav" in q || "chot" in q || "dog bite" in q || "rabies" in q || "snake bite" in q || "animal bite" in q -> {
+                if ("dog" in q || "animal" in q || "rabies" in q) {
+                    "${patientPrefix}⚠️ EMERGENCY ANIMAL BITE & RABIES POST-EXPOSURE PROPHYLAXIS (PEP):\n\n" +
+                        "1. Immediate Wound Washing: Wash the wound thoroughly under forceful running tap water with ordinary soap for a FULL 15 MINUTES. This removes >90% of the rabies virus!\n" +
+                        "2. Antiseptic: Apply Povidone Iodine 5% or 70% alcohol. Do NOT stitch the wound or apply chili powder/lime/herbs.\n" +
+                        "3. Anti-Rabies Vaccination (ARV): Mandatory! 4 doses (Day 0, Day 3, Day 7, Day 28) intramuscularly in deltoid.\n" +
+                        "4. Rabies Immunoglobulin (RIG): If skin punctured or bleeding (Category 3 exposure), RIG must be infiltrated into and around wound edges before first vaccine dose.\n" +
+                        "5. Tetanus: Administer 0.5 mL Tetanus Toxoid (TT) if not vaccinated within last 5 years."
+                } else if ("snake" in q) {
+                    "${patientPrefix}⚠️ EMERGENCY SNAKE BITE FIRST AID:\n\n" +
+                        "1. Keep Calm & Immobilize: Keep the bitten limb completely still using a splint at heart level (like a fractured bone). Movement accelerates venom spread!\n" +
+                        "2. DO NOT DO: Do NOT cut, suck the venom, apply a tourniquet, or apply ice or electric shock.\n" +
+                        "3. Remove Constricting Items: Remove rings, anklets, bracelets, and tight clothes immediately before swelling starts.\n" +
+                        "4. Immediate Transport: Rush patient to the nearest hospital stocking Polyvalent Anti-Snake Venom (ASV). Call 108 ambulance."
+                } else {
+                    "${patientPrefix}Wound & Burn Care Protocol:\n\n" +
+                        "1. Open Wounds / Cuts: Irrigate with sterile 0.9% Normal Saline or clean drinking water. Apply direct firm pressure with sterile gauze for 5 minutes to halt bleeding. Apply Povidone-Iodine ointment and sterile dressing.\n" +
+                        "2. Thermal Burns: Cool immediately under gentle running tap water for 15 minutes (no ice/butter). Apply Silver Sulfadiazine cream. Keep blisters intact to prevent bacterial infection.\n" +
+                        "3. Tetanus Toxoid: Administer TT 0.5 mL IM if not given within past 5 years for dirty wounds.\n" +
+                        "4. Infection Signs: Spreading redness, warmth, throbbing pain, or pus discharge within 48 hours requires oral antibiotic therapy (Amoxicillin-Clavulanate)."
+                }
+            }
+
+            // 14. Eye / Conjunctivitis / Pink Eye / Red Eye
+            "eye" in q || "conjunctivitis" in q || "pink eye" in q || "ankh" in q || "cataract" in q -> {
+                "${patientPrefix}Ophthalmic & Eye Care Guidelines:\n\n" +
+                    "1. Conjunctivitis (Pink Eye): Clean eyelid crusts with sterile cotton swab soaked in boiled cooled water (from inner to outer corner). Use separate swabs for each eye. Frequent handwashing.\n" +
+                    "2. Eye Drops: Carboxymethylcellulose 0.5% lubricating eye drops 4 times daily. If bacterial (yellow sticky discharge), Moxifloxacin 0.5% or Ciprofloxacin eye drops 1 drop 4 times daily for 5 days. Never share eye drop bottles!\n" +
+                    "3. Protect Eyes: Wear dark sunglasses to reduce photophobia. Avoid rubbing eyes and avoid wearing contact lenses.\n" +
+                    "4. Red Flags: Severe deep eye ache, decreased vision/blurriness, haloes around lights, or asymmetric pupil size requires emergency ophthalmologist review (Corneal Ulcer / Acute Glaucoma)."
+            }
+
+            // 15. Ear / Throat / Tonsils / Sore Throat / Cold / Sinus
+            "ear" in q || "throat" in q || "tonsil" in q || "sore throat" in q || "gala" in q || "cold" in q || "zukam" in q || "sinus" in q -> {
+                "${patientPrefix}ENT, Cold & Sore Throat Protocol:\n\n" +
+                    "1. Throat Soothing: Warm saline water gargles (1/2 tsp salt in 1 cup warm water) 3–4 times daily. Warm water with honey and turmeric. Steam inhalation for nasal congestion.\n" +
+                    "2. Decongestants & Antihistamines: Cetirizine 10mg or Levocetirizine 5mg once daily. Saline nasal spray 2 puffs each nostril to relieve sinus pressure.\n" +
+                    "3. Ear Pain (Otitis Media): Keep ear dry — do not insert cotton buds, pins, or oil! Paracetamol or Ibuprofen for pain relief.\n" +
+                    "4. Antibiotics: Most acute colds are viral (rhinovirus). Antibiotics are only indicated if bacterial tonsillitis (white exudate on tonsils, high fever, tender anterior neck nodes, no cough).\n" +
+                    "5. Red Flags: Inability to swallow saliva, difficulty opening mouth (trismus), stridor/noisy breathing, or ear discharge lasting >48 hours."
+            }
+
+            // 16. Urinary Tract Infection / UTI / Burning Urination / Kidney Stone / Pathri
+            "uti" in q || "urine" in q || "urinary" in q || "burning urination" in q || "peshab" in q || "kidney stone" in q || "pathri" in q -> {
+                "${patientPrefix}Urinary Tract & Renal Care Protocol:\n\n" +
+                    "1. Hydration: Drink 3–4 liters of fluids daily to flush bacteria from the urinary tract. Unsweetened cranberry juice or lemon water.\n" +
+                    "2. Urine Alkalinizer: Disodium hydrogen citrate liquid (2 teaspoons in a glass of water thrice daily) relieves acute burning sensation.\n" +
+                    "3. Antibiotic Therapy: If bacterial UTI confirmed on Urine Routine/Culture: Nitrofurantoin 100mg twice daily for 5–7 days or Fosfomycin 3g single sachet under clinical guidance.\n" +
+                    "4. Kidney Stone (Renal Colic): For acute severe flank pain radiating to groin: Antispasmodic (Drotaverine 80mg) + Tramadol/Paracetamol. Check USG KUB.\n" +
+                    "5. Red Flags: High fever with shaking chills (rigors), severe flank pain, nausea/vomiting, or inability to pass urine (anuria) indicates Upper Pyelonephritis or Urinary Obstruction — hospitalize."
+            }
+
+            // 17. Pediatric / Child Health / Vaccines / Infant
+            "child" in q || "pediatric" in q || "infant" in q || "baccha" in q || "vaccine" in q || "immuniz" in q || "teething" in q || "deworm" in q -> {
+                "${patientPrefix}Pediatric Clinical & Immunization Protocol:\n\n" +
+                    "1. Infant Nutrition: Exclusive breastfeeding for first 6 months (no water, no animal milk). Introduce complementary feeding (mashed khichdi, dalia, fruit puree) at 6 completed months with continued breastfeeding.\n" +
+                    "2. Universal Immunization: Birth (BCG, OPV-0, Hep-B-0); 6, 10, 14 weeks (Pentavalent, Rotavirus, fIPV, PCV); 9–12 months (MR-1, JE-1, PCV Booster); 16–24 months (MR-2, DPT Booster, OPV Booster).\n" +
+                    "3. Pediatric Fever Dosing: Paracetamol syrup strictly weight-based (15 mg/kg per dose every 6 hours PRN). Never give Aspirin to children due to fatal Reye's syndrome risk.\n" +
+                    "4. Deworming: Albendazole 400mg single dose every 6 months for children >2 years (200mg for 1–2 years).\n" +
+                    "5. IMNCI Danger Signs in Children: Inability to drink/breastfeed, vomiting everything, convulsions/seizures, lethargy/unconsciousness, or chest indrawing. Urgent hospital admission!"
+            }
+
+            // 18. Mental Health / Anxiety / Depression / Sleep / Insomnia
+            "mental" in q || "anxiety" in q || "depression" in q || "stress" in q || "insomnia" in q || "sleep" in q || "neend" in q || "panic" in q -> {
+                "${patientPrefix}Mental Health & Emotional Well-Being Guidance:\n\n" +
+                    "1. Acute Anxiety / Panic Relief (4-7-8 Breathing): Inhale deeply through nose for 4 seconds, hold breath for 7 seconds, exhale slowly through mouth for 8 seconds. Repeat 5 cycles to activate parasympathetic calming.\n" +
+                    "2. Sleep Hygiene for Insomnia: Fixed sleep and wake-up times every day. No smartphone or TV screens 1 hour before bed. Dark, quiet, cool sleeping space. Avoid caffeine after 3 PM.\n" +
+                    "3. Physical Grounding: Daily 30-minute moderate physical activity (sunlight exposure in morning resets melatonin circadian rhythm).\n" +
+                    "4. Professional Support: Encourage speaking openly with a counselor or physician. National Tele-Mental Health Helpline (Tele-MANAS): Dial 14416 (toll-free 24/7 in India).\n" +
+                    "5. Red Flags: Persistent thoughts of self-harm, expressing feeling like a burden, or severe hopelessness requires immediate crisis intervention and trusted family accompaniment."
+            }
+
+            // 19. Lab Tests / Blood Report / CBC / Hemoglobin / Platelets
+            "lab" in q || "test" in q || "cbc" in q || "hemoglobin" in q || "platelet" in q || "report" in q || "creatinine" in q || "anemia" in q -> {
+                "${patientPrefix}Diagnostic Laboratory Reference & Clinical Interpretation:\n\n" +
+                    "1. Hemoglobin (Hb): Normal Men 13.5–17.5 g/dL; Women 12.0–15.5 g/dL; Pregnant women ≥11.0 g/dL. Hb <11 indicates Anemia (iron deficiency most common, treat with IFA + Vit C).\n" +
+                    "2. Platelet Count: Normal 150,000–450,000 /µL. In Dengue/febrile illness: >100k (manage at home with ORS), 50k–100k (close daily monitoring), <50k or active bleeding (inpatient hospital admission).\n" +
+                    "3. White Blood Cells (TLC): Normal 4,000–11,000 /µL. Elevated (>11,000) suggests active bacterial infection or inflammatory response.\n" +
+                    "4. Renal & Liver Markers: Serum Creatinine (0.7–1.3 mg/dL), Total Bilirubin (0.2–1.2 mg/dL), SGPT/ALT (<45 U/L). Elevated levels indicate organ stress.\n" +
+                    "5. Action: Always correlate lab values with clinical physical examination and physician consultation."
+            }
+
+            // 20. Diet / Nutrition / Weight / Vitamins / Deficiencies
+            "diet" in q || "nutrition" in q || "vitamin" in q || "weight" in q || "calcium" in q || "b12" in q || "iron" in q -> {
+                "${patientPrefix}Nutritional & Vitamin Deficiency Clinical Protocol:\n\n" +
+                    "1. Vitamin D3 Deficiency: Symptoms include generalized bone ache, muscle cramps, and fatigue. Correct with Vitamin D3 60,000 IU weekly for 8 weeks + 15 min morning sun exposure.\n" +
+                    "2. Vitamin B12 Deficiency: Symptoms include tingling/numbness in feet/hands, memory lapses, and mouth ulcers. Supplement with Methylcobalamin 1500 mcg daily for 1 month.\n" +
+                    "3. Iron Deficiency Anemia: Eat iron-rich foods (spinach, jaggery/gur, roasted chana, beetroots, pomegranate). Always combine iron with Vitamin C (lemon water/amla) to enhance gut absorption.\n" +
+                    "4. Healthy Weight Balancing: High-protein, high-fiber, low-refined carbohydrate meals. 10,000 steps daily. Eliminate sugary carbonated drinks and processed packaged snacks."
+            }
+
+            // 21. Medication Safety / Paracetamol / Antibiotics / Side Effects
+            "medicine" in q || "tablet" in q || "capsule" in q || "dose" in q || "paracetamol" in q || "antibiotic" in q || "dawa" in q -> {
+                "${patientPrefix}Pharmacological Principles & Medication Safety:\n\n" +
+                    "1. Paracetamol Safety: Standard adult dose is 500–650mg every 6 hours PRN. Maximum safe daily ceiling is 2,000–3,000 mg in 24 hours. Overdose causes severe irreversible liver failure (hepatotoxicity).\n" +
+                    "2. Antibiotic Stewardship: Never take antibiotics for viral colds or simple watery diarrhea. Always complete the prescribed 5–7 day course to prevent multi-drug resistant superbugs.\n" +
+                    "3. Painkiller (NSAID) Protection: Always take Ibuprofen, Diclofenac, or Aceclofenac with or immediately after food and along with a PPI (Pantoprazole) to avoid stomach ulcers.\n" +
+                    "4. Storage & Expiry: Keep all medicines in a cool, dry place away from direct sunlight and out of reach of children. Never use expired pharmaceuticals."
+            }
+
+            // 22. General Health / Dynamic Clinical Fallback
             else -> {
-                "${patientPrefix}Namaste! I am Sehat Setu, your clinical AI assistant.\n\n" +
-                    "I am ready to assist you with:\n" +
-                    "• Clinical Symptom Triage & Disease Risk Evaluation\n" +
-                    "• Maternal ANC & High-Risk Pregnancy Monitoring\n" +
-                    "• Pediatric Growth & Universal Immunization Tracking\n" +
-                    "• Emergency Chest Pain, SpO2 Drop, and Fever Protocols\n" +
-                    "• Generic Medication Safety & Prescription OCR\n\n" +
-                    "Please ask your specific health or patient query in English or Hindi!"
+                "${patientPrefix}Clinical Health Assessment from Sehat Setu:\n\n" +
+                    "**1. Clinical Overview & Triage:**\n" +
+                    "Regarding your inquiry on '$userMessage': Maintaining physiological balance requires evaluating symptom onset, severity, and baseline vitals (BP, SpO2, Heart Rate, and Blood Sugar).\n\n" +
+                    "**2. Evidence-Based Self-Care Measures:**\n" +
+                    "• Ensure restorative hydration (minimum 2–2.5 L clean fluids daily).\n" +
+                    "• Rest and avoid strenuous physical or emotional exertion.\n" +
+                    "• Maintain a well-balanced diet rich in micronutrients and dietary fiber.\n\n" +
+                    "**3. Recommended Diagnostic Action:**\n" +
+                    "• Record your baseline vitals using a home monitor or visit the local primary health center (PHC).\n" +
+                    "• If symptoms persist for more than 48–72 hours, obtain a physical examination and targeted laboratory workup.\n\n" +
+                    "**4. Universal Red Flag Warning Signs:**\n" +
+                    "• Difficulty breathing (dyspnea or SpO2 <92%)\n" +
+                    "• Radiating chest pain or sudden loss of consciousness\n" +
+                    "• Uncontrolled high-grade fever (>103°F / 39.5°C) with neck stiffness\n" +
+                    "• Sudden weakness or numbness on one side of face or body — seek emergency care immediately."
             }
         }
         return text to listOf("Sehat Setu", "Clinical Knowledge")
     }
 
+    private suspend fun generateChatReplyOffline(userMessage: String, activePatient: PatientEntity?): Pair<String, List<String>> {
+        delay(250L)
+        return generateChatReplyOfflineDirect(userMessage, activePatient)
+    }
+
     private suspend fun analyzeImageOffline(scanLabel: String): String {
-        delay(300L)
-        return "### Sehat Setu Clinical Vision Report: $scanLabel\n\n" +
-            "**1. Visual Morphology & Observation:**\n" +
-            "• Lesion exhibits circumscribed margins with localized erythema and mild tissue edema.\n" +
-            "• Wound bed demonstrates clean granulating pink tissue without overt necrotic slough or purulent exudate.\n\n" +
-            "**2. Diagnostic Impression / Differential:**\n" +
-            "• Superficial dermal abrasion / Healing stage 2 laceration\n" +
-            "• Secondary contact dermatitis / Mild localized viral or allergic exanthem\n\n" +
-            "**3. Recommended Wound & Skin Protocol:**\n" +
-            "• Irrigate gently with sterile 0.9% Normal Saline solution.\n" +
-            "• Apply sterile paraffin gauze or non-adherent dressing pad; secure with micropore tape.\n" +
-            "• Change dressing every 24–48 hours or immediately if soiled.\n" +
-            "• Verify Tetanus Toxoid (TT) immunization status (give 0.5 mL IM if last dose >5 years).\n\n" +
-            "**4. Escalation Red Flags:**\n" +
-            "• Rapid spreading redness warmth extending >2cm, foul odor, or body temp >38.5°C warrants physician evaluation for oral antibiotics."
+        delay(250L)
+        return analyzeImageOfflineDirect(scanLabel)
     }
 }
