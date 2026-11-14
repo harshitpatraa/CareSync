@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="caresync_primary">#FF2E7DFF</color>
+    <color name="caresync_secondary">#FF4CAF50</color>
+    <color name="caresync_accent">#FF00BCD4</color>
+    <color name="caresync_background">#FFF8FAFC</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

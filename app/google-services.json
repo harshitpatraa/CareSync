@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "879174369515",
+    "project_id": "gen-lang-client-0413618590",
+    "storage_bucket": "gen-lang-client-0413618590.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:879174369515:android:ab59c35e7c2d519d977eae",
+        "android_client_info": {
+          "package_name": "com.caresync.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqdq4ZaZ4MAH8LXfHwHn9V62CDRCyOR2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
