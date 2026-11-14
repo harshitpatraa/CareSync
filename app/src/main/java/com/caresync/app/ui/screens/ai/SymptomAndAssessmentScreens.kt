@@ -426,7 +426,7 @@ fun MedicalAssessmentScreen(
                     }
                     Surface(shape = CareSyncButtonShape, color = CareSyncGreen.copy(alpha = 0.14f)) {
                         Text(
-                            text = if (state.isOfflineOnlyMode) "Sehat Setu Offline" else "Gemini 1.5 Flash",
+                            text = if (state.isOfflineOnlyMode) "Sehat Setu Offline" else "Sehat Setu Gemini AI",
                             style = MaterialTheme.typography.labelSmall,
                             color = CareSyncGreen,
                             fontWeight = FontWeight.Bold,

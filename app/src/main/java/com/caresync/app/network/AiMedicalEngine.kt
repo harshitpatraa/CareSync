@@ -42,7 +42,7 @@ import javax.inject.Singleton
 import kotlin.math.max
 
 private const val TAG = "AiMedicalEngine"
-private const val MODEL_NAME = "gemini-3.8-flash"
+private const val MODEL_NAME = "gemini-3.5-flash"
 private const val AI_TIMEOUT_MS = 25_000L
 private val DEFAULT_FALLBACK_API_KEY: String by lazy {
     try {
@@ -343,7 +343,13 @@ class AiMedicalEngine @Inject constructor(
     }
 
     private fun parseAssessmentJson(jsonString: String): ClinicalAssessmentResult {
-        val cleaned = jsonString.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
+        val firstBrace = jsonString.indexOf('{')
+        val lastBrace = jsonString.lastIndexOf('}')
+        val cleaned = if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+            jsonString.substring(firstBrace, lastBrace + 1).trim()
+        } else {
+            jsonString.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
+        }
         val json = JSONObject(cleaned)
 
         val score = json.optInt("riskScore", 40).coerceIn(0, 100)
@@ -532,7 +538,13 @@ class AiMedicalEngine @Inject constructor(
                 } else {
                     callDirectGeminiRest(prompt, effectiveKey, isJsonExpected = true)
                 }
-                val cleaned = jsonString.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
+                val firstBrace = jsonString.indexOf('{')
+                val lastBrace = jsonString.lastIndexOf('}')
+                val cleaned = if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+                    jsonString.substring(firstBrace, lastBrace + 1).trim()
+                } else {
+                    jsonString.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
+                }
                 val json = JSONObject(cleaned)
                 val medsArray = json.optJSONArray("medications")
                 val meds = buildList {
@@ -849,12 +861,12 @@ class AiMedicalEngine @Inject constructor(
         isJsonExpected: Boolean
     ): String = withContext(Dispatchers.IO) {
         val cleanKey = apiKey.trim()
-        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=$cleanKey"
+        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$cleanKey"
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
-            connectTimeout = 3_500
-            readTimeout = 4_000
+            connectTimeout = 6_000
+            readTimeout = 8_000
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("x-goog-api-key", cleanKey)
         }
@@ -912,12 +924,12 @@ class AiMedicalEngine @Inject constructor(
         apiKey: String
     ): String = withContext(Dispatchers.IO) {
         val cleanKey = apiKey.trim()
-        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=$cleanKey"
+        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$cleanKey"
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
-            connectTimeout = 4_000
-            readTimeout = 4_500
+            connectTimeout = 7_000
+            readTimeout = 9_000
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("x-goog-api-key", cleanKey)
         }
@@ -979,7 +991,7 @@ class AiMedicalEngine @Inject constructor(
         throw IllegalStateException("Gemini returned empty image response.")
     }
 
-    private suspend fun analyzeWardOutbreakOffline(patients: List<PatientEntity>): WardOutbreakInsight {
+    internal suspend fun analyzeWardOutbreakOffline(patients: List<PatientEntity>): WardOutbreakInsight {
         delay(250L)
         val febrileOrDengue = patients.filter {
             it.chronicConditions.contains("dengue", ignoreCase = true) ||

@@ -212,13 +212,16 @@ class DashboardViewModel @Inject constructor(
                     patients = latestPatients.value,
                     recentActivities = latestActivities.value,
                     language = latestPrefs.value.language,
-                    offlineOnly = latestPrefs.value.isOfflineOnlyMode
+                    offlineOnly = latestPrefs.value.isOfflineOnlyMode,
+                    apiKey = latestPrefs.value.geminiApiKey
                 )
                 outbreakInsight.value = insight
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                outbreakError.value = e.localizedMessage ?: "Failed to scan ward trends."
+                val fallback = aiEngine.analyzeWardOutbreakOffline(latestPatients.value)
+                outbreakInsight.value = fallback
+                outbreakError.value = null
             } finally {
                 isScanningOutbreak.value = false
             }
