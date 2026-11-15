@@ -62,8 +62,8 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
       {/* Drawer Body */}
       <div className="relative w-[82%] max-w-[320px] h-full bg-[#0d131f] border-r border-slate-800 shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
         
-        {/* Drawer Header with Gradient */}
-        <div className="p-5 bg-gradient-to-r from-[#6366f1] via-[#4f46e5] to-[#2563eb] text-white shrink-0 relative">
+        {/* Drawer Header - Solid Grey */}
+        <div className="p-5 bg-[#27272a] border-b border-[#3f3f46] text-white shrink-0 relative">
           <button 
             onClick={onClose}
             className="absolute top-3 right-3 p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
@@ -73,25 +73,22 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
 
           {/* Logo */}
           <div className="flex items-center space-x-2.5 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-white/20 p-1 backdrop-blur-xs flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[#18181b] border border-[#3f3f46] p-1 flex items-center justify-center">
               <div className="relative w-5 h-5 flex items-center justify-center">
-                <div className="w-3.5 h-3.5 bg-white rounded-sm rotate-45"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-300"></div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-300"></div>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-pink-300"></div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-pink-300"></div>
+                <div className="w-3.5 h-3.5 bg-white rounded-xs rotate-45"></div>
+                <div className="absolute w-1.5 h-1.5 bg-[#22c55e] rounded-full"></div>
               </div>
             </div>
             <div>
-              <h3 className="font-bold text-base text-white leading-tight">CareSync</h3>
-              <p className="text-[10px] text-blue-100/80 leading-none">Offline-First Healthcare Sync</p>
+              <h3 className="font-extrabold text-base text-white leading-tight">CareSync</h3>
+              <p className="text-[10px] text-[#a1a1aa] font-bold leading-none">Offline-First Healthcare Sync</p>
             </div>
           </div>
 
           {/* Clinician Details */}
-          <div className="pt-2 border-t border-white/20">
-            <h4 className="font-semibold text-sm text-white">Dr. Priya Kulkarni</h4>
-            <p className="text-xs text-blue-100/80">priya.kulkarni@gmail.com</p>
+          <div className="pt-2 border-t border-[#3f3f46]">
+            <h4 className="font-extrabold text-sm text-white">Dr. Priya Kulkarni</h4>
+            <p className="text-xs text-[#a1a1aa] font-medium">priya.kulkarni@gmail.com</p>
           </div>
         </div>
 

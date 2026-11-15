@@ -161,7 +161,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
   return (
     <div className="space-y-4">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between py-1 border-b border-slate-800/60 pb-2">
+      <div className="flex items-center justify-between py-1 border-b border-[#27272a]/60 pb-2">
         <button onClick={onBack} className="p-1.5 text-slate-300 hover:text-white cursor-pointer">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -180,7 +180,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
       </div>
 
       {/* Disease Risk Assessment Header */}
-      <div className="p-4 rounded-3xl bg-[#131926] border border-slate-800 space-y-3">
+      <div className="p-4 rounded-3xl bg-[#131926] border border-[#27272a] space-y-3">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="font-bold text-sm text-white tracking-tight">Disease Risk Assessment</h3>
@@ -201,7 +201,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
             className={`flex-1 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
               activeTab === 'screening'
                 ? 'bg-[#183a2b] text-[#4ade80] border border-[#22c55e]/40'
-                : 'bg-[#101421] text-slate-400 border border-slate-800'
+                : 'bg-[#101421] text-slate-400 border border-[#27272a]'
             }`}
           >
             12-Question Screening
@@ -211,7 +211,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
             className={`flex-1 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
               activeTab === 'vitals'
                 ? 'bg-[#183a2b] text-[#4ade80] border border-[#22c55e]/40'
-                : 'bg-[#101421] text-slate-400 border border-slate-800'
+                : 'bg-[#101421] text-slate-400 border border-[#27272a]'
             }`}
           >
             Numeric Vitals Triage
@@ -228,25 +228,25 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                   setAnswers(initialAnswers);
                   setScreeningResult(null);
                 }}
-                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-slate-800 text-slate-400 hover:text-white text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-[#27272a] text-slate-400 hover:text-white text-xs font-semibold whitespace-nowrap cursor-pointer"
               >
                 Reset (All No)
               </button>
               <button
                 onClick={() => handleApplyPreset('dengue')}
-                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-slate-800 text-amber-400 hover:border-amber-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-[#27272a] text-amber-400 hover:border-amber-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
               >
                 Preset: Dengue / Febrile
               </button>
               <button
                 onClick={() => handleApplyPreset('anc')}
-                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-slate-800 text-purple-400 hover:border-purple-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-[#27272a] text-white hover:border-[#3f3f46] text-xs font-semibold whitespace-nowrap cursor-pointer"
               >
                 Preset: ANC Danger
               </button>
               <button
                 onClick={() => handleApplyPreset('cardiac')}
-                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-slate-800 text-red-400 hover:border-red-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#101421] border border-[#27272a] text-red-400 hover:border-red-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
               >
                 Preset: Cardiac
               </button>
@@ -261,15 +261,15 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
       {activeTab === 'screening' && (
         <div className="space-y-3">
           {screeningResult && (
-            <div className="p-4 rounded-3xl bg-[#1b152b] border border-purple-500/40 space-y-3 animate-in fade-in-50">
+            <div className="p-4 rounded-3xl bg-[#1b152b] border border-[#3f3f46] space-y-3 animate-in fade-in-50">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-bold text-white">AI Diagnostic Assessment</h4>
-                  <p className="text-[11px] text-purple-300">Community Risk Score: {screeningResult.riskScore}/100</p>
+                  <p className="text-[11px] text-[#d4d4d8]">Community Risk Score: {screeningResult.riskScore}/100</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-bold ${
                   screeningResult.riskLevel === 'CRITICAL' ? 'bg-red-500/20 text-red-400 border border-red-500/40' :
-                  screeningResult.riskLevel === 'HIGH' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' :
+                  screeningResult.riskLevel === 'HIGH' ? 'bg-[#18181b]mber-500/20 text-amber-400 border border-amber-500/40' :
                   'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                 }`}>
                   {screeningResult.riskLevel} PRIORITY
@@ -280,7 +280,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                 {screeningResult.diseaseRisksWithPercentage.map((d, idx) => (
                   <div key={idx} className="flex items-center justify-between text-xs p-2 rounded-xl bg-[#121021]">
                     <span className="text-white">{d.diseaseName}</span>
-                    <span className="font-bold text-purple-400">{d.riskPercentage}%</span>
+                    <span className="font-bold text-white">{d.riskPercentage}%</span>
                   </div>
                 ))}
               </div>
@@ -290,10 +290,10 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
           {screeningQuestions.map((q) => {
             const currentVal = answers[q.key] || "No";
             return (
-              <div key={q.key} className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800 space-y-2.5">
+              <div key={q.key} className="p-3.5 rounded-2xl bg-[#131926] border border-[#27272a] space-y-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="font-bold text-xs text-white leading-tight">{q.title}</h4>
-                  <span className="px-2 py-0.5 rounded-md bg-[#251d3b] text-[#c084fc] border border-purple-500/30 text-[10px] font-medium whitespace-nowrap">
+                  <span className="px-2 py-0.5 rounded-md bg-[#251d3b] text-white border border-[#3f3f46] text-[10px] font-medium whitespace-nowrap">
                     {q.tag}
                   </span>
                 </div>
@@ -320,7 +320,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                               : opt === 'Yes'
                               ? 'bg-[#3b151e] text-[#f43f5e] border border-red-500/40'
                               : 'bg-[#2b1f14] text-[#fb923c] border border-amber-500/40'
-                            : 'bg-[#101421] text-slate-400 border border-slate-800 hover:text-white'
+                            : 'bg-[#101421] text-slate-400 border border-[#27272a] hover:text-white'
                         }`}
                       >
                         {opt}
@@ -338,7 +338,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
       {/* Numeric Vitals Triage Tab */}
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === 'vitals' && (
-        <div className="p-4 rounded-3xl bg-[#0f172a] border border-slate-800 space-y-4">
+        <div className="p-4 rounded-3xl bg-[#0f172a] border border-[#27272a] space-y-4">
           <div>
             <h3 className="text-xs font-bold text-white tracking-wide">Numeric Vitals Screening</h3>
             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -347,7 +347,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-[#27272a] focus-within:border-[#3f3f46]">
               <label className="text-[10px] text-slate-400 block mb-0.5">Systolic BP (mmHg)</label>
               <input
                 type="number"
@@ -357,7 +357,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-[#27272a] focus-within:border-[#3f3f46]">
               <label className="text-[10px] text-slate-400 block mb-0.5">Diastolic BP (mmHg)</label>
               <input
                 type="number"
@@ -367,7 +367,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-[#27272a] focus-within:border-[#3f3f46]">
               <label className="text-[10px] text-slate-400 block mb-0.5">SpO2 Percentage (%)</label>
               <input
                 type="number"
@@ -377,7 +377,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-[#27272a] focus-within:border-[#3f3f46]">
               <label className="text-[10px] text-slate-400 block mb-0.5">Heart Rate (bpm)</label>
               <input
                 type="number"
@@ -387,7 +387,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-[#27272a] focus-within:border-[#3f3f46]">
               <label className="text-[10px] text-slate-400 block mb-0.5">Blood Glucose (mg/dL)</label>
               <input
                 type="number"
@@ -397,7 +397,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 flex items-center justify-between">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-[#27272a] flex items-center justify-between">
               <div>
                 <label className="text-[10px] text-slate-400 block">Pregnancy Flag</label>
                 <span className="text-[11px] font-semibold text-white">{isPregnant ? 'Active ANC' : 'Not Pregnant'}</span>
@@ -406,7 +406,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                 type="button"
                 onClick={() => setIsPregnant(!isPregnant)}
                 className={`px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-colors ${
-                  isPregnant ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
+                  isPregnant ? 'bg-white text-black font-black text-white' : 'bg-slate-800 text-slate-400'
                 }`}
               >
                 {isPregnant ? 'ON' : 'OFF'}
@@ -416,7 +416,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
 
           <button
             onClick={handleRunVitals}
-            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 cursor-pointer transition-all active:scale-[0.99]"
+            className="w-full py-3 rounded-2xl bg-white hover:bg-[#e4e4e7] text-black font-black font-bold text-xs shadow-lg shadow-none cursor-pointer transition-all active:scale-[0.99]"
           >
             Calculate Vitals Triage
           </button>
@@ -425,9 +425,9 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
           {vitalsResult && (
             <div className="space-y-3.5 pt-2 animate-in fade-in-50 duration-300">
               {/* Primary Clinical Risk Score Banner with 48px Typography */}
-              <div className="p-4 rounded-3xl bg-[#0b101c] border border-indigo-500/30 flex items-center justify-between">
+              <div className="p-4 rounded-3xl bg-[#0b101c] border border-[#3f3f46] flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">
+                  <span className="text-[10px] uppercase font-bold text-white tracking-wider block">
                     Composite Clinical Risk Score
                   </span>
                   <div className="stat-headline-bold mt-1">
@@ -457,7 +457,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                   <h4 className="text-xs font-bold text-white tracking-wide">
                     All Differential Disease Possibilities ({vitalsResult.diseaseRisksWithPercentage.length})
                   </h4>
-                  <span className="text-[10px] text-indigo-400 font-medium">Scored by Probability</span>
+                  <span className="text-[10px] text-white font-medium">Scored by Probability</span>
                 </div>
 
                 <div className="space-y-2">
@@ -471,8 +471,8 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                           isCrit
                             ? 'bg-red-950/20 border-red-500/30'
                             : isHigh
-                            ? 'bg-indigo-950/30 border-indigo-500/30'
-                            : 'bg-[#0b101c] border-slate-800'
+                            ? 'bg-[#18181b] border-[#3f3f46]'
+                            : 'bg-[#0b101c] border-[#27272a]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -483,7 +483,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
 
                           <div className="text-right">
                             <span className={`text-sm font-mono font-bold ${
-                              isCrit ? 'text-red-400' : isHigh ? 'text-indigo-300' : 'text-emerald-400'
+                              isCrit ? 'text-red-400' : isHigh ? 'text-white' : 'text-emerald-400'
                             }`}>
                               {d.riskPercentage}%
                             </span>
@@ -495,7 +495,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                         <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${
-                              isCrit ? 'bg-red-500' : isHigh ? 'bg-indigo-500' : 'bg-emerald-500'
+                              isCrit ? 'bg-red-500' : isHigh ? 'bg-[#52525b]' : 'bg-emerald-500'
                             }`}
                             style={{ width: `${d.riskPercentage}%` }}
                           />
@@ -512,8 +512,8 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               </div>
 
               {/* Immediate Clinical Directives */}
-              <div className="p-3.5 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
-                <h5 className="text-xs font-bold text-indigo-300">ASHA Protocol & Immediate Directives:</h5>
+              <div className="p-3.5 rounded-2xl bg-[#18181b] border border-[#3f3f46] space-y-2">
+                <h5 className="text-xs font-bold text-white">ASHA Protocol & Immediate Directives:</h5>
                 <div className="space-y-1">
                   {vitalsResult.recommendedActions.map((action, i) => (
                     <div key={i} className="flex items-start gap-2 text-[11px] text-slate-200">
@@ -530,3 +530,4 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
     </div>
   );
 };
+

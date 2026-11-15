@@ -45,8 +45,8 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
       time: '09:40 AM Today',
       type: 'MEDS',
       icon: Pill,
-      iconColor: 'text-indigo-400',
-      iconBg: 'bg-indigo-500/15',
+      iconColor: 'text-white',
+      iconBg: 'bg-[#27272a]',
       title: 'Medication Dispensed - Meera Devi',
       desc: 'Ferrous Sulfate + Folic Acid (IFA 100 tablets) dispensed. Ankle edema check scheduled.',
       patientName: 'Meera Devi',
@@ -71,13 +71,13 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
       time: '08:45 AM Today',
       type: 'MEDS',
       icon: HeartPulse,
-      iconColor: 'text-indigo-400',
-      iconBg: 'bg-indigo-500/15',
+      iconColor: 'text-white',
+      iconBg: 'bg-[#27272a]',
       title: 'Fasting Blood Glucose Recorded - Fatima Begum',
       desc: 'Pre-prandial glucose 142 mg/dL. Metformin 500mg adherence verified by ASHA worker.',
       patientName: 'Fatima Begum',
       tag: 'NCD Screening',
-      tagBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+      tagBg: 'bg-indigo-500/10 text-white border-[#3f3f46]/20'
     },
     {
       id: 'act-5',
@@ -97,13 +97,13 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
       time: '04:30 PM Yesterday',
       type: 'ALERTS',
       icon: ShieldAlert,
-      iconColor: 'text-indigo-400',
-      iconBg: 'bg-indigo-500/15',
+      iconColor: 'text-white',
+      iconBg: 'bg-[#27272a]',
       title: 'Category III Dog Bite Protocol - Sunita Rao',
       desc: 'Wound washed with carbolic soap. Anti-Rabies Vaccine (ARV Dose 2) administered at PHC.',
       patientName: 'Sunita Rao',
       tag: 'Urgent Triage',
-      tagBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+      tagBg: 'bg-indigo-500/10 text-white border-[#3f3f46]/20'
     },
     {
       id: 'act-7',
@@ -131,13 +131,13 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
   return (
     <div className="space-y-3.5 pb-2">
       {/* Top Header */}
-      <div className="flex items-center justify-between py-1 border-b border-slate-800/80 pb-2">
+      <div className="flex items-center justify-between py-1 border-b border-[#27272a]/80 pb-2">
         <button onClick={onBack} className="p-1.5 text-slate-300 hover:text-white cursor-pointer">
           <ArrowLeft className="w-5 h-5" />
         </button>
 
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+          <div className="w-6 h-6 rounded-lg bg-white text-black font-black flex items-center justify-center text-white">
             <ClipboardList className="w-3.5 h-3.5" />
           </div>
           <h2 className="font-bold text-sm text-white tracking-tight">Recent Clinical Activity</h2>
@@ -152,12 +152,12 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
       </div>
 
       {/* Overview Banner */}
-      <div className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800 flex items-center justify-between">
+      <div className="p-3.5 rounded-2xl bg-[#0f172a] border border-[#27272a] flex items-center justify-between">
         <div>
           <h3 className="text-xs font-bold text-white">ASHA Field Work Ledger</h3>
           <p className="text-[11px] text-slate-400 mt-0.5">Chronological record of patient visits, vitals & emergency events</p>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold">
+        <span className="px-2.5 py-1 rounded-full bg-white text-black font-black/20 text-white border border-[#3f3f46] text-[10px] font-semibold">
           {activities.length} Events
         </span>
       </div>
@@ -170,7 +170,7 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
           value={search}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Filter by patient, symptom, or event..."
-          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#0b101c] border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#3f3f46]"
         />
       </div>
 
@@ -187,8 +187,8 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
             onClick={() => setFilter(f.id as any)}
             className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
               filter === f.id
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'bg-[#0f172a] text-slate-400 border border-slate-800 hover:text-white'
+                ? 'bg-white text-black font-black text-white shadow-xs'
+                : 'bg-[#0f172a] text-slate-400 border border-[#27272a] hover:text-white'
             }`}
           >
             {f.label}
@@ -208,7 +208,7 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
                   onSelectPatient(act.patientName);
                 }
               }}
-              className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800 hover:border-indigo-500/40 transition-all cursor-pointer space-y-2"
+              className="p-3.5 rounded-2xl bg-[#0f172a] border border-[#27272a] hover:border-[#52525b] transition-all cursor-pointer space-y-2"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start space-x-3">
@@ -226,14 +226,14 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-800/80">
+              <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-[#27272a]/80">
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3 text-slate-500" />
                   <span>{act.time}</span>
                 </div>
 
                 {act.patientName && (
-                  <span className="text-indigo-400 font-semibold flex items-center gap-0.5 hover:text-indigo-300">
+                  <span className="text-white font-semibold flex items-center gap-0.5 hover:text-white">
                     <span>View Record</span>
                     <ChevronRight className="w-3 h-3" />
                   </span>
@@ -246,3 +246,4 @@ export const RecentActivityView: React.FC<RecentActivityViewProps> = ({ onBack, 
     </div>
   );
 };
+
