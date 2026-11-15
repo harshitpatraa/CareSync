@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { Patient } from '../types';
 import { useApp } from '../context/AppContext';
+import { RealHealthQrModal, HealthRecordPayload } from './RealHealthQrModal';
 
 interface PatientProfileViewProps {
   patient: Patient;
@@ -121,6 +122,41 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     });
     setShowLogVitalsModal(false);
     showToast("New clinical vitals saved & trend updated!");
+  };
+
+  const patientHealthRecord: HealthRecordPayload = {
+    abhaId: `91-${patient.id.replace('pt-', '2026-')}-00${patient.age}`,
+    fullName: patient.fullName,
+    age: patient.age,
+    gender: patient.gender,
+    bloodGroup: patient.bloodGroup,
+    phone: patient.phone,
+    villageOrWard: patient.villageOrWard,
+    pmjayId: `PMJAY-${patient.id.toUpperCase()}-8821`,
+    emergencyContact: `${patient.familyHeadName} · ${patient.phone}`,
+    allergies: patient.allergies || 'No Known Drug Allergies (NKDA)',
+    chronicConditions: patient.chronicConditions || 'Hypertension / NCD Watch',
+    vitals: {
+      bp: `${sysInput}/${diaInput} mmHg`,
+      spo2: `${spo2Input}%`,
+      pulse: `${hrInput} bpm`,
+      sugar: `${sugarInput} mg/dL`,
+      temp: `${patient.vitals?.temperatureC || 37.0} °C`
+    },
+    medications: [
+      'Tab Telmisartan 40mg (OD Morning)',
+      'Tab Metformin 500mg (BD Post Meals)',
+      'Tab Paracetamol 500mg (SOS)'
+    ],
+    recentBookings: [
+      'PHC Follow-up Visit (Dr. Priya Kulkarni) - Confirmed',
+      'Blood Pressure Ambulatory Diary Log - Synced'
+    ],
+    sosHistory: [
+      '108 CareSync Emergency Network Linked'
+    ],
+    facilityName: 'Ayushman Bharat HWC Rampur Hub',
+    doctorName: 'Dr. Priya Kulkarni (MBBS, DGO)'
   };
 
   return (
@@ -584,82 +620,13 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       )}
 
       {/* ────────────────────────────────────────────────────────── */}
-      {/* MODAL 2: ABHA / ABDM QR Health Card */}
+      {/* MODAL 2: Real ABDM Health QR Card with Encoded Records     */}
       {/* ────────────────────────────────────────────────────────── */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-4 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-[#0F172A]">Ayushman Bharat Health Card (ABHA)</span>
-              </div>
-              <button onClick={() => setShowQrModal(false)} className="text-slate-400 hover:text-black cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* QR Card Graphic */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-300 text-center space-y-3">
-              <div className="flex items-center justify-between text-[10px] text-slate-700 font-bold border-b border-slate-200 pb-1.5">
-                <span>National Health Authority (NHA)</span>
-                <span>MoHFW · India</span>
-              </div>
-
-              {/* QR Code Matrix preview */}
-              <div className="w-32 h-32 mx-auto bg-white p-2 rounded-2xl flex items-center justify-center shadow-sm border border-slate-300">
-                <div className="w-full h-full border-4 border-black grid grid-cols-4 gap-1 p-1 bg-white">
-                  <div className="bg-black"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-white"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-white"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-white"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-white"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-black"></div>
-                  <div className="bg-white"></div>
-                  <div className="bg-black"></div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-black text-[#0F172A]">{patient.fullName}</h4>
-                <p className="text-xs font-mono font-bold text-slate-900 mt-0.5">ABHA: 91-8492-3310-9281</p>
-                <p className="text-[10px] text-slate-600 font-medium">harish.verma@abdm · Blood {patient.bloodGroup}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button 
-                onClick={() => {
-                  setShowQrModal(false);
-                  showToast("QR Card downloaded to device storage!");
-                }}
-                className="py-2.5 rounded-xl bg-black hover:bg-neutral-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
-              </button>
-
-              <button 
-                onClick={() => {
-                  setShowQrModal(false);
-                  showToast("ABHA link shared to patient phone!");
-                }}
-                className="py-2.5 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RealHealthQrModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        record={patientHealthRecord}
+      />
 
       {/* ────────────────────────────────────────────────────────── */}
       {/* MODAL 3: Official PHC Referral Slip PDF Preview */}

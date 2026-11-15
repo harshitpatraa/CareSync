@@ -28,6 +28,7 @@ import {
   Download
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { RealHealthQrModal, HealthRecordPayload } from './RealHealthQrModal';
 
 interface IndividualHomeViewProps {
   onNavigateTab: (tab: string) => void;
@@ -97,6 +98,42 @@ export const IndividualHomeView: React.FC<IndividualHomeViewProps> = ({
       statusBadge: 'Resolved & Safe'
     }
   ];
+
+  const citizenHealthRecord: HealthRecordPayload = {
+    abhaId: abhaId,
+    fullName: citizenName,
+    age: 38,
+    gender: 'Male',
+    bloodGroup: 'O+',
+    phone: '+91 98231 44102',
+    villageOrWard: 'Ward 4 · Shanti Nagar, Rampur Sub-District, Delhi NCR - 110085',
+    pmjayId: 'PMJAY-DEL-99104821',
+    emergencyContact: 'Sunita Sharma (Wife) · +91 98231 99011',
+    allergies: 'No Known Drug Allergies (NKDA)',
+    chronicConditions: 'Borderline Prehypertension (Diet & Lifestyle Watch)',
+    vitals: {
+      bp: '120/80 mmHg',
+      spo2: '98%',
+      pulse: '76 bpm',
+      sugar: '105 mg/dL',
+      temp: '37.0 °C'
+    },
+    medications: [
+      'Tab Paracetamol 500mg (SOS for fever/headache)',
+      'Oral Rehydration Salts (ORS) 1 sachet in 1L water',
+      'Tab Telmisartan 40mg (OD Morning empty stomach)'
+    ],
+    recentBookings: [
+      'PHC Rampur General Medicine (Dr. Arvind Mehta) - Tomorrow 10:30 AM (Token #14 Confirmed)',
+      'Diagnostic Lab: Fasting Blood Sugar & Lipid Profile - Completed (12 Nov 2026)',
+      'Mission Indradhanush Family Booster Camp - 18 Nov 2026'
+    ],
+    sosHistory: [
+      '108 Ambulance Dispatch #EM-8821 - Resolved (8 min response time) on 04 Nov 2026'
+    ],
+    facilityName: 'Primary Health Centre (PHC) Rampur Sector 4',
+    doctorName: 'Dr. Arvind Mehta (MBBS, MD)'
+  };
 
   return (
     <div className="space-y-3.5 pb-6 select-none text-slate-800">
@@ -193,27 +230,12 @@ export const IndividualHomeView: React.FC<IndividualHomeViewProps> = ({
           </button>
         </div>
 
-        {/* QR Modal expand preview */}
-        {showQrModal && (
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-300 text-center space-y-2 animate-in fade-in-50">
-            <div className="w-24 h-24 mx-auto bg-white p-1 rounded-xl border border-slate-300 flex items-center justify-center">
-              <div className="w-full h-full border-2 border-black grid grid-cols-3 gap-0.5 p-1 bg-white">
-                <div className="bg-black"></div>
-                <div className="bg-white"></div>
-                <div className="bg-black"></div>
-                <div className="bg-white"></div>
-                <div className="bg-black"></div>
-                <div className="bg-white"></div>
-                <div className="bg-black"></div>
-                <div className="bg-black"></div>
-                <div className="bg-black"></div>
-              </div>
-            </div>
-            <p className="text-[10px] font-mono font-bold text-black">
-              ABDM Digital Token #ABHA-DEL-918842
-            </p>
-          </div>
-        )}
+        {/* Real ABDM Health QR Modal with Full Encoded Records */}
+        <RealHealthQrModal
+          isOpen={showQrModal}
+          onClose={() => setShowQrModal(false)}
+          record={citizenHealthRecord}
+        />
 
         <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[11px] font-bold text-black">
