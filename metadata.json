@@ -1,6 +1,0 @@
-{
-  "name": "CareSync",
-  "description": "Offline-first healthcare synchronization, patient management, AI clinical triage, maternal/child tracking, and emergency response app.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
