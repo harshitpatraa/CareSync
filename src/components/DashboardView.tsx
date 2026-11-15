@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   Menu, 
   Bell, 
-  CloudCheck, 
   RotateCw, 
   UserPlus, 
   BriefcaseMedical, 
@@ -14,11 +13,13 @@ import {
   History, 
   Baby, 
   Heart,
-  TrendingUp,
-  TrendingDown
+  Target,
+  CheckCircle2,
+  ChevronRight
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Patient } from '../types';
+import { WardRadarModal } from './WardRadarModal';
 
 interface DashboardViewProps {
   onNavigateTab: (tab: string) => void;
@@ -26,23 +27,29 @@ interface DashboardViewProps {
   onOpenAddModal: () => void;
   onOpenSosModal: () => void;
   onOpenDrawer: () => void;
+  onOpenRecentActivity?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateTab,
   onOpenAddModal,
   onOpenSosModal,
-  onOpenDrawer
+  onOpenDrawer,
+  onOpenRecentActivity
 }) => {
   const { patients, syncAllRecords } = useApp();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showWardModal, setShowWardModal] = useState(false);
+  const [syncToast, setSyncToast] = useState<string | null>(null);
 
   const handleSync = () => {
     setIsSyncing(true);
     setTimeout(() => {
-      syncAllRecords();
+      const res = syncAllRecords();
       setIsSyncing(false);
-    }, 600);
+      setSyncToast(res.message || "All local Room records synchronized to CareSync Cloud!");
+      setTimeout(() => setSyncToast(null), 3000);
+    }, 700);
   };
 
   const todayCount = patients.filter(p => p.isTodayVisit).length;
@@ -52,31 +59,46 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const childCount = patients.filter(p => p.category === 'CHILD').length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-4">
+      {/* Toast Notification */}
+      {syncToast && (
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-indigo-950 border border-indigo-500 text-indigo-200 text-xs font-semibold shadow-2xl flex items-center gap-2 animate-in fade-in-50">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{syncToast}</span>
+        </div>
+      )}
+
+      {/* Ward Radar Modal */}
+      {showWardModal && (
+        <WardRadarModal 
+          onClose={() => setShowWardModal(false)} 
+          onNavigateToRisk={() => onNavigateTab('risk-assessment')}
+        />
+      )}
+
       {/* Top App Bar */}
       <div className="flex items-center justify-between py-1">
         <button 
           onClick={onOpenDrawer}
           className="p-2 text-slate-300 hover:text-white cursor-pointer"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
 
         <div className="flex items-center space-x-2">
-          {/* Logo icon */}
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-500 via-indigo-500 to-cyan-400 p-[1.5px]">
-            <div className="w-full h-full bg-[#0d1017] rounded-[7px] flex items-center justify-center">
-              <div className="w-3.5 h-3.5 border-2 border-cyan-400 rounded-sm rotate-45 flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
-              </div>
+          {/* Logo icon (Unified 2-color: Indigo & Emerald) */}
+          <div className="w-7 h-7 rounded-xl bg-indigo-600 flex items-center justify-center p-1 text-white shadow-md shadow-indigo-600/30">
+            <div className="relative w-4 h-4 flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-xs rotate-45"></div>
+              <div className="absolute w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
             </div>
           </div>
           <span className="font-bold text-base text-white tracking-tight">CareSync</span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="px-2.5 py-1 rounded-full bg-[#1b382b] text-[#22c55e] border border-[#22c55e]/30 text-[11px] font-semibold flex items-center gap-1">
-            <span className="text-[10px]">☁️</span>
+          <div className="px-2.5 py-1 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold flex items-center gap-1">
+            <span>☁️</span>
             <span>Sync</span>
           </div>
           <button 
@@ -88,20 +110,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* Hero Field Hub Card (Gradient Blue) */}
-      <div className="p-4 rounded-3xl bg-gradient-to-r from-[#6366f1] via-[#3b82f6] to-[#06b6d4] text-white shadow-xl shadow-blue-500/10 space-y-3 relative overflow-hidden">
+      {/* Hero Field Hub Card (2-color theme: Deep Clinical Indigo) */}
+      <div className="p-4 rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-800 text-white shadow-xl shadow-indigo-950/40 space-y-3 relative overflow-hidden">
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-[11px] font-medium text-blue-100/90 tracking-wide block">CareSync Field Hub</span>
+            <span className="text-[11px] font-medium text-indigo-200 tracking-wide block">CareSync Field Hub</span>
             <h2 className="text-xl font-bold text-white tracking-tight mt-0.5">Dr. Priya Kulkarni</h2>
-            <p className="text-xs text-blue-100/80">CareSync Community Health Hub</p>
+            <p className="text-xs text-indigo-200/90">CareSync Community Health Hub</p>
           </div>
 
-          {/* Medical Illustration mockup box */}
-          <div className="w-20 h-14 rounded-2xl bg-white/95 p-1.5 flex items-center justify-center shadow-md">
-            <div className="w-full h-full rounded-xl bg-blue-50 flex flex-col items-center justify-center p-1 text-[8px] text-blue-600 font-bold leading-tight text-center">
+          <div className="w-16 h-12 rounded-2xl bg-white/95 p-1 flex items-center justify-center shadow-md">
+            <div className="w-full h-full rounded-xl bg-indigo-50 flex flex-col items-center justify-center text-[8px] text-indigo-700 font-bold leading-tight text-center">
               <span>🩺 NHM</span>
-              <span className="text-[7px] text-cyan-600">Health Hub</span>
+              <span className="text-[7px] text-indigo-900 font-mono">Hub</span>
             </div>
           </div>
         </div>
@@ -110,13 +131,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="pt-2 border-t border-white/20 flex items-center justify-between">
           <div>
             <div className="text-xs font-semibold text-white">All local records synchronized</div>
-            <p className="text-[10px] text-blue-100/70">Last sync: Just now</p>
+            <p className="text-[10px] text-indigo-200">Last sync: Just now</p>
           </div>
 
           <button
             onClick={handleSync}
             disabled={isSyncing}
-            className="px-3.5 py-1.5 rounded-full bg-white text-[#4f46e5] text-xs font-bold shadow-md hover:bg-slate-100 cursor-pointer flex items-center gap-1.5 transition-all"
+            className="px-3.5 py-1.5 rounded-full bg-white text-indigo-700 text-xs font-bold shadow-md hover:bg-slate-100 cursor-pointer flex items-center gap-1.5 transition-all"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
             <span>Sync Now</span>
@@ -124,7 +145,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* Quick Actions Grid */}
+      {/* Quick Actions Grid (2-Color Theme: Clean Indigo) */}
       <div className="space-y-2">
         <h3 className="text-xs font-bold text-slate-300">Quick Actions</h3>
 
@@ -132,50 +153,50 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Add Patient */}
           <button
             onClick={onOpenAddModal}
-            className="p-3 rounded-2xl bg-[#131926] border border-slate-800/80 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-indigo-500/40 transition-colors"
+            className="p-3 rounded-2xl bg-[#0f172a] border border-slate-800/90 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-[#1e2040] text-[#818cf8] flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center shadow-inner">
               <UserPlus className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-300 text-center leading-tight">Add Patient</span>
+            <span className="text-[11px] font-medium text-slate-200 text-center leading-tight">Add Patient</span>
           </button>
 
           {/* Symptoms */}
           <button
             onClick={() => onNavigateTab('risk-assessment')}
-            className="p-3 rounded-2xl bg-[#131926] border border-slate-800/80 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-purple-500/40 transition-colors"
+            className="p-3 rounded-2xl bg-[#0f172a] border border-slate-800/90 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-[#271d40] text-[#c084fc] flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center shadow-inner">
               <BriefcaseMedical className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-300 text-center leading-tight">Symptoms</span>
+            <span className="text-[11px] font-medium text-slate-200 text-center leading-tight">Symptoms</span>
           </button>
 
           {/* AI Chat */}
           <button
             onClick={() => onNavigateTab('ai-assistant')}
-            className="p-3 rounded-2xl bg-[#131926] border border-slate-800/80 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-emerald-500/40 transition-colors"
+            className="p-3 rounded-2xl bg-[#0f172a] border border-slate-800/90 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-[#152e25] text-[#4ade80] flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center shadow-inner">
               <Bot className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-300 text-center leading-tight">AI Chat</span>
+            <span className="text-[11px] font-medium text-slate-200 text-center leading-tight">AI Chat</span>
           </button>
 
           {/* Risk */}
           <button
             onClick={() => onNavigateTab('risk-assessment')}
-            className="p-3 rounded-2xl bg-[#131926] border border-slate-800/80 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-rose-500/40 transition-colors"
+            className="p-3 rounded-2xl bg-[#0f172a] border border-slate-800/90 flex flex-col items-center justify-center space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-[#351b27] text-[#fb7185] flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center shadow-inner">
               <Stethoscope className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-300 text-center leading-tight">Risk</span>
+            <span className="text-[11px] font-medium text-slate-200 text-center leading-tight">Risk</span>
           </button>
         </div>
       </div>
 
-      {/* Clinical Care Overview Section */}
+      {/* Clinical Care Overview Section (2-Color Theme: Indigo & Emerald, Crimson for Emergency) */}
       <div className="space-y-2.5">
         <h3 className="text-xs font-bold text-slate-300">Clinical Care Overview</h3>
 
@@ -183,10 +204,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Today's Patients */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-2 cursor-pointer hover:border-slate-700 transition-colors"
+            className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#201d3b] text-[#a78bfa] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
                 <Calendar className="w-4 h-4" />
               </div>
               <span className="text-xl font-bold text-white">{todayCount}</span>
@@ -194,7 +215,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-white truncate">Today's Patie...</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#183327] text-[#4ade80] border border-[#22c55e]/20 flex items-center">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 flex items-center">
                   ↗ 18.2%
                 </span>
               </div>
@@ -205,10 +226,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Pending Visits */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-2 cursor-pointer hover:border-slate-700 transition-colors"
+            className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#33221b] text-[#fb923c] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
               <span className="text-xl font-bold text-white">{pendingCount}</span>
@@ -216,7 +237,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-white">Pending Visits</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#352119] text-[#f97316] border border-[#f97316]/20 flex items-center">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center">
                   ↘ 3.2%
                 </span>
               </div>
@@ -224,13 +245,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          {/* Emergency Cases */}
+          {/* Emergency Cases (Red alert) */}
           <div 
             onClick={onOpenSosModal}
-            className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-2 cursor-pointer hover:border-red-500/40 transition-colors"
+            className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-2 cursor-pointer hover:border-red-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#36191f] text-[#f43f5e] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-red-950/60 text-red-400 border border-red-500/30 flex items-center justify-center">
                 <AlertTriangle className="w-4 h-4" />
               </div>
               <span className="text-xl font-bold text-white">{emergencyCount}</span>
@@ -238,21 +259,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-white truncate">Emergency Ca...</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#183327] text-[#4ade80] border border-[#22c55e]/20 flex items-center">
-                  ↗ 2.1%
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-950 text-red-400 border border-red-500/30 flex items-center">
+                  Critical
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 mt-0.5">Critical priority</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Critical priority watch</p>
             </div>
           </div>
 
           {/* Follow Ups */}
           <div 
             onClick={() => onNavigateTab('records')}
-            className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-2 cursor-pointer hover:border-slate-700 transition-colors"
+            className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#241f3d] text-[#c084fc] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
                 <History className="w-4 h-4" />
               </div>
               <span className="text-xl font-bold text-white">4</span>
@@ -260,7 +281,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-white">Follow Ups</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#183327] text-[#4ade80] border border-[#22c55e]/20 flex items-center">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 flex items-center">
                   ↗ 31.1%
                 </span>
               </div>
@@ -271,10 +292,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Pregnancy Tracking */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-2 cursor-pointer hover:border-slate-700 transition-colors"
+            className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#361e2e] text-[#f472b6] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
                 <Baby className="w-4 h-4" />
               </div>
               <span className="text-xl font-bold text-white">{ancCount}</span>
@@ -288,10 +309,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Child Monitoring */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-2 cursor-pointer hover:border-slate-700 transition-colors"
+            className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-2 cursor-pointer hover:border-indigo-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#182c23] text-[#4ade80] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
                 <Heart className="w-4 h-4" />
               </div>
               <span className="text-xl font-bold text-white">{childCount}</span>
@@ -307,25 +328,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Vaccination Status Card */}
       <div 
         onClick={() => onNavigateTab('patients')}
-        className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 flex items-center justify-between cursor-pointer hover:border-slate-700 transition-colors"
+        className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 flex items-center justify-between cursor-pointer hover:border-indigo-500/50 transition-colors"
       >
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-[#152e22] text-[#4ade80] flex items-center justify-center shrink-0">
-            <span className="text-base">💉</span>
+          <div className="w-9 h-9 rounded-xl bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <span className="text-sm font-bold">💉</span>
           </div>
           <div>
             <h4 className="text-xs font-bold text-white">Vaccination Status</h4>
             <p className="text-[10px] text-slate-400">Cohort immunization coverage across {patients.length} patients</p>
           </div>
         </div>
-        <span className="text-xl font-bold text-white">85%</span>
+        <span className="text-xl font-bold text-emerald-400">85%</span>
       </div>
 
       {/* Ward Outbreak & Trend Radar Card */}
-      <div className="p-4 rounded-2xl bg-[#131926] border border-slate-800/90 space-y-3">
+      <div className="p-4 rounded-2xl bg-[#0f172a] border border-slate-800/90 space-y-3">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-xl bg-[#261938] text-[#c084fc] flex items-center justify-center shrink-0">
-            <span className="text-base">🎯</span>
+          <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <Target className="w-4 h-4" />
           </div>
           <div>
             <h4 className="text-xs font-bold text-white">Ward Outbreak & Trend Radar</h4>
@@ -334,8 +355,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <button 
-          onClick={() => onNavigateTab('risk-assessment')}
-          className="w-full py-2.5 rounded-xl border border-purple-500/40 bg-purple-950/20 hover:bg-purple-900/30 text-purple-300 font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
+          onClick={() => setShowWardModal(true)}
+          className="w-full py-2.5 rounded-xl border border-indigo-500/40 bg-indigo-950/30 hover:bg-indigo-900/50 text-indigo-300 font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
         >
           <span>✨</span>
           <span>Scan Ward Trends</span>
@@ -345,25 +366,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Health Analytics Card */}
       <div 
         onClick={() => onNavigateTab('records')}
-        className="p-3.5 rounded-2xl bg-[#131926] border border-slate-800/90 flex items-center justify-between cursor-pointer hover:border-slate-700 transition-colors"
+        className="p-3.5 rounded-2xl bg-[#0f172a] border border-slate-800/90 flex items-center justify-between cursor-pointer hover:border-indigo-500/50 transition-colors"
       >
         <div>
           <h4 className="text-xs font-bold text-white">Health Analytics</h4>
           <p className="text-[10px] text-slate-400">7-day outpatient & home-visit volume</p>
         </div>
-        <div className="px-2.5 py-1 rounded-full bg-[#183a2b] text-[#4ade80] border border-[#22c55e]/30 text-[10px] font-semibold">
+        <div className="px-2.5 py-1 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold">
           {patients.filter(p => p.syncStatus === 'SYNCED').length}/{patients.length} Synced
         </div>
       </div>
 
-      {/* Recent Activity Card */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#171633] to-[#121626] border border-purple-900/30 flex items-center justify-between">
+      {/* Recent Activity Card (Clickable to open RecentActivityView) */}
+      <div 
+        onClick={() => onOpenRecentActivity && onOpenRecentActivity()}
+        className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-950/40 to-[#0f172a] border border-indigo-500/30 flex items-center justify-between cursor-pointer hover:border-indigo-500/60 transition-all shadow-sm"
+      >
         <div>
-          <h4 className="text-xs font-bold text-white">Recent Activity</h4>
+          <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+            <span>Recent Activity</span>
+            <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+          </h4>
           <p className="text-[10px] text-slate-400">Live clinical events, vitals & field ledger</p>
         </div>
-        <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[10px] font-semibold border border-slate-700">
-          Active
+        <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 text-[10px] font-semibold border border-emerald-500/30">
+          Active (7)
         </span>
       </div>
     </div>

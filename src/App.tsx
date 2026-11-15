@@ -25,6 +25,7 @@ import { NotificationsView } from './components/NotificationsView';
 import { PatientProfileView } from './components/PatientProfileView';
 import { PatientRegistrationView } from './components/PatientRegistrationView';
 import { SosView } from './components/SosView';
+import { RecentActivityView } from './components/RecentActivityView';
 import { ClinicianSignInView } from './components/ClinicianSignInView';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { PatientDetailModal } from './components/PatientDetailModal';
@@ -38,6 +39,7 @@ const MobileDeviceApp: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isRegisteringPatient, setIsRegisteringPatient] = useState<boolean>(false);
+  const [showRecentActivity, setShowRecentActivity] = useState<boolean>(false);
 
   // Modals
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -240,6 +242,21 @@ const MobileDeviceApp: React.FC = () => {
             🚨 Emergency SOS
           </button>
           <button
+            onClick={() => {
+              setIsAuthenticated(true);
+              setSelectedPatient(null);
+              setIsRegisteringPatient(false);
+              setShowRecentActivity(true);
+            }}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
+              showRecentActivity
+                ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+            }`}
+          >
+            📋 Recent Activity
+          </button>
+          <button
             onClick={() => setIsDrawerOpen(true)}
             className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 cursor-pointer"
           >
@@ -340,6 +357,15 @@ const MobileDeviceApp: React.FC = () => {
                   setCurrentTab('risk-assessment');
                 }}
               />
+            ) : showRecentActivity ? (
+              <RecentActivityView
+                onBack={() => setShowRecentActivity(false)}
+                onSelectPatient={(name) => {
+                  const matched = patients.find(p => p.fullName.toLowerCase().includes(name.toLowerCase())) || patients[0];
+                  setShowRecentActivity(false);
+                  setSelectedPatient(matched);
+                }}
+              />
             ) : isRegisteringPatient ? (
               <PatientRegistrationView
                 onBack={() => setIsRegisteringPatient(false)}
@@ -352,11 +378,15 @@ const MobileDeviceApp: React.FC = () => {
               <>
                 {currentTab === 'dashboard' && (
                   <DashboardView
-                    onNavigateTab={setCurrentTab}
+                    onNavigateTab={(tab) => {
+                      setShowRecentActivity(false);
+                      setCurrentTab(tab);
+                    }}
                     onSelectPatient={setSelectedPatient}
                     onOpenAddModal={() => setIsRegisteringPatient(true)}
                     onOpenSosModal={handleOpenGeneralSos}
                     onOpenDrawer={() => setIsDrawerOpen(true)}
+                    onOpenRecentActivity={() => setShowRecentActivity(true)}
                   />
                 )}
 
@@ -423,6 +453,7 @@ const MobileDeviceApp: React.FC = () => {
                   <button
                     key={btn.id}
                     onClick={() => {
+                      setShowRecentActivity(false);
                       setCurrentTab(btn.id);
                     }}
                     className="flex flex-col items-center justify-center flex-1 h-full py-1 cursor-pointer transition-all"
