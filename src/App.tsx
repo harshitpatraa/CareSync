@@ -105,6 +105,14 @@ const MobileDeviceApp: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#F1F5F9] flex flex-col items-center justify-start py-6 px-2 sm:px-4 select-none font-sans text-slate-800 overflow-y-auto">
+      {/* Team Innovix - Fixed Corner Watermark Outside Mobile Screen */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black text-white border-2 border-neutral-800 shadow-2xl select-none">
+        <span className="w-2 h-2 rounded-full bg-[#15803D] animate-pulse"></span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">By</span>
+          <span className="text-xs font-black tracking-wide text-white">Team Innovix</span>
+        </div>
+      </div>
       {/* Top Banner / Studio Control Header */}
       <div className="text-center mb-4 hidden sm:flex flex-col items-center">
         <div className="flex items-center gap-2">
@@ -285,8 +293,16 @@ const MobileDeviceApp: React.FC = () => {
         </div>
       </div>
 
-      {/* Android Device Outer Chassis - Solid Black Phone Frame & Border */}
-      <div className={`relative ${phoneDimensions[phoneHeight]} bg-black rounded-[54px] p-3 shadow-2xl border-[10px] border-black flex flex-col overflow-hidden ring-2 ring-neutral-900 transition-all duration-300`}>
+      {/* Phone Chassis Wrapper with Outside Corner Branding */}
+      <div className="relative">
+        {/* Team Innovix Floating Badge - At Corner Outside Mobile Screen */}
+        <div className="absolute -bottom-3 -right-3 z-40 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black text-white border-2 border-neutral-700 shadow-xl font-black text-[11px] select-none tracking-wide">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Team Innovix</span>
+        </div>
+
+        {/* Android Device Outer Chassis - Solid Black Phone Frame & Border */}
+        <div className={`relative ${phoneDimensions[phoneHeight]} bg-black rounded-[54px] p-3 shadow-2xl border-[10px] border-black flex flex-col overflow-hidden ring-2 ring-neutral-900 transition-all duration-300`}>
         
         {/* Device Camera Punch Hole (Center Top) */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center pointer-events-none">
@@ -546,6 +562,7 @@ const MobileDeviceApp: React.FC = () => {
             <div className="w-32 h-1 bg-slate-300 rounded-full"></div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SOS Broadcast Modal */}
