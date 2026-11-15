@@ -73,49 +73,52 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
   ];
 
   return (
-    <div className="flex flex-col h-full space-y-3">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between py-1 border-b border-[#27272a]/80 pb-2">
-        <button 
-          onClick={onOpenDrawer || onBack}
-          className="p-1.5 text-slate-300 hover:text-white cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+    <div className="flex flex-col h-full space-y-2.5 select-none">
+      {/* Official Government Tricolor Header Bar */}
+      <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
+        <div className="w-1/3 bg-[#FF9933]"></div>
+        <div className="w-1/3 bg-white"></div>
+        <div className="w-1/3 bg-[#138808]"></div>
+      </div>
 
+      {/* Top Bar */}
+      <div className="flex items-center justify-between py-0.5 border-b border-[#1e293b] pb-2">
         <div className="flex items-center space-x-2">
-          {/* Logo icon (Unified 2-color: Clinical Indigo & Emerald) */}
-          <div className="w-7 h-7 rounded-xl bg-white text-black font-black flex items-center justify-center p-1 text-white shadow-md shadow-none">
-            <div className="relative w-4 h-4 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-xs rotate-45"></div>
-              <div className="absolute w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+          <button 
+            onClick={onOpenDrawer || onBack}
+            className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-black text-sm text-white tracking-tight">Sehat Setu AI</span>
+              <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-[#1e3a8a] text-blue-200 border border-[#3b82f6]/40 uppercase">
+                MoHFW
+              </span>
             </div>
+            <p className="text-[9px] font-bold text-slate-400 leading-none">
+              National Health Mission · Clinical Decision Support System (CDSS)
+            </p>
           </div>
-          <span className="font-extrabold text-sm text-white tracking-tight">CareSync AI Chat</span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
-            <span className="text-[9px]">☁️</span>
-            <span>Sync</span>
+          <div className="px-2 py-0.5 rounded-md bg-[#064e3b] text-[#34d399] border border-[#059669]/50 text-[10px] font-black flex items-center gap-1">
+            <span>☁️</span>
+            <span>ABDM</span>
           </div>
-          <button className="p-1.5 text-slate-300 hover:text-white cursor-pointer">
+          <button className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
             <Bell className="w-4 h-4 text-slate-300" />
           </button>
         </div>
       </div>
 
-      {/* Pill Badge: General Care */}
-      <div className="flex items-center">
-        <span className="px-3 py-1 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-xs font-bold shadow-xs">
-          General Care
-        </span>
-      </div>
-
-      {/* Mini Banner: Sehat Setu MoHFW Clinical Intelligence */}
-      <div className="px-3 py-1.5 rounded-xl bg-[#27272a] border border-[#3f3f46] flex items-center gap-2 text-[10px] text-white font-bold">
-        <Bot className="w-3.5 h-3.5 text-white" />
-        <span>Sehat Setu · MoHFW Clinical Intelligence & Gemini Hybrid</span>
+      {/* Official MoHFW Protocol Badge Banner */}
+      <div className="px-3 py-1.5 rounded-xl bg-[#0f172a] border border-[#1e3a8a] flex items-center gap-2 text-[10px] text-blue-200 font-bold">
+        <Bot className="w-3.5 h-3.5 text-[#38bdf8]" />
+        <span>Sehat Setu · Verified against Official MoHFW & National Health Mission Standard 2026</span>
       </div>
 
       {/* Chat Messages Flow */}

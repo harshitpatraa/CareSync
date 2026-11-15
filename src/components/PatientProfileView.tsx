@@ -133,52 +133,67 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         </div>
       )}
 
+      {/* Official Government Tricolor Header Bar */}
+      <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
+        <div className="w-1/3 bg-[#FF9933]"></div>
+        <div className="w-1/3 bg-white"></div>
+        <div className="w-1/3 bg-[#138808]"></div>
+      </div>
+
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between py-1 border-b border-[#27272a]/80 pb-2">
-        <button onClick={onBack} className="p-1.5 text-slate-300 hover:text-white cursor-pointer">
+      <div className="flex items-center justify-between py-1 border-b border-[#1e293b] pb-2">
+        <button onClick={onBack} className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        <h2 className="font-bold text-sm text-white tracking-tight">Patient Profile</h2>
+        <div className="text-center">
+          <h2 className="font-black text-sm text-white tracking-tight">ABHA Citizen Health Record</h2>
+          <p className="text-[9px] font-bold text-slate-400">National Health Authority (NHA) · MoHFW</p>
+        </div>
 
         <div className="flex items-center space-x-2">
-          <div className="px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1">
-            <span>☁️</span>
-            <span>Room DB</span>
+          <div className="px-2 py-0.5 rounded-md bg-[#064e3b] text-[#34d399] border border-[#059669]/50 text-[10px] font-black flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3 text-[#10b981]" />
+            <span>ABDM</span>
           </div>
-          <button className="p-1.5 text-slate-300 hover:text-white cursor-pointer">
+          <button className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
             <Bell className="w-4 h-4 text-slate-300" />
           </button>
         </div>
       </div>
 
-      {/* Patient Hero Card (2-color theme: Deep Indigo & Emerald, Red only for critical) */}
-      <div className="p-4 rounded-3xl bg-[#0f172a] border border-[#27272a] space-y-3.5">
+      {/* Patient Hero Card - Official ABHA Health ID Format */}
+      <div className="p-4 rounded-2xl bg-[#0f172a] border-2 border-[#1e3a8a] space-y-3.5 shadow-xl relative overflow-hidden">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3.5">
             {/* Avatar Circle */}
-            <div className={`w-13 h-13 rounded-2xl flex items-center justify-center font-bold text-sm shadow-inner ${
+            <div className={`w-13 h-13 rounded-2xl flex items-center justify-center font-black text-sm shadow-inner ${
               patient.isCritical
-                ? 'bg-red-950/50 text-red-400 border border-red-500/40'
-                : 'bg-[#27272a] text-white border border-[#3f3f46]'
+                ? 'bg-red-950 text-red-400 border border-red-600'
+                : 'bg-[#1e293b] text-[#60a5fa] border border-[#334155]'
             }`}>
               {getInitials(patient.fullName)}
             </div>
 
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">{patient.fullName}</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                {patient.id} · {patient.age}y {patient.gender} · Blood {patient.bloodGroup}
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-sm font-black text-white tracking-tight">{patient.fullName}</h3>
+                <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-[#064e3b] text-[#34d399] border border-[#059669]/40">
+                  PM-JAY
+                </span>
+              </div>
+              <p className="text-[11px] font-mono font-bold text-amber-300 mt-0.5">
+                ABHA: 91-{patient.id.replace('pt-', '2026-')}-00{patient.age}
               </p>
-              <p className="text-[11px] text-slate-400">
-                {patient.villageOrWard}
+              <p className="text-[11px] font-medium text-slate-300">
+                {patient.age}y · {patient.gender} · Blood {patient.bloodGroup} · {patient.villageOrWard}
               </p>
             </div>
           </div>
 
           <button 
             onClick={handleSpeech}
-            className="p-2 rounded-xl bg-[#27272a] text-white hover:bg-indigo-900/80 cursor-pointer border border-[#3f3f46]"
+            className="p-2 rounded-xl bg-[#1e293b] text-[#60a5fa] hover:bg-[#334155] cursor-pointer border border-[#334155]"
             title="Read clinical snapshot aloud"
           >
             <Volume2 className="w-4 h-4" />

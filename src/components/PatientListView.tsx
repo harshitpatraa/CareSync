@@ -10,7 +10,10 @@ import {
   Phone, 
   MapPin, 
   Clock, 
-  UserPlus 
+  UserPlus,
+  ShieldCheck,
+  Building2,
+  FileCheck
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Patient } from '../types';
@@ -33,12 +36,12 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
 
   const categories: { label: string; value: string }[] = [
-    { label: 'All Patients', value: 'ALL' },
-    { label: 'Pregnancy (ANC)', value: 'PREGNANCY' },
-    { label: 'Child Health', value: 'CHILD' },
-    { label: 'Chronic Care', value: 'CHRONIC' },
-    { label: 'Emergency', value: 'EMERGENCY' },
-    { label: 'General', value: 'GENERAL' },
+    { label: 'All Beneficiaries', value: 'ALL' },
+    { label: 'Maternal ANC', value: 'PREGNANCY' },
+    { label: 'Child Health (UIP)', value: 'CHILD' },
+    { label: 'NCD Chronic Care', value: 'CHRONIC' },
+    { label: '108 Emergency', value: 'EMERGENCY' },
+    { label: 'General OPD', value: 'GENERAL' },
   ];
 
   const filteredPatients = patients.filter(p => {
@@ -51,69 +54,81 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
   });
 
   return (
-    <div className="space-y-3.5 pb-2">
-      {/* Mobile Top Header Bar */}
-      <div className="flex items-center justify-between py-1 border-b border-[#27272a] pb-2">
-        <button 
-          onClick={onOpenDrawer}
-          className="p-1.5 text-white hover:text-[#d4d4d8] cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+    <div className="space-y-3 pb-2 select-none">
+      {/* Official Government Tricolor Header Bar */}
+      <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
+        <div className="w-1/3 bg-[#FF9933]"></div>
+        <div className="w-1/3 bg-white"></div>
+        <div className="w-1/3 bg-[#138808]"></div>
+      </div>
 
+      {/* Mobile Top Header Bar */}
+      <div className="flex items-center justify-between py-0.5 border-b border-[#1e293b] pb-2">
         <div className="flex items-center space-x-2">
-          {/* Logo icon - Solid Grey / Black */}
-          <div className="w-7 h-7 rounded-xl bg-[#27272a] border border-[#3f3f46] flex items-center justify-center p-1 text-white shadow-md">
-            <div className="relative w-4 h-4 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-xs rotate-45"></div>
-              <div className="absolute w-1.5 h-1.5 bg-[#22c55e] rounded-full"></div>
+          <button 
+            onClick={onOpenDrawer}
+            className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-black text-sm text-white tracking-tight">ABHA Beneficiary Register</span>
             </div>
+            <p className="text-[9px] font-bold text-slate-400 leading-none">
+              राष्ट्रीय स्वास्थ्य मिशन (NHM) · Ward 7 Sub-Centre
+            </p>
           </div>
-          <span className="font-black text-sm text-white tracking-tight">Patients Roster</span>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <div className="px-2 py-0.5 rounded-full bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/40 text-[10px] font-black flex items-center gap-1">
-            <span className="text-[9px]">☁️</span>
-            <span>Sync</span>
+        <div className="flex items-center space-x-1.5">
+          <div className="px-2 py-0.5 rounded-md bg-[#064e3b] text-[#34d399] border border-[#059669]/50 text-[10px] font-black flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3 text-[#10b981]" />
+            <span>ABDM</span>
           </div>
-          <button className="p-1.5 text-white hover:text-[#d4d4d8] cursor-pointer">
-            <Bell className="w-4 h-4 text-white" />
+          <button className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
+            <Bell className="w-4 h-4 text-slate-300" />
           </button>
         </div>
       </div>
 
-      {/* Roster Title & Add Patient Action */}
+      {/* Roster Title & Add ABHA Patient Action */}
       <div className="flex items-center justify-between pt-0.5">
         <div>
-          <h2 className="text-xs font-black text-white tracking-wider uppercase">Community Patient Roster</h2>
-          <p className="text-[10px] font-bold text-[#a1a1aa]">
-            {filteredPatients.length} record(s) isolated in local Room vault
+          <h2 className="text-xs font-black text-white tracking-wide uppercase flex items-center gap-1.5">
+            <span>Enrolled Citizens</span>
+            <span className="px-1.5 py-0.2 rounded-xs bg-[#1e3a8a] text-blue-200 text-[9px] font-black">
+              {filteredPatients.length} Active
+            </span>
+          </h2>
+          <p className="text-[10px] font-medium text-slate-400">
+            Encrypted offline health ledger (NIC Vault compliant)
           </p>
         </div>
 
         <button
           onClick={onOpenAddModal}
-          className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#e4e4e7] text-black font-black text-[11px] flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+          className="px-3 py-1.5 rounded-lg bg-[#1d4ed8] hover:bg-[#1e40af] text-white font-black text-[11px] flex items-center gap-1.5 shadow-md border border-[#3b82f6]/40 cursor-pointer transition-all"
         >
-          <UserPlus className="w-3.5 h-3.5 text-black" />
-          <span>Add Patient</span>
+          <UserPlus className="w-3.5 h-3.5" />
+          <span>+ Enroll ABHA</span>
         </button>
       </div>
 
-      {/* Search Input - Solid Black / Grey */}
+      {/* Search Input */}
       <div className="relative">
-        <Search className="w-3.5 h-3.5 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
+        <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by name, ward, phone, or ID..."
-          className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] text-xs text-white placeholder-[#71717a] font-bold focus:outline-none focus:border-[#52525b] transition-colors"
+          placeholder="Search by ABHA ID, name, ward, phone..."
+          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#0f172a] border border-[#334155] text-xs text-white placeholder-slate-400 font-medium focus:outline-none focus:border-[#38bdf8] transition-colors"
         />
       </div>
 
-      {/* Category Filter Pills - Solid Grey / Solid Black */}
+      {/* Category Filter Pills (Govt Program Badges) */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 select-none scrollbar-none">
         {categories.map((c) => {
           const isSelected = categoryFilter === c.value;
@@ -121,10 +136,10 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
             <button
               key={c.value}
               onClick={() => setCategoryFilter(c.value)}
-              className={`px-3 py-1.5 rounded-xl text-[11px] font-black whitespace-nowrap transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-black whitespace-nowrap transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-white text-black border-2 border-white shadow-xs'
-                  : 'bg-[#18181b] text-[#d4d4d8] border-2 border-[#27272a] hover:border-[#3f3f46]'
+                  ? 'bg-[#1d4ed8] text-white border border-[#3b82f6] shadow-xs'
+                  : 'bg-[#0f172a] text-slate-300 border border-[#334155] hover:text-white'
               }`}
             >
               {c.label}
@@ -134,109 +149,114 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
       </div>
 
       {/* Single Column Patient List */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         {filteredPatients.map((p) => {
           const isCrit = p.riskLevel === 'CRITICAL' || p.isCritical;
           const initials = p.fullName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+          const pseudoAbha = `91-${p.id.replace('pt-', '2026-')}-00${p.age}`;
 
           return (
             <div
               key={p.id}
-              className={`p-4 rounded-3xl border-2 transition-all space-y-3 ${
+              className={`p-3.5 rounded-2xl border transition-all space-y-2.5 ${
                 isCrit
-                  ? 'bg-[#18181b] border-red-800'
-                  : 'bg-[#18181b] border-[#27272a] hover:border-[#52525b]'
+                  ? 'bg-[#181014] border-red-800 hover:border-red-500'
+                  : 'bg-[#0f172a] border-[#334155] hover:border-[#3b82f6]'
               }`}
             >
               <div>
-                {/* Header row: Avatar, Name, ID, Risk Pill */}
+                {/* Header row: Avatar, Name, ABHA ID, Risk Pill */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 shadow-inner ${
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-inner ${
                       isCrit 
-                        ? 'bg-red-950 text-red-400 border border-red-600' 
-                        : 'bg-[#27272a] text-white border border-[#3f3f46]'
+                        ? 'bg-red-950 text-red-400 border border-red-700' 
+                        : 'bg-[#1e293b] text-[#60a5fa] border border-[#334155]'
                     }`}>
                       {initials}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <h3 className="font-black text-xs text-white tracking-tight">{p.fullName}</h3>
-                        <span className="text-[10px] text-[#a1a1aa] font-mono font-bold">({p.id})</span>
+                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-[#1e293b] text-slate-300 border border-[#334155] font-mono">
+                          ABHA: {pseudoAbha}
+                        </span>
                       </div>
-                      <p className="text-[11px] font-bold text-[#a1a1aa]">
-                        {p.age}y · {p.gender} · Blood {p.bloodGroup}
+                      <p className="text-[11px] font-bold text-slate-300 mt-0.5">
+                        {p.age}y · {p.gender} · Blood {p.bloodGroup} · PM-JAY Eligible
                       </p>
                     </div>
                   </div>
 
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${
+                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 ${
                     isCrit 
                       ? 'bg-red-950 text-red-400 border border-red-600 animate-pulse'
-                      : 'bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/40'
+                      : 'bg-[#064e3b] text-[#34d399] border border-[#059669]/40'
                   }`}>
-                    {p.riskLevel} RISK
+                    {p.riskLevel} PRIORITY
                   </span>
                 </div>
 
                 {/* Patient metadata details */}
-                <div className="grid grid-cols-2 gap-2 mt-3 text-[10px] text-[#d4d4d8]">
+                <div className="grid grid-cols-2 gap-1.5 mt-2.5 text-[10px] text-slate-300">
                   <div className="flex items-center gap-1.5 font-bold truncate">
-                    <MapPin className="w-3 h-3 text-[#a1a1aa] shrink-0" />
+                    <MapPin className="w-3 h-3 text-[#38bdf8] shrink-0" />
                     <span className="truncate">{p.villageOrWard}</span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Phone className="w-3 h-3 text-[#a1a1aa] shrink-0" />
+                    <Phone className="w-3 h-3 text-[#38bdf8] shrink-0" />
                     <span className="truncate">{p.phone}</span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Calendar className="w-3 h-3 text-[#a1a1aa] shrink-0" />
-                    <span className="truncate">Follow-up: <strong className="text-white">{p.nextFollowUpDate}</strong></span>
+                    <Calendar className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                    <span className="truncate">Next Field Visit: <strong className="text-white">{p.nextFollowUpDate}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Clock className="w-3 h-3 text-[#a1a1aa] shrink-0" />
+                    <Clock className="w-3 h-3 text-[#38bdf8] shrink-0" />
                     <span className="truncate">{p.lastVisitLabel}</span>
                   </div>
                 </div>
 
                 {/* Vitals pill */}
                 {p.vitals && (
-                  <div className="mt-2.5 p-2 rounded-xl bg-[#0f0f10] border border-[#27272a] flex items-center justify-between text-[11px]">
+                  <div className="mt-2 p-2 rounded-lg bg-[#0b1329] border border-[#1e293b] flex items-center justify-between text-[11px]">
                     <div className="flex items-center gap-1.5 text-white">
                       <HeartPulse className="w-3.5 h-3.5 text-red-400 shrink-0" />
                       <span>BP: <strong className="text-white font-black">{p.vitals.systolicBp}/{p.vitals.diastolicBp}</strong></span>
-                      <span className="text-[#52525b]">·</span>
+                      <span className="text-[#334155]">·</span>
                       <span>SpO2: <strong className="text-white font-black">{p.vitals.spo2Percent}%</strong></span>
                     </div>
-                    <div className="text-[10px] font-black text-[#d4d4d8]">
+                    <div className="text-[10px] font-black text-slate-300">
                       HR: {p.vitals.heartRate} · Sugar: {p.vitals.bloodSugarMgDl}
                     </div>
                   </div>
                 )}
 
-                {/* Chronic conditions note */}
+                {/* Clinical note */}
                 {p.chronicConditions && (
-                  <p className="mt-2 text-[10px] text-white font-black">
-                    ⚠️ {p.chronicConditions}
+                  <p className="mt-1.5 text-[10px] text-amber-300 font-black flex items-center gap-1">
+                    <span>⚠️ NCD Watch:</span>
+                    <span className="text-white">{p.chronicConditions}</span>
                   </p>
                 )}
               </div>
 
-              {/* Action buttons - Solid Red & Solid Grey */}
-              <div className="pt-2 border-t border-[#27272a] flex items-center justify-between gap-2">
+              {/* Action buttons */}
+              <div className="pt-2 border-t border-[#1e293b] flex items-center justify-between gap-2">
                 <button
                   onClick={() => onOpenSosModal(p)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-red-950 hover:bg-red-900 text-red-400 border border-red-700 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-red-950 hover:bg-red-900 text-red-400 border border-red-700 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                 >
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Dispatch 108</span>
+                  <span>108 Referral</span>
                 </button>
 
                 <button
                   onClick={() => onSelectPatient(p)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-[#27272a] hover:bg-[#3f3f46] text-white border border-[#3f3f46] text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-[#1e293b] hover:bg-[#334155] text-white border border-[#334155] text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                 >
-                  <span>View Details</span>
+                  <FileCheck className="w-3.5 h-3.5 text-[#38bdf8]" />
+                  <span>Clinical File</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>

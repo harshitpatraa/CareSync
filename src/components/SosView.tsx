@@ -93,46 +93,59 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between py-1 border-b border-[#27272a]/80 pb-2">
-        <button 
-          onClick={onOpenDrawer}
-          className="p-1.5 text-slate-300 hover:text-white cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+    <div className="space-y-3.5 select-none">
+      {/* Official Government Tricolor Header Bar */}
+      <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
+        <div className="w-1/3 bg-[#FF9933]"></div>
+        <div className="w-1/3 bg-white"></div>
+        <div className="w-1/3 bg-[#138808]"></div>
+      </div>
 
+      {/* Top Header Bar */}
+      <div className="flex items-center justify-between py-0.5 border-b border-[#1e293b] pb-2">
         <div className="flex items-center space-x-2">
-          {/* Logo icon (Unified 2-color: Clinical Indigo & Emerald) */}
-          <div className="w-7 h-7 rounded-xl bg-[#27272a] flex items-center justify-center p-1 text-white shadow-md shadow-none">
-            <div className="relative w-4 h-4 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-xs rotate-45"></div>
-              <div className="absolute w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+          <button 
+            onClick={onOpenDrawer}
+            className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-black text-sm text-white tracking-tight">108 Emergency Dispatch</span>
+              <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-red-950 text-red-400 border border-red-600 animate-pulse">
+                LIVE
+              </span>
             </div>
+            <p className="text-[9px] font-bold text-slate-400 leading-none">
+              National Health Mission · Emergency Medical Response System (EMRS)
+            </p>
           </div>
-          <span className="font-extrabold text-sm text-white tracking-tight">Emergency SOS</span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
-            <span className="text-[9px]">☁️</span>
-            <span>Sync</span>
+          <div className="px-2 py-0.5 rounded-md bg-[#064e3b] text-[#34d399] border border-[#059669]/50 text-[10px] font-black flex items-center gap-1">
+            <span>☁️</span>
+            <span>ABDM</span>
           </div>
-          <button className="p-1.5 text-slate-300 hover:text-white cursor-pointer">
+          <button className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
             <Bell className="w-4 h-4 text-slate-300" />
           </button>
         </div>
       </div>
 
       {/* Main SOS Dispatch Card */}
-      <div className="p-5 rounded-3xl bg-[#141018] border border-red-950/60 space-y-4 shadow-xl shadow-red-950/20 text-center relative overflow-hidden">
+      <div className="p-5 rounded-2xl bg-[#1c1214] border-2 border-red-800 space-y-4 shadow-xl text-center relative overflow-hidden">
         <div>
-          <h3 className="text-sm font-extrabold text-red-400 uppercase tracking-wider">
-            CareSync Emergency Dispatch
+          <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block">
+            National Health Mission · Disaster & Trauma Desk
+          </span>
+          <h3 className="text-base font-black text-white mt-0.5">
+            Emergency 108 Ambulance Hotline
           </h3>
           <p className="text-[11px] font-medium text-slate-300 mt-0.5">
-            Tap SOS to alert the PHC emergency desk & log offline dispatch
+            Instant PHC Rampur Trauma Desk Alert & Automatic Offline Telemetry Dispatch
           </p>
         </div>
 

@@ -62,33 +62,50 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
       {/* Drawer Body */}
       <div className="relative w-[82%] max-w-[320px] h-full bg-[#0d131f] border-r border-slate-800 shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
         
-        {/* Drawer Header - Solid Grey */}
-        <div className="p-5 bg-[#27272a] border-b border-[#3f3f46] text-white shrink-0 relative">
+        {/* Official Government Drawer Header */}
+        <div className="p-4 bg-[#0f172a] border-b-2 border-[#1e3a8a] text-white shrink-0 relative">
+          {/* Tricolor Stripe */}
+          <div className="h-1 w-full flex overflow-hidden mb-3 rounded-full">
+            <div className="w-1/3 bg-[#FF9933]"></div>
+            <div className="w-1/3 bg-white"></div>
+            <div className="w-1/3 bg-[#138808]"></div>
+          </div>
+
           <button 
             onClick={onClose}
-            className="absolute top-3 right-3 p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
+            className="absolute top-4 right-3 p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
 
-          {/* Logo */}
-          <div className="flex items-center space-x-2.5 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-[#18181b] border border-[#3f3f46] p-1 flex items-center justify-center">
-              <div className="relative w-5 h-5 flex items-center justify-center">
-                <div className="w-3.5 h-3.5 bg-white rounded-xs rotate-45"></div>
-                <div className="absolute w-1.5 h-1.5 bg-[#22c55e] rounded-full"></div>
-              </div>
+          {/* Logo with Govt Emblem */}
+          <div className="flex items-center space-x-2.5 mb-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#1e293b] border border-[#334155] p-1 flex items-center justify-center text-lg shadow-sm">
+              🏛️
             </div>
             <div>
-              <h3 className="font-extrabold text-base text-white leading-tight">CareSync</h3>
-              <p className="text-[10px] text-[#a1a1aa] font-bold leading-none">Offline-First Healthcare Sync</p>
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-black text-base text-white leading-tight">CareSync</h3>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-[#1e3a8a] text-blue-200 border border-[#3b82f6]/40 uppercase">
+                  NHM Govt
+                </span>
+              </div>
+              <p className="text-[9px] font-bold text-slate-400 leading-none">
+                Ministry of Health & Family Welfare · Govt of India
+              </p>
             </div>
           </div>
 
           {/* Clinician Details */}
-          <div className="pt-2 border-t border-[#3f3f46]">
-            <h4 className="font-extrabold text-sm text-white">Dr. Priya Kulkarni</h4>
-            <p className="text-xs text-[#a1a1aa] font-medium">priya.kulkarni@gmail.com</p>
+          <div className="pt-2 border-t border-[#1e293b]">
+            <div className="flex items-center justify-between">
+              <h4 className="font-black text-xs text-white">Dr. Priya Kulkarni</h4>
+              <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-[#064e3b] text-[#34d399] border border-[#059669]/40">
+                ABHA Verified
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-300 font-medium">Medical Officer Incharge · PHC Rampur</p>
+            <p className="text-[9px] text-amber-400 font-mono mt-0.5">Govt Reg: NHM-DEL-2026-88102</p>
           </div>
         </div>
 

@@ -14,7 +14,10 @@ import {
   Baby, 
   Heart,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Building2,
+  Globe2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Patient } from '../types';
@@ -38,13 +41,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const { patients, syncAllRecords } = useApp();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncToast, setSyncToast] = useState<string | null>(null);
+  const [activeLang, setActiveLang] = useState<'EN' | 'हिन्दी'>('EN');
 
   const handleSync = () => {
     setIsSyncing(true);
     setTimeout(() => {
       const res = syncAllRecords();
       setIsSyncing(false);
-      setSyncToast(res.message || "All local records synchronized to CareSync Cloud!");
+      setSyncToast(res.message || "ABDM / NIC Cloud Vault Synchronized Successfully!");
       setTimeout(() => setSyncToast(null), 3000);
     }, 700);
   };
@@ -56,310 +60,368 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const childCount = patients.filter(p => p.category === 'CHILD').length;
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-3.5 pb-4 select-none">
       {/* Toast Notification */}
       {syncToast && (
-        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-[#262626] border border-[#52525b] text-white text-xs font-bold shadow-2xl flex items-center gap-2 animate-in fade-in-50">
-          <CheckCircle2 className="w-4 h-4 text-[#22c55e] shrink-0" />
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-[#0b2545] border border-[#1d4ed8] text-white text-xs font-bold shadow-2xl flex items-center gap-2 animate-in fade-in-50">
+          <CheckCircle2 className="w-4 h-4 text-[#10b981] shrink-0" />
           <span className="font-bold">{syncToast}</span>
         </div>
       )}
 
-      {/* Top App Bar */}
-      <div className="flex items-center justify-between py-1">
-        <button 
-          onClick={onOpenDrawer}
-          className="p-2 text-white hover:text-[#d4d4d8] cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+      {/* Official Government Tricolor Header Bar */}
+      <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
+        <div className="w-1/3 bg-[#FF9933]"></div>
+        <div className="w-1/3 bg-white"></div>
+        <div className="w-1/3 bg-[#138808]"></div>
+      </div>
 
+      {/* Official Top App Bar */}
+      <div className="flex items-center justify-between py-0.5 border-b border-[#1e293b] pb-2">
         <div className="flex items-center space-x-2">
-          {/* Logo icon - Solid Grey / Black */}
-          <div className="w-7 h-7 rounded-xl bg-[#27272a] border border-[#3f3f46] flex items-center justify-center p-1 text-white shadow-md">
-            <div className="relative w-4 h-4 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-xs rotate-45"></div>
-              <div className="absolute w-1.5 h-1.5 bg-[#22c55e] rounded-full"></div>
+          <button 
+            onClick={onOpenDrawer}
+            className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          {/* National Health Mission Emblem Badge */}
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e3a8a] flex items-center justify-center p-1 text-white shadow-xs">
+              <span className="text-base leading-none">🏛️</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-sm text-white tracking-tight">CareSync</span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-[#1e3a8a] text-blue-200 border border-[#3b82f6]/40 uppercase">
+                  NHM Govt
+                </span>
+              </div>
+              <p className="text-[9px] font-bold text-slate-400 leading-none">
+                राष्ट्रीय स्वास्थ्य मिशन · MoHFW
+              </p>
             </div>
           </div>
-          <span className="font-black text-base text-white tracking-tight">CareSync</span>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <div className="px-2.5 py-1 rounded-full bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/40 text-[11px] font-bold flex items-center gap-1">
-            <span>☁️</span>
-            <span className="font-extrabold">Sync</span>
+        {/* Right Actions: Lang Switcher & Official Sync Badge */}
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={() => setActiveLang(activeLang === 'EN' ? 'हिन्दी' : 'EN')}
+            className="px-2 py-0.5 rounded-md bg-[#0f172a] border border-[#334155] text-[10px] font-black text-amber-400 hover:text-amber-300 cursor-pointer flex items-center gap-1"
+          >
+            <Globe2 className="w-2.5 h-2.5" />
+            <span>{activeLang}</span>
+          </button>
+
+          <div className="px-2 py-0.5 rounded-md bg-[#064e3b] text-[#34d399] border border-[#059669]/50 text-[10px] font-black flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></span>
+            <span>ABDM</span>
           </div>
+
           <button 
             onClick={() => onNavigateTab('emergency')}
-            className="p-1.5 text-white hover:text-[#d4d4d8] cursor-pointer"
+            className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer"
           >
-            <Bell className="w-5 h-5 text-white" />
+            <Bell className="w-4 h-4 text-slate-300" />
           </button>
         </div>
       </div>
 
-      {/* Hero Field Hub Card - Solid Grey / Solid Black */}
-      <div className="p-4 rounded-3xl bg-[#27272a] border-2 border-[#3f3f46] text-white shadow-xl space-y-3 relative overflow-hidden">
-        <div className="flex justify-between items-start">
+      {/* Official Government Officer Hero Banner (Ayushman Bharat / NHM Field Portal) */}
+      <div className="p-4 rounded-2xl bg-[#0f172a] border-2 border-[#1e3a8a] shadow-xl space-y-3 relative overflow-hidden">
+        {/* Subtle background seal badge */}
+        <div className="absolute -right-3 -bottom-3 text-[70px] opacity-5 pointer-events-none text-white select-none">
+          🇮🇳
+        </div>
+
+        <div className="flex justify-between items-start relative z-10">
           <div>
-            <span className="text-[11px] font-extrabold text-[#d4d4d8] tracking-wider block uppercase">CareSync Field Hub</span>
-            <h2 className="text-xl font-black text-white tracking-tight mt-0.5">Dr. Priya Kulkarni</h2>
-            <p className="text-xs font-bold text-[#a1a1aa]">CareSync Community Health Hub</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black text-[#60a5fa] tracking-wider uppercase">
+                Ayushman Bharat · Health & Wellness Centre
+              </span>
+              <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" />
+            </div>
+            <h2 className="text-lg font-black text-white tracking-tight mt-0.5">Dr. Priya Kulkarni</h2>
+            <p className="text-xs font-bold text-slate-300">
+              Medical Officer Incharge · CHC / PHC Rampur Sector 4
+            </p>
+            <p className="text-[10px] font-mono font-bold text-amber-400 mt-0.5">
+              Govt Reg. No: NHM-DEL-2026-88102 · ASHA Hub
+            </p>
           </div>
 
-          <div className="w-16 h-12 rounded-2xl bg-[#18181b] border border-[#3f3f46] p-1 flex items-center justify-center shadow-md">
-            <div className="w-full h-full rounded-xl bg-[#27272a] flex flex-col items-center justify-center text-[8px] text-white font-black leading-tight text-center">
-              <span className="font-black">🩺 NHM</span>
-              <span className="text-[7px] text-[#a1a1aa] font-mono font-bold">Hub</span>
-            </div>
+          {/* Official Emblem Shield */}
+          <div className="w-14 h-12 rounded-xl bg-[#1e293b] border border-[#334155] p-1 flex flex-col items-center justify-center shadow-inner shrink-0 text-center">
+            <span className="text-xs font-black text-amber-400">ABHA</span>
+            <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tight">Verified</span>
           </div>
         </div>
 
-        {/* Sync Status strip & Button */}
-        <div className="pt-2 border-t border-[#3f3f46] flex items-center justify-between">
+        {/* Sync Status strip & Official Button */}
+        <div className="pt-2 border-t border-[#1e293b] flex items-center justify-between relative z-10">
           <div>
-            <div className="text-xs font-extrabold text-white">All local records synchronized</div>
-            <p className="text-[10px] font-bold text-[#a1a1aa]">Last sync: Just now</p>
+            <div className="text-[11px] font-black text-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#10b981]"></span>
+              <span>NIC Cloud Database Synchronized</span>
+            </div>
+            <p className="text-[10px] font-medium text-slate-400">Offline-first local records ready for upload</p>
           </div>
 
           <button
             onClick={handleSync}
             disabled={isSyncing}
-            className="px-3.5 py-1.5 rounded-full bg-white text-black text-xs font-black shadow-md hover:bg-[#e4e4e7] cursor-pointer flex items-center gap-1.5 transition-all"
+            className="px-3.5 py-1.5 rounded-lg bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs font-black shadow-md border border-[#3b82f6]/40 cursor-pointer flex items-center gap-1.5 transition-all"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>Sync Now</span>
+            <span>Sync ABDM</span>
           </button>
         </div>
       </div>
 
-      {/* Quick Actions Grid - Solid Grey Surfaces */}
+      {/* Official Government Quick Actions */}
       <div className="space-y-2">
-        <h3 className="text-xs font-black text-white uppercase tracking-wider">Quick Actions</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-[#38bdf8]" />
+            <span>Field Health Directives</span>
+          </h3>
+          <span className="text-[10px] font-bold text-slate-400">MoHFW Standard 2026</span>
+        </div>
 
-        <div className="grid grid-cols-4 gap-2.5">
-          {/* Add Patient */}
+        <div className="grid grid-cols-4 gap-2">
+          {/* Add Patient / ABHA Registration */}
           <button
             onClick={onOpenAddModal}
-            className="p-3 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex flex-col items-center justify-center space-y-2 cursor-pointer transition-colors"
+            className="p-2.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#38bdf8] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs group"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center shadow-inner">
-              <UserPlus className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-lg bg-[#1e3a8a]/40 text-[#60a5fa] border border-[#1e40af]/60 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+              <UserPlus className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-extrabold text-white text-center leading-tight">Add Patient</span>
+            <span className="text-[10px] font-black text-slate-200 text-center leading-tight">
+              + ABHA Entry
+            </span>
           </button>
 
-          {/* Symptoms */}
+          {/* NCD & Symptoms Checker */}
           <button
             onClick={() => onNavigateTab('risk-assessment')}
-            className="p-3 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex flex-col items-center justify-center space-y-2 cursor-pointer transition-colors"
+            className="p-2.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#38bdf8] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs group"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center shadow-inner">
-              <BriefcaseMedical className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-lg bg-[#1e3a8a]/40 text-[#60a5fa] border border-[#1e40af]/60 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+              <BriefcaseMedical className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-extrabold text-white text-center leading-tight">Symptoms</span>
+            <span className="text-[10px] font-black text-slate-200 text-center leading-tight">
+              NCD Screen
+            </span>
           </button>
 
-          {/* AI Chat */}
+          {/* AI Clinical Assistant (Sehat Setu) */}
           <button
             onClick={() => onNavigateTab('ai-assistant')}
-            className="p-3 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex flex-col items-center justify-center space-y-2 cursor-pointer transition-colors"
+            className="p-2.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#38bdf8] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs group"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center shadow-inner">
-              <Bot className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-lg bg-[#1e3a8a]/40 text-[#60a5fa] border border-[#1e40af]/60 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+              <Bot className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-extrabold text-white text-center leading-tight">AI Chat</span>
+            <span className="text-[10px] font-black text-slate-200 text-center leading-tight">
+              Sehat Setu
+            </span>
           </button>
 
-          {/* Risk */}
+          {/* Clinical Risk Triage */}
           <button
             onClick={() => onNavigateTab('risk-assessment')}
-            className="p-3 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex flex-col items-center justify-center space-y-2 cursor-pointer transition-colors"
+            className="p-2.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#38bdf8] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs group"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center shadow-inner">
-              <Stethoscope className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-lg bg-[#1e3a8a]/40 text-[#60a5fa] border border-[#1e40af]/60 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+              <Stethoscope className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-extrabold text-white text-center leading-tight">Risk</span>
+            <span className="text-[10px] font-black text-slate-200 text-center leading-tight">
+              Triage AI
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Clinical Care Overview Section - Solid Grey & Solid Black */}
-      <div className="space-y-2.5">
-        <h3 className="text-xs font-black text-white uppercase tracking-wider">Clinical Care Overview</h3>
+      {/* Clinical Care Overview Section - National Health Mission Performance */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <span>NHM Sector Indicators</span>
+          </h3>
+          <span className="text-[10px] font-bold text-emerald-400">Ward 7 Health Sub-Centre</span>
+        </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5">
           {/* Today's Patients */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] space-y-2 cursor-pointer transition-colors"
+            className="p-3 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#3b82f6] space-y-1.5 cursor-pointer transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-[#1e293b] text-[#60a5fa] border border-[#334155] flex items-center justify-center">
+                <Calendar className="w-3.5 h-3.5" />
               </div>
-              <span className="text-2xl font-black text-white">{todayCount}</span>
+              <span className="text-xl font-black text-white">{todayCount}</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-white truncate">Today's Patients</span>
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/30 flex items-center">
+                <span className="text-xs font-black text-white truncate">OPD Field Visits</span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-[#064e3b] text-[#34d399] border border-[#059669]/40 flex items-center">
                   ↗ 18.2%
                 </span>
               </div>
-              <p className="text-[10px] font-bold text-[#a1a1aa] mt-0.5">Active rounds · 1,234 today</p>
+              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Active home rounds today</p>
             </div>
           </div>
 
-          {/* Pending Visits */}
+          {/* Pending PHC Reviews */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] space-y-2 cursor-pointer transition-colors"
+            className="p-3 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#3b82f6] space-y-1.5 cursor-pointer transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center">
-                <Clock className="w-4 h-4 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-[#1e293b] text-[#60a5fa] border border-[#334155] flex items-center justify-center">
+                <Clock className="w-3.5 h-3.5" />
               </div>
-              <span className="text-2xl font-black text-white">{pendingCount}</span>
+              <span className="text-xl font-black text-white">{pendingCount}</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-white">Pending Visits</span>
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#27272a] text-white border border-[#3f3f46] flex items-center">
-                  ↘ 3.2%
+                <span className="text-xs font-black text-white">Pending Sync</span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-[#1e293b] text-slate-300 border border-[#334155] flex items-center">
+                  Offline
                 </span>
               </div>
-              <p className="text-[10px] font-bold text-[#a1a1aa] mt-0.5">Awaiting checkup</p>
+              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Awaiting cloud upload</p>
             </div>
           </div>
 
-          {/* Emergency Cases (Solid Red alert for medical urgency) */}
+          {/* 108 Emergency Referrals (Red alert for national emergency protocol) */}
           <div 
             onClick={onOpenSosModal}
-            className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-red-900/60 hover:border-red-600 space-y-2 cursor-pointer transition-colors"
+            className="p-3 rounded-xl bg-[#1c1417] border border-red-800/80 hover:border-red-500 space-y-1.5 cursor-pointer transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-red-950 text-red-400 border border-red-600 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
+              <div className="w-7 h-7 rounded-lg bg-red-950 text-red-400 border border-red-700 flex items-center justify-center">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
               </div>
-              <span className="text-2xl font-black text-white">{emergencyCount}</span>
+              <span className="text-xl font-black text-white">{emergencyCount}</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-white truncate">Emergency Cases</span>
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-red-950 text-red-400 border border-red-600 flex items-center">
-                  Critical
+                <span className="text-xs font-black text-white truncate">108 Emergency</span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-red-950 text-red-400 border border-red-600 flex items-center">
+                  Priority
                 </span>
               </div>
-              <p className="text-[10px] font-bold text-[#a1a1aa] mt-0.5">Critical priority watch</p>
+              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Critical ambulance dispatch</p>
             </div>
           </div>
 
           {/* Follow Ups */}
           <div 
             onClick={() => onNavigateTab('records')}
-            className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] space-y-2 cursor-pointer transition-colors"
+            className="p-3 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#3b82f6] space-y-1.5 cursor-pointer transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center">
-                <History className="w-4 h-4 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-[#1e293b] text-[#60a5fa] border border-[#334155] flex items-center justify-center">
+                <History className="w-3.5 h-3.5" />
               </div>
-              <span className="text-2xl font-black text-white">4</span>
+              <span className="text-xl font-black text-white">4</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-white">Follow Ups</span>
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/30 flex items-center">
+                <span className="text-xs font-black text-white">NCD Reviews</span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-[#064e3b] text-[#34d399] border border-[#059669]/40 flex items-center">
                   ↗ 31.1%
                 </span>
               </div>
-              <p className="text-[10px] font-bold text-[#a1a1aa] mt-0.5">Scheduled reviews</p>
+              <p className="text-[10px] font-medium text-slate-400 mt-0.5">BP & Sugar follow-ups</p>
             </div>
           </div>
 
-          {/* Pregnancy Tracking */}
+          {/* Maternal ANC Tracking */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] space-y-2 cursor-pointer transition-colors"
+            className="p-3 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#3b82f6] space-y-1.5 cursor-pointer transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center">
-                <Baby className="w-4 h-4 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-[#1e293b] text-[#60a5fa] border border-[#334155] flex items-center justify-center">
+                <Baby className="w-3.5 h-3.5" />
               </div>
-              <span className="text-2xl font-black text-white">{ancCount}</span>
+              <span className="text-xl font-black text-white">{ancCount}</span>
             </div>
             <div>
-              <span className="text-xs font-black text-white">Pregnancy Tracking</span>
-              <p className="text-[10px] font-bold text-[#a1a1aa] mt-0.5">ANC mothers monitored</p>
+              <span className="text-xs font-black text-white">Maternal ANC Care</span>
+              <p className="text-[10px] font-medium text-slate-400 mt-0.5">PMSMA high-risk mothers</p>
             </div>
           </div>
 
-          {/* Child Monitoring */}
+          {/* Child Immunization UIP */}
           <div 
             onClick={() => onNavigateTab('patients')}
-            className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] space-y-2 cursor-pointer transition-colors"
+            className="p-3 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#3b82f6] space-y-1.5 cursor-pointer transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-[#27272a] text-white border border-[#3f3f46] flex items-center justify-center">
-                <Heart className="w-4 h-4 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-[#1e293b] text-[#60a5fa] border border-[#334155] flex items-center justify-center">
+                <Heart className="w-3.5 h-3.5" />
               </div>
-              <span className="text-2xl font-black text-white">{childCount}</span>
+              <span className="text-xl font-black text-white">{childCount}</span>
             </div>
             <div>
-              <span className="text-xs font-black text-white">Child Monitoring</span>
-              <p className="text-[10px] font-bold text-[#a1a1aa] mt-0.5">Growth & pediatric care</p>
+              <span className="text-xs font-black text-white">UIP Immunization</span>
+              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Mission Indradhanush</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Vaccination Status Card - Solid Grey */}
+      {/* Universal Immunization UIP Target Card */}
       <div 
         onClick={() => onNavigateTab('patients')}
-        className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex items-center justify-between cursor-pointer transition-colors"
+        className="p-3.5 rounded-xl bg-[#0f172a] border border-[#1e3a8a] flex items-center justify-between cursor-pointer hover:border-[#3b82f6] transition-colors shadow-xs"
       >
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/40 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-[#064e3b] text-[#34d399] border border-[#059669]/40 flex items-center justify-center shrink-0">
             <span className="text-sm font-black">💉</span>
           </div>
           <div>
-            <h4 className="text-xs font-black text-white">Vaccination Status</h4>
-            <p className="text-[10px] font-bold text-[#a1a1aa]">Cohort immunization coverage across {patients.length} patients</p>
+            <div className="flex items-center gap-1.5">
+              <h4 className="text-xs font-black text-white">Mission Indradhanush (UIP)</h4>
+              <span className="px-1.5 py-0.2 rounded-xs bg-[#1e3a8a] text-blue-200 text-[8px] font-black">Govt Target</span>
+            </div>
+            <p className="text-[10px] font-medium text-slate-400">Ward 7 cohort vaccination coverage verified</p>
           </div>
         </div>
-        <span className="text-2xl font-black text-[#4ade80]">85%</span>
+        <span className="text-xl font-black text-[#34d399]">85%</span>
       </div>
 
-      {/* Health Analytics Card - Solid Grey */}
-      <div 
-        onClick={() => onNavigateTab('records')}
-        className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex items-center justify-between cursor-pointer transition-colors"
-      >
-        <div>
-          <h4 className="text-xs font-black text-white">Health Analytics</h4>
-          <p className="text-[10px] font-bold text-[#a1a1aa]">7-day outpatient & home-visit volume</p>
-        </div>
-        <div className="px-2.5 py-1 rounded-full bg-[#1c2e1f] text-[#4ade80] border border-[#22c55e]/40 text-[10px] font-black">
-          {patients.filter(p => p.syncStatus === 'SYNCED').length}/{patients.length} Synced
-        </div>
-      </div>
-
-      {/* Recent Activity Card - Solid Grey */}
+      {/* Recent Activity Ledger (Clickable to open RecentActivityView) */}
       <div 
         onClick={() => onOpenRecentActivity && onOpenRecentActivity()}
-        className="p-3.5 rounded-2xl bg-[#18181b] border-2 border-[#27272a] hover:border-[#52525b] flex items-center justify-between cursor-pointer transition-all shadow-sm"
+        className="p-3.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-[#3b82f6] flex items-center justify-between cursor-pointer transition-all shadow-xs"
       >
         <div>
           <h4 className="text-xs font-black text-white flex items-center gap-1.5">
-            <span>Recent Activity</span>
-            <ChevronRight className="w-3.5 h-3.5 text-white" />
+            <span>ASHA Field Work Ledger</span>
+            <ChevronRight className="w-3.5 h-3.5 text-[#60a5fa]" />
           </h4>
-          <p className="text-[10px] font-bold text-[#a1a1aa]">Live clinical events, vitals & field ledger</p>
+          <p className="text-[10px] font-medium text-slate-400">Live clinical field records & household surveys</p>
         </div>
-        <span className="px-2.5 py-0.5 rounded-full bg-[#1c2e1f] text-[#4ade80] text-[10px] font-black border border-[#22c55e]/40">
-          Active (7)
+        <span className="px-2.5 py-0.5 rounded-full bg-[#064e3b] text-[#34d399] text-[10px] font-black border border-[#059669]/40">
+          7 Recorded
         </span>
+      </div>
+
+      {/* Official Government Compliance Footer */}
+      <div className="pt-1 text-center">
+        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+          ABDM COMPLIANT · MoHFW GOVT. OF INDIA · NIC CLOUD SECURE
+        </p>
       </div>
     </div>
   );
