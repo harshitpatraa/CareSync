@@ -336,3 +336,10 @@ A separate backend deployment may be required for secure Gemini API integration.
 
 ## License
 
+MIT License
+
+Copyright (c) 2026 Gulshan Gautam and Harshit Patra
+
+Permission is hereby granted, free of charge, to use, modify, and distribute this software, provided the copyright notice is retained.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
