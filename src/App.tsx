@@ -266,13 +266,13 @@ const MobileDeviceApp: React.FC = () => {
         </div>
       </div>
 
-      {/* Android Device Outer Chassis - Clean Premium Device Frame */}
-      <div className={`relative ${phoneDimensions[phoneHeight]} bg-[#E2E8F0] rounded-[52px] p-3 shadow-2xl border-[6px] border-[#CBD5E1] flex flex-col overflow-hidden ring-1 ring-slate-300 transition-all duration-300`}>
+      {/* Android Device Outer Chassis - Solid Black Phone Frame & Border */}
+      <div className={`relative ${phoneDimensions[phoneHeight]} bg-black rounded-[54px] p-3 shadow-2xl border-[10px] border-black flex flex-col overflow-hidden ring-2 ring-neutral-900 transition-all duration-300`}>
         
         {/* Device Camera Punch Hole (Center Top) */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center pointer-events-none">
-          <div className="w-4 h-4 bg-slate-800 rounded-full border border-slate-400 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
+          <div className="w-4 h-4 bg-black rounded-full border border-neutral-800 flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-neutral-950"></div>
           </div>
         </div>
 
