@@ -1,8 +1,12 @@
 package com.caresync.app.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.caresync.app.ai.LocalModelInfo
+import com.caresync.app.ai.LocalModelManager
+import com.caresync.app.ai.ModelImportProgress
 import com.caresync.app.database.NotificationEntity
 import com.caresync.app.database.PatientEntity
 import com.caresync.app.database.SyncQueueEntity
@@ -78,6 +82,15 @@ val defaultNearbyClinicians = listOf(
     )
 )
 
+data class ModelImportUiState(
+    val installedModel: LocalModelInfo? = null,
+    val isImportingModel: Boolean = false,
+    val modelImportProgress: Float = 0f,
+    val modelImportStatus: String? = null,
+    val modelErrorMessage: String? = null,
+    val modelSuccessMessage: String? = null
+)
+
 data class SettingsUiState(
     val preferences: AppPreferences = AppPreferences(),
     val pendingQueue: List<SyncQueueEntity> = emptyList(),
@@ -92,14 +105,21 @@ data class SettingsUiState(
         district = "North Health Circle · Zone B",
         phone = "+91 98111 70409",
         email = "priya.kulkarni@caresync.org"
-    )
+    ),
+    val installedModel: LocalModelInfo? = null,
+    val isImportingModel: Boolean = false,
+    val modelImportProgress: Float = 0f,
+    val modelImportStatus: String? = null,
+    val modelErrorMessage: String? = null,
+    val modelSuccessMessage: String? = null
 )
 
 @HiltViewModel
 class OperationsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val repository: CareSyncRepository,
-    private val ttsManager: TtsManager
+    private val ttsManager: TtsManager,
+    private val localModelManager: LocalModelManager
 ) : ViewModel() {
 
     private val _sosTriggered = MutableStateFlow(false)
@@ -172,12 +192,20 @@ class OperationsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    private val _modelUiState = MutableStateFlow(
+        ModelImportUiState(
+            installedModel = localModelManager.getInstalledModel()
+        )
+    )
+
     val settingsState: StateFlow<SettingsUiState> = combine(
         repository.preferencesFlow,
         repository.syncQueueFlow,
         repository.syncStateFlow,
-        repository.allPatientsFlow
-    ) { prefs, queue, syncState, patients ->
+        repository.allPatientsFlow,
+        _modelUiState
+    ) { prefs, queue, syncState, patients, modelState ->
+        val effectiveModel = modelState.installedModel ?: localModelManager.getInstalledModel()
         SettingsUiState(
             preferences = prefs,
             pendingQueue = queue,
@@ -192,7 +220,13 @@ class OperationsViewModel @Inject constructor(
                 district = prefs.district,
                 phone = prefs.phone,
                 email = prefs.userEmail
-            )
+            ),
+            installedModel = effectiveModel,
+            isImportingModel = modelState.isImportingModel,
+            modelImportProgress = modelState.modelImportProgress,
+            modelImportStatus = modelState.modelImportStatus,
+            modelErrorMessage = modelState.modelErrorMessage,
+            modelSuccessMessage = modelState.modelSuccessMessage
         )
     }.stateIn(
         scope = viewModelScope,
@@ -320,5 +354,82 @@ class OperationsViewModel @Inject constructor(
                 onFailure = { err -> err.message ?: "Offline mode active." }
             )
         }
+    }
+
+    fun importGgufModel(uri: Uri) {
+        viewModelScope.launch {
+            _modelUiState.value = _modelUiState.value.copy(
+                isImportingModel = true,
+                modelImportProgress = 0f,
+                modelImportStatus = "Initializing import...",
+                modelErrorMessage = null,
+                modelSuccessMessage = null
+            )
+            localModelManager.importGgufFromUri(uri).collect { progress ->
+                when (progress) {
+                    is ModelImportProgress.Checking -> {
+                        _modelUiState.value = _modelUiState.value.copy(
+                            isImportingModel = true,
+                            modelImportStatus = progress.message
+                        )
+                    }
+                    is ModelImportProgress.Copying -> {
+                        _modelUiState.value = _modelUiState.value.copy(
+                            isImportingModel = true,
+                            modelImportProgress = progress.progress,
+                            modelImportStatus = "Copying to internal storage: ${progress.formattedProgress}"
+                        )
+                    }
+                    is ModelImportProgress.Validating -> {
+                        _modelUiState.value = _modelUiState.value.copy(
+                            isImportingModel = true,
+                            modelImportStatus = progress.message
+                        )
+                    }
+                    is ModelImportProgress.Success -> {
+                        _modelUiState.value = _modelUiState.value.copy(
+                            isImportingModel = false,
+                            installedModel = progress.modelInfo,
+                            modelImportProgress = 1f,
+                            modelImportStatus = null,
+                            modelSuccessMessage = progress.message,
+                            modelErrorMessage = null
+                        )
+                    }
+                    is ModelImportProgress.Error -> {
+                        _modelUiState.value = _modelUiState.value.copy(
+                            isImportingModel = false,
+                            modelImportProgress = 0f,
+                            modelImportStatus = null,
+                            modelErrorMessage = progress.reason
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun deleteGgufModel() {
+        viewModelScope.launch {
+            val deleted = localModelManager.deleteLocalModel()
+            if (deleted) {
+                _modelUiState.value = _modelUiState.value.copy(
+                    installedModel = null,
+                    modelSuccessMessage = "GGUF model removed from app internal storage.",
+                    modelErrorMessage = null
+                )
+            } else {
+                _modelUiState.value = _modelUiState.value.copy(
+                    modelErrorMessage = "Failed to delete model file from internal storage."
+                )
+            }
+        }
+    }
+
+    fun dismissModelFeedback() {
+        _modelUiState.value = _modelUiState.value.copy(
+            modelErrorMessage = null,
+            modelSuccessMessage = null
+        )
     }
 }

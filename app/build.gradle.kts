@@ -112,6 +112,8 @@ dependencies {
   // implementation(libs.converter.moshi)
   // Completely offline on-device text recognition (No cloud AI, No external servers)
   implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.1")
+  // Gemini AI SDK preserved for hybrid/cloud fallback mode
+  implementation(libs.firebase.ai)
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.auth)
   implementation(libs.androidx.credentials)

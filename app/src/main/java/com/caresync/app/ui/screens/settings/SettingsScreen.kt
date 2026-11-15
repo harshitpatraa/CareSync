@@ -1,5 +1,8 @@
 package com.caresync.app.ui.screens.settings
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,20 +15,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Password
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Policy
+import androidx.compose.material.icons.rounded.SmartToy
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,6 +41,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -57,6 +67,7 @@ import com.caresync.app.model.AppLanguage
 import com.caresync.app.theme.CareSyncBlue
 import com.caresync.app.theme.CareSyncButtonShape
 import com.caresync.app.theme.CareSyncCardShape
+import com.caresync.app.theme.CareSyncGreen
 import com.caresync.app.theme.CriticalRed
 import com.caresync.app.theme.PendingOrange
 import com.caresync.app.utils.LocalCareSyncStrings
@@ -73,6 +84,9 @@ fun SettingsScreen(
     onSelectLanguage: (AppLanguage) -> Unit,
     onUpdateApiKey: (String) -> Unit = {},
     onUpdateFirebaseConfig: (String, String, String) -> Unit = { _, _, _ -> },
+    onImportModel: (Uri) -> Unit = {},
+    onDeleteModel: () -> Unit = {},
+    onDismissModelFeedback: () -> Unit = {},
     onSyncNow: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -84,6 +98,14 @@ fun SettingsScreen(
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showPinDialog by remember { mutableStateOf(false) }
     var showFirebaseDialog by remember { mutableStateOf(false) }
+
+    val modelPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            onImportModel(uri)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -197,6 +219,264 @@ fun SettingsScreen(
                         "Tap to connect your personal Firebase project & credentials",
                     onClick = { showFirebaseDialog = true }
                 )
+            }
+        }
+
+        // On-Device AI & GGUF Model Management (llama.cpp)
+        Card(
+            shape = CareSyncCardShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.SmartToy,
+                            contentDescription = null,
+                            tint = CareSyncBlue,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "On-Device AI & GGUF Model",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (state.installedModel != null) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = CareSyncGreen.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = "GGUF Ready",
+                                color = CareSyncGreen,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = "Import quantized LLM models (e.g. Qwen 2.5 0.5B Instruct GGUF) from your phone's Downloads folder via Storage Access Framework for on-device inference.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Feedback Banners
+                if (!state.modelSuccessMessage.isNullOrBlank()) {
+                    Surface(
+                        shape = CareSyncButtonShape,
+                        color = CareSyncGreen.copy(alpha = 0.12f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = state.modelSuccessMessage,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = CareSyncGreen,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = onDismissModelFeedback, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Rounded.Close, contentDescription = "Dismiss", tint = CareSyncGreen, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+
+                if (!state.modelErrorMessage.isNullOrBlank()) {
+                    Surface(
+                        shape = CareSyncButtonShape,
+                        color = CriticalRed.copy(alpha = 0.12f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = state.modelErrorMessage,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = CriticalRed,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = onDismissModelFeedback, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Rounded.Close, contentDescription = "Dismiss", tint = CriticalRed, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+
+                // If currently importing
+                if (state.isImportingModel) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = state.modelImportStatus ?: "Importing model...",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = CareSyncBlue
+                            )
+                            if (state.modelImportProgress > 0f) {
+                                Text(
+                                    text = "${(state.modelImportProgress * 100).toInt()}%",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CareSyncBlue
+                                )
+                            }
+                        }
+                        if (state.modelImportProgress > 0f) {
+                            LinearProgressIndicator(
+                                progress = { state.modelImportProgress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp),
+                                color = CareSyncBlue,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        } else {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp),
+                                color = CareSyncBlue,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        }
+                    }
+                } else if (state.installedModel != null) {
+                    // Installed model details
+                    Surface(
+                        shape = CareSyncButtonShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = state.installedModel.fileName,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = state.installedModel.formattedSize,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = CareSyncBlue,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Text(
+                                text = "Path: ${state.installedModel.absolutePath}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Format: GGUF v${state.installedModel.version} (Little Endian) · Validated binary header",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = CareSyncGreen
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = { modelPickerLauncher.launch(arrayOf("*/*")) },
+                            shape = CareSyncButtonShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Rounded.FileUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Re-import")
+                        }
+
+                        Button(
+                            onClick = onDeleteModel,
+                            shape = CareSyncButtonShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = CriticalRed),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Rounded.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Delete")
+                        }
+                    }
+                } else {
+                    // No model installed
+                    Surface(
+                        shape = CareSyncButtonShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Info,
+                                contentDescription = null,
+                                tint = PendingOrange,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "No GGUF Model Installed",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Select 'qwen2.5-0.5b-instruct-q4_k_m.gguf' from phone Downloads to enable local LLM.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = { modelPickerLauncher.launch(arrayOf("*/*")) },
+                        shape = CareSyncButtonShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = CareSyncBlue),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .testTag("settings_import_model_button")
+                    ) {
+                        Icon(Icons.Rounded.FileUpload, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Import GGUF Model from Downloads", fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
 

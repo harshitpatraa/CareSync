@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.caresync.app.database.ActivityDao
 import com.caresync.app.database.ActivityEntity
@@ -79,7 +80,11 @@ data class AppPreferences(
     val phone: String = "+91 98111 70409",
     val geminiApiKey: String = DEFAULT_SEHAT_SETU_KEY,
     val firebaseProjectId: String = "",
-    val firebaseAppId: String = ""
+    val firebaseAppId: String = "",
+    val localModelPath: String = "",
+    val localModelName: String = "",
+    val localModelSizeBytes: Long = 0L,
+    val isLocalModelReady: Boolean = false
 )
 
 @Singleton
@@ -115,6 +120,10 @@ class CareSyncRepository @Inject constructor(
         val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
         val FIREBASE_PROJECT_ID = stringPreferencesKey("firebase_project_id")
         val FIREBASE_APP_ID = stringPreferencesKey("firebase_app_id")
+        val LOCAL_MODEL_PATH = stringPreferencesKey("local_model_path")
+        val LOCAL_MODEL_NAME = stringPreferencesKey("local_model_name")
+        val LOCAL_MODEL_SIZE = longPreferencesKey("local_model_size")
+        val LOCAL_MODEL_READY = booleanPreferencesKey("local_model_ready")
     }
 
     val preferencesFlow: Flow<AppPreferences> = dataStore.data.map { prefs ->
@@ -134,7 +143,11 @@ class CareSyncRepository @Inject constructor(
             phone = prefs[Keys.PHONE] ?: "+91 98111 70409",
             geminiApiKey = prefs[Keys.GEMINI_API_KEY] ?: DEFAULT_SEHAT_SETU_KEY,
             firebaseProjectId = prefs[Keys.FIREBASE_PROJECT_ID] ?: "",
-            firebaseAppId = prefs[Keys.FIREBASE_APP_ID] ?: ""
+            firebaseAppId = prefs[Keys.FIREBASE_APP_ID] ?: "",
+            localModelPath = prefs[Keys.LOCAL_MODEL_PATH] ?: "",
+            localModelName = prefs[Keys.LOCAL_MODEL_NAME] ?: "",
+            localModelSizeBytes = prefs[Keys.LOCAL_MODEL_SIZE] ?: 0L,
+            isLocalModelReady = prefs[Keys.LOCAL_MODEL_READY] ?: false
         )
     }
 
@@ -278,6 +291,28 @@ class CareSyncRepository @Inject constructor(
             prefs[Keys.FIREBASE_APP_ID] = appId.trim()
             prefs[Keys.GEMINI_API_KEY] = apiKey.trim()
         }
+    }
+
+    suspend fun saveLocalModelInfo(path: String, name: String, sizeBytes: Long) {
+        dataStore.edit { prefs ->
+            prefs[Keys.LOCAL_MODEL_PATH] = path.trim()
+            prefs[Keys.LOCAL_MODEL_NAME] = name.trim()
+            prefs[Keys.LOCAL_MODEL_SIZE] = sizeBytes
+            prefs[Keys.LOCAL_MODEL_READY] = true
+        }
+    }
+
+    suspend fun clearLocalModelInfo() {
+        dataStore.edit { prefs ->
+            prefs.remove(Keys.LOCAL_MODEL_PATH)
+            prefs.remove(Keys.LOCAL_MODEL_NAME)
+            prefs.remove(Keys.LOCAL_MODEL_SIZE)
+            prefs.remove(Keys.LOCAL_MODEL_READY)
+        }
+    }
+
+    fun getPreferencesSnapshot(): AppPreferences {
+        return kotlinx.coroutines.runBlocking { preferencesFlow.first() }
     }
 
     suspend fun updateUserProfile(

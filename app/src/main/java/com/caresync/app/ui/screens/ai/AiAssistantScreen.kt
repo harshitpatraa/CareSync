@@ -122,6 +122,41 @@ fun AiAssistantScreen(
             }
         }
 
+        // Engine indicator pill
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.SmartToy,
+                        contentDescription = null,
+                        tint = CareSyncBlue,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = if (state.isLocalModelReady && state.localModelName.isNotBlank())
+                            "Local GGUF: ${state.localModelName} · Ready for llama.cpp"
+                        else
+                            "Sehat Setu · MoHFW Clinical Intelligence & Gemini Hybrid",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
         // Chat Stream
         LazyColumn(
             state = listState,

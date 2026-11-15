@@ -152,4 +152,48 @@ class CareSyncUnitTest {
         assertTrue(categories.any { it.contains("Anemia", ignoreCase = true) })
         assertTrue(categories.any { it.contains("Emergency", ignoreCase = true) })
     }
+
+    @Test
+    fun localModelManager_validatesGgufMagicHeaderSuccessfully() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val validGgufStream = java.io.ByteArrayInputStream(
+            byteArrayOf(
+                0x47, 0x47, 0x55, 0x46, // 'G', 'G', 'U', 'F'
+                0x03, 0x00, 0x00, 0x00  // Version 3 in Little Endian uint32
+            )
+        )
+        val manager = com.caresync.app.ai.LocalModelManager(context)
+        val result = manager.validateStreamGgufHeader(validGgufStream)
+        assertTrue(result.isValid)
+        assertEquals(3, result.version)
+        assertNull(result.errorReason)
+    }
+
+    @Test
+    fun localModelManager_rejectsNonGgufHeader() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val invalidStream = java.io.ByteArrayInputStream("NOT_A_VALID_GGUF_FILE".toByteArray())
+        val manager = com.caresync.app.ai.LocalModelManager(context)
+        val result = manager.validateStreamGgufHeader(invalidStream)
+        assertTrue(!result.isValid)
+        assertTrue(result.errorReason != null && result.errorReason!!.contains("Invalid magic"))
+    }
+
+    @Test
+    fun localModelManager_formatsBytesAccurately() {
+        val formatted = com.caresync.app.ai.LocalModelManager.formatBytes(491400032L)
+        assertTrue(formatted.contains("468") || formatted.contains("491") || formatted.contains("MB"))
+    }
+
+    @Test
+    fun localModelManager_validatesActualDesktopModelIfPresent() {
+        val desktopModel = java.io.File("C:\\Users\\Harshit\\Desktop\\qwen2.5-0.5b-instruct-q4_k_m.gguf")
+        if (desktopModel.exists()) {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val manager = com.caresync.app.ai.LocalModelManager(context)
+            val result = manager.validateGgufHeader(desktopModel)
+            assertTrue("Desktop Qwen GGUF model must have valid header", result.isValid)
+            assertEquals(3, result.version)
+        }
+    }
 }

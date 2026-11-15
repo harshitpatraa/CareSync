@@ -54,6 +54,8 @@ data class AiToolsUiState(
     val isOfflineOnlyMode: Boolean = false,
     val activeLanguage: AppLanguage = AppLanguage.ENGLISH,
     val isSpeaking: Boolean = false,
+    val localModelName: String = "",
+    val isLocalModelReady: Boolean = false,
     // Pre-filled assessment fields when opened from a specific patient
     val prefillSystolic: String = "142",
     val prefillDiastolic: String = "92",
@@ -93,7 +95,9 @@ class AiToolsViewModel @Inject constructor(
         raw.copy(
             isOfflineOnlyMode = prefs.isOfflineOnlyMode,
             activeLanguage = prefs.language,
-            isSpeaking = speaking
+            isSpeaking = speaking,
+            localModelName = prefs.localModelName,
+            isLocalModelReady = prefs.isLocalModelReady
         )
     }.stateIn(
         scope = viewModelScope,
