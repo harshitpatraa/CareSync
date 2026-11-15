@@ -42,6 +42,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
 
   const individualMenuItems = [
     { id: 'dashboard', label: 'My Health Vault (ABHA)', icon: HeartPulse },
+    { id: 'risk-assessment', label: '12-Q Symptom & Risk Assessment', icon: PlusSquare },
     { id: 'ocr', label: 'Scan Rx & Lab OCR', icon: Camera },
     { id: 'ai-assistant', label: 'Sehat Setu AI Assistant', icon: Bot },
     { id: 'sos', label: '108 Emergency & Nearest Doctor', icon: Asterisk, isDanger: true },

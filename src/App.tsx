@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   Camera,
   HeartPulse,
-  IdCard
+  IdCard,
+  Activity
 } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
 import { DashboardView } from './components/DashboardView';
@@ -80,6 +81,7 @@ const MobileDeviceApp: React.FC = () => {
   // Role-Separated Bottom Tabs
   const individualBottomTabs = [
     { id: 'dashboard', label: 'My Health', icon: HeartPulse },
+    { id: 'risk-assessment', label: 'Risk Check', icon: Activity },
     { id: 'ocr', label: 'Scan Rx', icon: Camera },
     { id: 'ai-assistant', label: 'AI Health', icon: Sparkles },
     { id: 'sos', label: '108 SOS', icon: Asterisk, isDanger: true },
@@ -199,6 +201,23 @@ const MobileDeviceApp: React.FC = () => {
             }`}
           >
             📸 Scan Rx (OCR)
+          </button>
+
+          {/* Risk Assessment Button */}
+          <button
+            onClick={() => {
+              setIsAuthenticated(true);
+              setSelectedPatient(null);
+              setIsRegisteringPatient(false);
+              setCurrentTab('risk-assessment');
+            }}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
+              isAuthenticated && currentTab === 'risk-assessment'
+                ? 'bg-black text-white border-black shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            🩺 Risk Assessment
           </button>
 
           {/* AI Health Assistant */}
@@ -371,6 +390,10 @@ const MobileDeviceApp: React.FC = () => {
                         }}
                         userRole="individual"
                       />
+                    )}
+
+                    {currentTab === 'risk-assessment' && (
+                      <RiskAssessmentView onBack={() => setCurrentTab('dashboard')} />
                     )}
 
                     {currentTab === 'ai-assistant' && (
