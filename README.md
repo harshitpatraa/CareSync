@@ -113,4 +113,5 @@ This web application can be deployed with zero configuration on:
 ---
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is made by Team Innovix.
+Team Members- Gulshan Gautam, Harshit Patra.
