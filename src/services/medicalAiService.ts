@@ -1,4 +1,4 @@
-import { ClinicalAssessmentResult, DiseaseRiskItem, RiskLevel } from '../types';
+import { ClinicalAssessmentResult, DiseaseRiskItem, RiskLevel, DiseaseBrief } from '../types';
 
 interface KnowledgeItem {
   keywords: string[];
@@ -259,9 +259,153 @@ Mandatory Vaccinations: 2 doses of Tetanus & adult Diphtheria (Td) toxoid inject
   }
 ];
 
+export const DISEASE_BRIEFS: Record<string, DiseaseBrief> = {
+  dengue: {
+    diseaseName: "Dengue Viral Fever (डेंगू बुखार)",
+    whatIsIt: "मच्छर (Aedes) के काटने से फैलने वाला वायरल संक्रमण, जिसमें प्लेटलेट्स तेजी से गिर सकते हैं।",
+    keySymptoms: [
+      "अचानक तेज बुखार और आंखों के पीछे तेज दर्द",
+      "गंभीर बदन दर्द (Breakbone fever) और उल्टी",
+      "त्वचा पर लाल चकत्ते और अत्यधिक कमजोरी"
+    ],
+    quickCare: [
+      "खूब तरल पिएं: ओआरएस (ORS), नारियल पानी, नीबू पानी (> 2.5L/day)",
+      "केवल पैरासिटामोल लें (एस्पिरिन या ब्रूफेन कभी न लें)"
+    ],
+    whenToSeeDoctor: "मसूड़ों/नाक से खून, लगातार उल्टी, या प्लेटलेट्स < 1 लाख होने पर तुरंत PHC/अस्पताल जाएं।"
+  },
+  malaria: {
+    diseaseName: "Malaria (मलेरिया संक्रमण)",
+    whatIsIt: "मादा एनाफिलीज़ मच्छर के काटने से होने वाला प्रोटोजोआ परजीवी संक्रमण।",
+    keySymptoms: [
+      "तेज कंपकंपी के साथ बुखार आना और उतरना",
+      "अत्यधिक पसीना आना और सिरदर्द",
+      "उल्टी और तेज बदन दर्द"
+    ],
+    quickCare: [
+      "रक्त जांच (RDT/Malarial Slide) तुरंत करवाएं",
+      "मच्छरदानी में सोएं और पर्याप्त पानी पिएं"
+    ],
+    whenToSeeDoctor: "ठंड के साथ बार-बार तेज बुखार आने पर 24 घंटे के भीतर सरकारी स्वास्थ्य केंद्र पर जांच कराएं।"
+  },
+  typhoid: {
+    diseaseName: "Typhoid Enteric Fever (टाइफाइड / मियादी बुखार)",
+    whatIsIt: "दूषित पानी या भोजन से फैलने वाला साल्मोनेला बैक्टीरियल आंतों का संक्रमण।",
+    keySymptoms: [
+      "लगातार चढ़ता हुआ बुखार (Step-ladder fever)",
+      "पेट में दर्द, कब्ज या दस्त",
+      "भूख न लगना और जीभ पर सफेद परत"
+    ],
+    quickCare: [
+      "उबला हुआ छना पानी ही पिएं",
+      "हल्का सुपाच्य भोजन (खिचड़ी, दलिया) लें"
+    ],
+    whenToSeeDoctor: "बुखार 4-5 दिन से लगातार रहे तो विडाल / ब्लड कल्चर टेस्ट और एंटीबायोटिक हेतु डॉक्टर से मिलें।"
+  },
+  hypertension: {
+    diseaseName: "Hypertension / High BP (उच्च रक्तचाप)",
+    whatIsIt: "धमनियों की दीवारों पर रक्त का अत्यधिक दबाव (140/90 mmHg से अधिक), जो हार्ट और किडनी पर दबाव डालता है।",
+    keySymptoms: [
+      "सिर के पिछले हिस्से में भारीपन या दर्द",
+      "चक्कर आना या आंखों के आगे धुंधलापन",
+      "हल्की सी मेहनत पर सांस फूलना"
+    ],
+    quickCare: [
+      "दैनिक नमक की मात्रा 1 छोटे चम्मच (<5g) से कम करें",
+      "पापड़, अचार, नमकीन बंद करें और 30 मिनट टहलें"
+    ],
+    whenToSeeDoctor: "बीपी 160/100 से अधिक हो, सीने में भारीपन या बाएं हाथ में दर्द फैले तो आपातकाल 108 बुलाएं।"
+  },
+  diabetes: {
+    diseaseName: "Type 2 Diabetes Mellitus (शुगर / मधुमेह)",
+    whatIsIt: "शरीर में इंसुलिन की कमी या अप्रभावशीलता के कारण रक्त में ग्लूकोज (शुगर) का अत्यधिक बढ़ जाना।",
+    keySymptoms: [
+      "बार-बार पेशाब लगना (विशेषकर रात में)",
+      "अत्यधिक प्यास और भूख लगना",
+      "बिना कारण वजन घटना और घाव देर से भरना"
+    ],
+    quickCare: [
+      "मीठा, कोल्ड ड्रिंक, मैदा और आलू-चावल सीमित करें",
+      "थाली में 50% हरी सब्जियां, 25% दाल और 25% चपाती रखें"
+    ],
+    whenToSeeDoctor: "फास्टिंग शुगर > 126 mg/dL या रैंडम > 200 mg/dL होने पर मेडिकल सुपरवाइजर से दवा शुरू करवाएं।"
+  },
+  asthma: {
+    diseaseName: "Bronchial Asthma / Respiratory Distress (दमा / श्वास रोग)",
+    whatIsIt: "फेफड़ों की सांस नलियों में सूजन और संकुचन जिससे सांस लेने में सीटी जैसी आवाज और रुकावट होती है।",
+    keySymptoms: [
+      "सांस फूलना और सीने में जकड़न",
+      "सांस लेते समय सीटी (Wheezing) की आवाज",
+      "रात या सुबह के समय सूखी खांसी बढ़ना"
+    ],
+    quickCare: [
+      "धूल, धुआं, अगरबत्ती और ठंडी हवा से बचें",
+      "गर्म पानी की भाप लें और सिर ऊंचा करके बैठें"
+    ],
+    whenToSeeDoctor: "ऑक्सीजन SpO2 94% से नीचे आए या बोलते समय सांस फूले तो तुरंत इमरजेंसी नेबुलाइजर लें।"
+  },
+  anemia: {
+    diseaseName: "Anemia / Iron Deficiency (खून की कमी)",
+    whatIsIt: "रक्त में हीमोग्लोबिन (Hb < 11-12 g/dL) की कमी जिससे अंगों तक ऑक्सीजन कम पहुंचती है।",
+    keySymptoms: [
+      "चेहरे, नाखूनों और आंखों का पीलापन",
+      "जल्दी थकान और सीढ़ियां चढ़ने पर सांस फूलना",
+      "चक्कर आना और सिरदर्द"
+    ],
+    quickCare: [
+      "आयरन युक्त आहार: पालक, मेथी, गुड़, भुना चना खाएं",
+      "नींबू पानी के साथ आईएफए (IFA लाल गोली) लें"
+    ],
+    whenToSeeDoctor: "हीमोग्लोबिन 7 g/dL से कम हो तो तुरंत रक्त चढ़ाने या इंजेक्शन हेतु अस्पताल जाएं।"
+  },
+  jaundice: {
+    diseaseName: "Jaundice / Viral Hepatitis (पीलिया)",
+    whatIsIt: "लिवर में संक्रमण के कारण रक्त में बिलीरुबिन का स्तर बढ़ जाना।",
+    keySymptoms: [
+      "आंखों और त्वचा का पीला पड़ना",
+      "गहरे पीले रंग का पेशाब और उल्टी",
+      "भूख बिल्कुल न लगना और अत्यधिक सुस्ती"
+    ],
+    quickCare: [
+      "पूर्ण शारीरिक आराम करें और उबला पानी पिएं",
+      "हल्का कार्बोहाइड्रेट आहार (गन्ने का स्वच्छ रस, ग्लूकोज, दलिया) लें"
+    ],
+    whenToSeeDoctor: "उल्टी न रुके या पेशाब बहुत गहरा पीला हो तो तुरंत लिवर फंक्शन टेस्ट (LFT) कराएं।"
+  },
+  pneumonia: {
+    diseaseName: "Pneumonia / Lung Infection (निमोनिया)",
+    whatIsIt: "फेफड़ों की वायु थैलियों में संक्रमण और मवाद/द्रव का भर जाना।",
+    keySymptoms: [
+      "तेज बुखार, कंपकंपी और सीने में दर्द",
+      "पीले या हरे बलगम वाली खांसी",
+      "सांस की तेज गति (Fast breathing) और पसलियां चलना"
+    ],
+    quickCare: [
+      "मरीज को गर्म रखें और भाप दें",
+      "पल्स ऑक्सीमीटर से SpO2 की नियमित निगरानी करें"
+    ],
+    whenToSeeDoctor: "SpO2 93% से कम हो या सांस की गति 24/min से अधिक हो तो तत्काल अस्पताल में भर्ती कराएं।"
+  }
+};
+
+export function findDiseaseBrief(query: string): DiseaseBrief | null {
+  const q = query.toLowerCase();
+  if (q.includes("dengue") || q.includes("डेंगू")) return DISEASE_BRIEFS.dengue;
+  if (q.includes("malaria") || q.includes("मलेरिया")) return DISEASE_BRIEFS.malaria;
+  if (q.includes("typhoid") || q.includes("मियादी") || q.includes("टाइफाइड")) return DISEASE_BRIEFS.typhoid;
+  if (q.includes("bp") || q.includes("hypertension") || q.includes("रक्तचाप") || q.includes("high pressure")) return DISEASE_BRIEFS.hypertension;
+  if (q.includes("sugar") || q.includes("diabetes") || q.includes("मधुमेह") || q.includes("डायबिटीज")) return DISEASE_BRIEFS.diabetes;
+  if (q.includes("asthma") || q.includes("दमा") || q.includes("सांस") || q.includes("wheeze") || q.includes("cough")) return DISEASE_BRIEFS.asthma;
+  if (q.includes("anemia") || q.includes("khoon ki kami") || q.includes("एनीमिया") || q.includes("खून की कमी")) return DISEASE_BRIEFS.anemia;
+  if (q.includes("jaundice") || q.includes("पीलिया") || q.includes("hepatitis")) return DISEASE_BRIEFS.jaundice;
+  if (q.includes("pneumonia") || q.includes("निमोनिया")) return DISEASE_BRIEFS.pneumonia;
+  return null;
+}
+
 export interface AiMedicalResponse {
   text: string;
   tags: string[];
+  conciseSummary?: DiseaseBrief;
   precautions: string[];
   dietAdvice: string[];
   warningRedFlags: string[];
@@ -436,6 +580,23 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): AiMedic
     ];
   }
 
+  const brief = findDiseaseBrief(q);
+  const isShortRequested = q.includes("less word") || q.includes("short") || q.includes("brief") || q.includes("kam shabd") || q.includes("summary") || q.includes("कम शब्द") || q.includes("chhota");
+
+  if (isShortRequested && brief) {
+    const shortText = `### ⚡ ${brief.diseaseName} (कम शब्दों में)\n\n• **क्या है:** ${brief.whatIsIt}\n• **मुख्य लक्षण:** ${brief.keySymptoms.join(", ")}\n• **त्वरित देखभाल:** ${brief.quickCare.join("; ")}\n• **खतरे के संकेत:** ${brief.whenToSeeDoctor}\n\n---\n*ℹ️ कम शब्दों में त्वरित स्वास्थ्य सारांश · MoHFW ABDM Standard*`;
+    return {
+      text: shortText,
+      tags: ["Sehat Setu Quick Summary", "कम शब्दों में", "MoHFW Protocol"],
+      conciseSummary: brief,
+      precautions,
+      dietAdvice,
+      warningRedFlags,
+      prescriptions,
+      requiresSupervisorVerification: true
+    };
+  }
+
   if (bestMatch && highestScore > 0) {
     const title = isHindi ? bestMatch.titleHi : bestMatch.titleEn;
     const content = isHindi ? bestMatch.contentHi : bestMatch.contentEn;
@@ -456,6 +617,22 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): AiMedic
     return {
       text: response,
       tags: ["Sehat Setu AI", isHindi ? "एनएचएम दिशानिर्देश" : "MoHFW Guidelines", "Verified Medical DB"],
+      conciseSummary: brief || undefined,
+      precautions,
+      dietAdvice,
+      warningRedFlags,
+      prescriptions,
+      requiresSupervisorVerification: true
+    };
+  }
+
+  // If a disease brief was matched even if no long knowledge article matched
+  if (brief) {
+    const briefText = `### ${brief.diseaseName}\n\n${brief.whatIsIt}\n\n**मुख्य लक्षण (Key Symptoms):**\n${brief.keySymptoms.map(s => `• ${s}`).join('\n')}\n\n**त्वरित देखभाल (Immediate Care):**\n${brief.quickCare.map(c => `• ${c}`).join('\n')}\n\n**डॉक्टर को कब दिखाएं:**\n• ${brief.whenToSeeDoctor}\n\n---\n*ℹ️ संक्षिप्त एवं सुरक्षित स्वास्थ्य मार्गदर्शन · MoHFW Standard*`;
+    return {
+      text: briefText,
+      tags: ["Sehat Setu AI", "संक्षिप्त रोग विवरण", "Verified Medical DB"],
+      conciseSummary: brief,
       precautions,
       dietAdvice,
       warningRedFlags,
@@ -469,6 +646,7 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): AiMedic
     return {
       text: `### सेहत सेतु आशा स्वास्थ्य सहायक (NHM Certified)\n\nआपके प्रश्न '${query}' के संदर्भ में राष्ट्रीय स्वास्थ्य मिशन के अनुसार सामान्य स्वास्थ्य दिशा-निर्देश:\n\n• **प्राथमिक जांच:** मरीज का तापमान, रक्तचाप (BP), नब्ज और सांस की गति की जांच करें।\n• **हाइड्रेशन:** पर्याप्त तरल पदार्थ (ओआरएस का घोल, नारियल पानी, स्वच्छ उबला पानी) दें।\n• **पोषण:** ताजा, पौष्टिक और सुपाच्य आहार सुनिश्चित करें।\n• **खतरे के संकेत:** यदि लक्षण 48 घंटे से अधिक बने रहें, तेज बुखार, उल्टी या सांस फूलने की समस्या हो, तो तुरंत प्राथमिक स्वास्थ्य केंद्र (PHC) में डॉक्टर को दिखाएं।\n\n---\n*ℹ️ राष्ट्रीय स्वास्थ्य मिशन आशा मॉड्यूल द्वारा समर्थित सुरक्षित स्वास्थ्य ज्ञानकोष।*`,
       tags: ["Sehat Setu", "MoHFW Guidelines", "Community Health"],
+      conciseSummary: brief || undefined,
       precautions,
       dietAdvice,
       warningRedFlags,
@@ -480,6 +658,7 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): AiMedic
   return {
     text: `### Sehat Setu ASHA Health Assistant (NHM Certified)\n\nRegarding your query on '${query}': General community health advisory per MoHFW guidelines:\n\n• **Baseline Evaluation:** Verify vital signs (Body temperature, Blood Pressure, Respiratory Rate, SpO2).\n• **Rest & Hydration:** Ensure clean boiled water, ORS fluids, and restorative rest.\n• **Nutritional Support:** Provide home-cooked, balanced energy-dense meals.\n• **Escalation Protocol:** If symptoms persist beyond 48 hours or red flags emerge (severe weakness, chest pain, high fever, dyspnea), facilitate immediate referral to the Primary Health Center (PHC).\n\n---\n*ℹ️ Verified medical database based on National Health Mission (NHM) standards.*`,
     tags: ["Sehat Setu", "MoHFW Guidelines", "Community Health"],
+    conciseSummary: brief || undefined,
     precautions,
     dietAdvice,
     warningRedFlags,

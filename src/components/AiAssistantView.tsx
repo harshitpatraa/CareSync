@@ -12,11 +12,14 @@ import {
   HeartPulse,
   Apple,
   Pill,
-  UserCheck
+  UserCheck,
+  Sparkles,
+  Zap,
+  ChevronRight
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { ChatMessage } from '../types';
-import { queryMedicalAi } from '../services/medicalAiService';
+import { ChatMessage, DiseaseBrief } from '../types';
+import { queryMedicalAi, findDiseaseBrief } from '../services/medicalAiService';
 
 interface AiAssistantViewProps {
   onBack?: () => void;
@@ -30,13 +33,29 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
   userRole = 'asha_worker'
 }) => {
   const { language } = useApp();
+  const [lessWordsMode, setLessWordsMode] = useState<boolean>(true); // Default to less words mode as requested!
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "msg-welcome",
       isUser: false,
-      text: "Namaste! I am Sehat Setu, your official AI Health Assistant certified under Ministry of Health & Family Welfare (MoHFW) protocols. I provide direct, verified non-pharmacological precautions, home care, dietary guidance, and emergency danger signs immediately. In compliance with ABDM safety standards, prescription medications remain locked until authorized by a certified Medical Supervisor.",
+      text: "Namaste! I am Sehat Setu, your official AI Health Assistant certified under Ministry of Health & Family Welfare (MoHFW) protocols. You can ask me about any disease in few words (कम शब्दों में सार) or full details. I provide direct precautions immediately, while prescription medicines require Medical Supervisor authorization.",
       timestamp: "Sehat Setu",
-      tags: ["Sehat Setu", "MoHFW Protocol", "Safety Guardrail Active"],
+      tags: ["Sehat Setu", "MoHFW Protocol", "Less Words Ready"],
+      conciseSummary: {
+        diseaseName: "Universal Community Health Assistant (सेहत सेतु)",
+        whatIsIt: "राष्ट्रीय स्वास्थ्य मिशन दिशानिर्देशों पर आधारित त्वरित एवं संक्षिप्त रोग परामर्श प्रणाली।",
+        keySymptoms: [
+          "बुखार, बीपी, शुगर, दमा, पीलिया या किसी भी रोग का त्वरित विवरण",
+          "कम शब्दों में मुख्य लक्षण एवं तत्काल प्राथमिक देखभाल",
+          "108 इमरजेंसी रेड फ्लैग्स की सीधी चेतावनी"
+        ],
+        quickCare: [
+          "विटामिन, पर्याप्त पानी और ओआरएस से हाइड्रेशन रखें",
+          "हल्का पौष्टिक भोजन लें और भारी शारीरिक श्रम से बचें"
+        ],
+        whenToSeeDoctor: "लक्षण 48 घंटे से अधिक रहें या SpO2 < 94% हो तो नजदीकी प्राथमिक स्वास्थ्य केंद्र (PHC) जाएं।"
+      },
       precautions: [
         "Record baseline vitals: BP, SpO2, Temperature, and Pulse Rate",
         "Maintain clean boiled water and oral fluid hydration",
@@ -66,13 +85,17 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
   }, [messages, isTyping]);
 
   const handleSend = (textToSend?: string) => {
-    const text = textToSend || inputText;
-    if (!text.trim()) return;
+    const rawText = textToSend || inputText;
+    if (!rawText.trim()) return;
+
+    const queryToSend = lessWordsMode && !rawText.toLowerCase().includes("less word") && !rawText.toLowerCase().includes("short")
+      ? `${rawText.trim()} in less words`
+      : rawText.trim();
 
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`,
       isUser: true,
-      text: text.trim(),
+      text: rawText.trim(),
       timestamp: "Just now"
     };
 
@@ -81,13 +104,14 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
     setIsTyping(true);
 
     setTimeout(() => {
-      const response = queryMedicalAi(text, language);
+      const response = queryMedicalAi(queryToSend, language);
       const botMsg: ChatMessage = {
         id: `b-${Date.now()}`,
         isUser: false,
         text: response.text,
         timestamp: "Sehat Setu",
         tags: response.tags,
+        conciseSummary: response.conciseSummary,
         precautions: response.precautions,
         dietAdvice: response.dietAdvice,
         warningRedFlags: response.warningRedFlags,
@@ -97,7 +121,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
       };
       setMessages(prev => [...prev, botMsg]);
       setIsTyping(false);
-    }, 450);
+    }, 350);
   };
 
   const handleVerifyPrescription = (messageId: string) => {
@@ -115,10 +139,11 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
   };
 
   const quickChips = [
-    { label: "Fever & dengue precautions", query: "Fever & dengue watch protocol" },
-    { label: "High blood pressure home care", query: "ANC high BP warning signs" },
-    { label: "Diabetes dietary rules", query: "Type 2 diabetes meal plan" },
-    { label: "Burn & wound first aid", query: "First aid for burns and cuts" }
+    { label: "⚡ Dengue in less words", query: "Explain Dengue in less words" },
+    { label: "⚡ High BP summary (कम शब्द)", query: "High BP in less words" },
+    { label: "⚡ Diabetes symptoms & diet", query: "Diabetes in less words" },
+    { label: "⚡ Typhoid fever briefly", query: "Typhoid in less words" },
+    { label: "⚡ Asthma & cough care", query: "Asthma in less words" }
   ];
 
   return (
@@ -135,14 +160,14 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
         <div className="flex items-center space-x-2">
           <button 
             onClick={onOpenDrawer || onBack}
-            className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs"
+            className="p-1.5 rounded-lg bg-white border border-slate-300 text-black hover:bg-slate-50 cursor-pointer shadow-xs"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5 text-black" />
           </button>
 
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-black text-sm text-[#0F172A] tracking-tight">Sehat Setu AI</span>
+              <span className="font-black text-sm text-black tracking-tight">Sehat Setu AI</span>
               <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-black text-white border border-black uppercase">
                 MoHFW CDSS
               </span>
@@ -154,21 +179,32 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1 shadow-xs">
-            <ShieldCheck className="w-3 h-3 text-[#15803D]" />
-            <span>ABDM</span>
-          </div>
-          <button className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs">
-            <Bell className="w-4 h-4 text-slate-700" />
+          {/* Less Words Toggle Button */}
+          <button
+            onClick={() => setLessWordsMode(!lessWordsMode)}
+            className={`px-2 py-1 rounded-md text-[10px] font-black flex items-center gap-1 cursor-pointer transition-all shadow-xs ${
+              lessWordsMode
+                ? 'bg-black text-white border border-black'
+                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <Zap className={`w-3 h-3 ${lessWordsMode ? 'text-amber-400 fill-amber-400' : 'text-slate-500'}`} />
+            <span>{lessWordsMode ? 'Less Words: ON' : 'Detailed'}</span>
+          </button>
+
+          <button className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 cursor-pointer shadow-xs">
+            <Bell className="w-4 h-4 text-slate-800" />
           </button>
         </div>
       </div>
 
-      {/* Safety Protocol Banner */}
-      <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-between text-[10px] text-slate-900 font-bold shadow-xs">
+      {/* Mode Indicator Banner */}
+      <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-between text-[10px] text-black font-bold shadow-xs">
         <div className="flex items-center gap-1.5">
-          <Bot className="w-3.5 h-3.5 text-slate-900 shrink-0" />
-          <span>Clinical Rule: Precautions given directly · Medicines require Supervisor Sign-Off</span>
+          <Bot className="w-3.5 h-3.5 text-black shrink-0" />
+          <span>
+            {lessWordsMode ? '⚡ Less Words Active: Explaining diseases in punchy 1-minute summaries' : 'Clinical Rule: Precautions given directly · Medicines require Supervisor Sign-Off'}
+          </span>
         </div>
         <span className="px-1.5 py-0.2 bg-black text-white rounded text-[8px] font-black shrink-0">
           Govt Active
@@ -183,18 +219,55 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
             <div className={`p-3.5 rounded-2xl text-xs leading-relaxed space-y-2.5 shadow-xs ${
               m.isUser
                 ? 'bg-black text-white ml-auto max-w-[85%] rounded-tr-none font-medium'
-                : 'bg-white text-slate-800 border border-slate-200 max-w-[98%] rounded-tl-none font-medium'
+                : 'bg-white text-slate-900 border border-slate-200 max-w-[98%] rounded-tl-none font-medium'
             }`}>
               {!m.isUser && (
-                <div className="flex items-center justify-between text-slate-900 font-black text-xs pb-1.5 border-b border-slate-100">
+                <div className="flex items-center justify-between text-black font-black text-xs pb-1.5 border-b border-slate-100">
                   <span className="flex items-center gap-1.5">
-                    <Bot className="w-3.5 h-3.5" />
+                    <Bot className="w-3.5 h-3.5 text-black" />
                     <span>Sehat Setu Clinical Response</span>
                   </span>
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
                     <CheckCircle2 className="w-2.5 h-2.5 text-[#15803D]" />
                     <span>MoHFW Certified</span>
                   </span>
+                </div>
+              )}
+
+              {/* ⚡ 1. HIGHLIGHTED LESS-WORDS DISEASE SUMMARY CARD */}
+              {!m.isUser && m.conciseSummary && (
+                <div className="p-3.5 rounded-xl bg-slate-950 text-white space-y-2 border-2 border-black shadow-xs">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <div className="flex items-center gap-1.5 text-xs font-black text-white">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>⚡ {m.conciseSummary.diseaseName} (कम शब्दों में समझें)</span>
+                    </div>
+                    <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-black uppercase">
+                      1-Min Summary
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 text-[11px] leading-relaxed">
+                    <div>
+                      <span className="text-amber-300 font-black">• क्या है: </span>
+                      <span className="text-slate-100 font-medium">{m.conciseSummary.whatIsIt}</span>
+                    </div>
+
+                    <div>
+                      <span className="text-amber-300 font-black">• मुख्य लक्षण: </span>
+                      <span className="text-slate-200">{m.conciseSummary.keySymptoms.join(" • ")}</span>
+                    </div>
+
+                    <div>
+                      <span className="text-emerald-300 font-black">• त्वरित देखभाल: </span>
+                      <span className="text-slate-200">{m.conciseSummary.quickCare.join(" • ")}</span>
+                    </div>
+
+                    <div className="pt-1 border-t border-slate-800 text-[10px] text-red-300 flex items-start gap-1 font-bold">
+                      <span className="shrink-0">⚠️ डॉक्टर को कब दिखाएं:</span>
+                      <span>{m.conciseSummary.whenToSeeDoctor}</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -203,7 +276,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
                 {m.text}
               </div>
 
-              {/* 1. DIRECT PRECAUTIONS (Given Directly as requested) */}
+              {/* 2. DIRECT PRECAUTIONS (Given Directly as requested) */}
               {!m.isUser && m.precautions && m.precautions.length > 0 && (
                 <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -262,7 +335,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
                 </div>
               )}
 
-              {/* 2. PRESCRIPTION MEDICINES GUARDRAIL (दवाइयां - सिर्फ सुपरवाइजर वेरिफिकेशन के बाद) */}
+              {/* 3. PRESCRIPTION MEDICINES GUARDRAIL (दवाइयां - सिर्फ सुपरवाइजर वेरिफिकेशन के बाद) */}
               {!m.isUser && m.prescriptions && m.prescriptions.length > 0 && (
                 <div className={`p-3.5 rounded-xl border-2 space-y-2.5 transition-all shadow-xs ${
                   m.supervisorVerified
@@ -403,7 +476,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
         {isTyping && (
           <div className="p-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-bold inline-flex items-center gap-2 shadow-xs">
             <span className="animate-spin">🌀</span>
-            <span>Sehat Setu is preparing direct precautions & checking verification rules...</span>
+            <span>Sehat Setu is preparing {lessWordsMode ? 'concise 1-minute summary' : 'direct precautions'}...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -415,7 +488,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
           <button
             key={idx}
             onClick={() => handleSend(chip.query)}
-            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-black text-slate-700 hover:text-black text-[11px] font-bold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-black text-slate-800 hover:text-black text-[11px] font-black whitespace-nowrap cursor-pointer transition-colors shadow-xs"
           >
             {chip.label}
           </button>
@@ -429,8 +502,8 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Ask Sehat Setu for health precautions & care..."
-          className="flex-1 py-2.5 px-3.5 rounded-xl bg-white border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-black shadow-xs"
+          placeholder={lessWordsMode ? "Ask about any disease in less words..." : "Ask Sehat Setu for health precautions..."}
+          className="flex-1 py-2.5 px-3.5 rounded-xl bg-white border border-slate-300 text-xs text-black placeholder-slate-400 font-medium focus:outline-none focus:border-black shadow-xs"
         />
         <button
           onClick={() => handleSend()}

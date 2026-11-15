@@ -96,12 +96,21 @@ export interface NearbyClinician {
   isAvailable: boolean;
 }
 
+export interface DiseaseBrief {
+  diseaseName: string;
+  whatIsIt: string;
+  keySymptoms: string[];
+  quickCare: string[];
+  whenToSeeDoctor: string;
+}
+
 export interface ChatMessage {
   id: string;
   isUser: boolean;
   text: string;
   timestamp: string;
   tags?: string[];
+  conciseSummary?: DiseaseBrief;
   precautions?: string[];
   dietAdvice?: string[];
   warningRedFlags?: string[];
