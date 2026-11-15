@@ -474,72 +474,169 @@ export function evaluateVitalsRisk(
   bloodSugar: number,
   isPregnant: boolean
 ): ClinicalAssessmentResult {
-  let score = 12;
+  let score = 15;
   const conditions: string[] = [];
   const actions: string[] = [];
   const meds: string[] = [];
   const redFlags: string[] = [];
+  const diseaseList: DiseaseRiskItem[] = [];
 
+  // 1. Blood Pressure Evaluation
+  const pulsePressure = systolic - diastolic;
+  if (systolic >= 160 || diastolic >= 100) {
+    score += 45;
+    const bpProb = Math.min(96, Math.round(75 + (systolic - 160) * 0.8));
+    diseaseList.push({
+      diseaseName: isPregnant ? "Severe Preeclampsia / Eclamptic Emergency" : "Stage 2 Hypertensive Crisis",
+      riskPercentage: bpProb,
+      riskTier: "Critical",
+      rationale: `Extreme arterial pressure (${systolic}/${diastolic} mmHg) exceeding emergency limits.`
+    });
+    redFlags.push(`Critical BP ${systolic}/${diastolic} mmHg: high risk of stroke or acute organ damage.`);
+    actions.push("Immediate Medical Officer evaluation and slow IV/oral antihypertensive stabilization.");
+  } else if (systolic >= 130 || diastolic >= 80) {
+    score += 25;
+    const bpProb = Math.min(88, Math.round(55 + (systolic - 130) * 1.1 + (diastolic - 80) * 0.8));
+    diseaseList.push({
+      diseaseName: "Prehypertension / Stage 1 Essential Hypertension",
+      riskPercentage: bpProb,
+      riskTier: bpProb >= 70 ? "High" : "Moderate",
+      rationale: `Systolic ${systolic} mmHg or Diastolic ${diastolic} mmHg above standard normotensive baseline (120/80).`
+    });
+    actions.push("Initiate 7-day ambulatory BP diary, reduce dietary sodium (<5g/day), and verify medication compliance.");
+  } else {
+    diseaseList.push({
+      diseaseName: "Essential Hypertension",
+      riskPercentage: 14,
+      riskTier: "Low",
+      rationale: `Normotensive arterial reading (${systolic}/${diastolic} mmHg).`
+    });
+  }
+
+  // 2. Metabolic & Glycemic Evaluation
+  if (bloodSugar >= 200) {
+    score += 30;
+    const dmProb = Math.min(95, Math.round(70 + (bloodSugar - 200) * 0.15));
+    diseaseList.push({
+      diseaseName: "Uncontrolled Hyperglycemia / Diabetes Mellitus Type 2",
+      riskPercentage: dmProb,
+      riskTier: "High",
+      rationale: `Random blood glucose ${bloodSugar} mg/dL significantly exceeds safe glycemic thresholds.`
+    });
+    actions.push("Urine dipstick testing for ketones and protein; review Metformin/Insulin titration.");
+  } else if (bloodSugar >= 126) {
+    score += 16;
+    const ifgProb = Math.min(75, Math.round(45 + (bloodSugar - 126) * 0.4));
+    diseaseList.push({
+      diseaseName: "Impaired Fasting Glucose & Early Metabolic Syndrome",
+      riskPercentage: ifgProb,
+      riskTier: "Moderate",
+      rationale: `Elevated glucose (${bloodSugar} mg/dL) coupled with cardiovascular strain signals insulin resistance.`
+    });
+    actions.push("Fasting HbA1c test and dietary counseling to limit high-glycemic carbohydrates.");
+  } else {
+    diseaseList.push({
+      diseaseName: "Type 2 Diabetes Mellitus",
+      riskPercentage: 18,
+      riskTier: "Low",
+      rationale: `Normal glycemic range (${bloodSugar} mg/dL).`
+    });
+  }
+
+  // 3. Oxygenation & Respiratory Evaluation
   if (spo2 < 90) {
     score += 50;
-    conditions.push(`Critical Hypoxemia (SpO2 ${spo2}%)`);
-    redFlags.push("Emergency Low Oxygen Saturation — call 108 for immediate oxygen transport.");
-  } else if (spo2 < 94) {
+    diseaseList.push({
+      diseaseName: "Acute Hypoxemic Respiratory Failure",
+      riskPercentage: 94,
+      riskTier: "Critical",
+      rationale: `Dangerous oxygen desaturation (${spo2}%); tissue hypoxia imminent.`
+    });
+    redFlags.push(`Critical SpO2 ${spo2}%: immediate oxygen support & 108 ambulance dispatch mandatory.`);
+    actions.push("Administer high-flow supplemental oxygen (4-6 L/min) and transfer to nearest ICU/trauma centre.");
+  } else if (spo2 < 95) {
+    score += 24;
+    const respProb = Math.min(80, Math.round(50 + (95 - spo2) * 6));
+    diseaseList.push({
+      diseaseName: "Subacute Respiratory Distress / Early Bronchial Obstruction",
+      riskPercentage: respProb,
+      riskTier: "Moderate",
+      rationale: `SpO2 ${spo2}% is below the 95% physiological resting threshold.`
+    });
+    actions.push("Auscultate lungs for crackles or wheeze; evaluate for early pneumonia or asthma exacerbation.");
+  } else {
+    diseaseList.push({
+      diseaseName: "Acute Respiratory Distress Syndrome",
+      riskPercentage: 10,
+      riskTier: "Low",
+      rationale: `Adequate peripheral capillary oxygenation (${spo2}%).`
+    });
+  }
+
+  // 4. Cardiac Workload & Pulse Pressure Strain
+  const cardiacStrainProb = Math.min(85, Math.round((heartRate >= 90 ? 50 : 25) + (pulsePressure >= 50 ? 25 : 10)));
+  diseaseList.push({
+    diseaseName: "Autonomic Cardiovascular Strain & High Pulse Pressure",
+    riskPercentage: cardiacStrainProb,
+    riskTier: cardiacStrainProb >= 60 ? "High" : "Moderate",
+    rationale: `Pulse pressure of ${pulsePressure} mmHg (Sys ${systolic} - Dia ${diastolic}) with HR ${heartRate} bpm indicates vascular resistance load.`
+  });
+
+  // 5. Early Chronic Kidney Disease (CKD) Microvascular Strain
+  const ckdProb = Math.min(72, Math.round((systolic >= 135 ? 40 : 15) + (bloodSugar >= 140 ? 25 : 10)));
+  diseaseList.push({
+    diseaseName: "Renal Microvascular Strain Watch (Early CKD)",
+    riskPercentage: ckdProb,
+    riskTier: ckdProb >= 50 ? "Moderate" : "Low",
+    rationale: `Co-occurrence of sustained arterial pressure (${systolic}/${diastolic}) and glycemic load stresses glomerular filtration.`
+  });
+
+  // 6. Pregnancy Specific Complication
+  if (isPregnant) {
+    const preeclampsiaProb = systolic >= 135 || diastolic >= 85 ? 88 : 28;
+    diseaseList.push({
+      diseaseName: "Gestational Hypertension / Preeclampsia Watch",
+      riskPercentage: preeclampsiaProb,
+      riskTier: preeclampsiaProb >= 70 ? "Critical" : "Low",
+      rationale: `Maternal BP of ${systolic}/${diastolic} mmHg in active pregnancy requires urgent proteinuria dipstick.`
+    });
+    if (preeclampsiaProb >= 70) {
+      redFlags.push("Obstetric Warning: check for headache, visual disturbances, epigastric pain, and ankle edema.");
+      actions.push("Refer immediately to First Referral Unit (FRU) for obstetrician review.");
+    }
+  }
+
+  // 7. Temperature / Infection
+  if (tempC >= 38.0) {
     score += 22;
-    conditions.push(`Borderline Oxygenation (SpO2 ${spo2}%)`);
+    diseaseList.push({
+      diseaseName: "Acute Systemic Febrile Infection / Vector-Borne Watch",
+      riskPercentage: 76,
+      riskTier: "High",
+      rationale: `Body temperature ${tempC}°C exceeds fever threshold; assess for Dengue/Malaria/Sepsis.`
+    });
+    meds.push("Tab Paracetamol 500mg every 6 hours PRN fever.");
   }
 
-  if (systolic >= 160 || diastolic >= 100) {
-    score += 35;
-    conditions.push(isPregnant ? "Severe Gestational Hypertension (Preeclampsia Alert)" : "Stage 2 Hypertensive Urgency");
-    redFlags.push(`BP ${systolic}/${diastolic} mmHg exceeds emergency threshold.`);
-    actions.push("Urgent Medical Officer referral for antihypertensive stabilization.");
-  } else if (systolic >= 140 || diastolic >= 90) {
-    score += 18;
-    conditions.push(`Elevated Blood Pressure (${systolic}/${diastolic} mmHg)`);
-  }
-
-  if (tempC >= 38.5) {
-    score += 20;
-    conditions.push(`High-Grade Pyrexia (${tempC}°C)`);
-    meds.push("Paracetamol 500mg + tepid water sponging");
-  }
-
-  if (bloodSugar >= 200) {
-    score += 20;
-    conditions.push(`Hyperglycemia (${bloodSugar} mg/dL)`);
-    actions.push("Check urine ketones and review diabetes management.");
-  }
-
-  if (heartRate > 115 || heartRate < 48) {
-    score += 18;
-    conditions.push(`Abnormal Heart Rate (${heartRate} bpm)`);
-  }
-
-  const clamped = Math.min(99, Math.max(8, score));
+  const clamped = Math.min(99, Math.max(12, score));
   let level: RiskLevel = "LOW";
-  if (clamped >= 70) level = "CRITICAL";
+  if (clamped >= 72) level = "CRITICAL";
   else if (clamped >= 48) level = "HIGH";
   else if (clamped >= 28) level = "MODERATE";
 
-  if (conditions.length === 0) conditions.push("Stable Baseline Vitals");
-  if (actions.length === 0) actions.push("Continue routine CareSync ASHA community monitoring.");
-  if (meds.length === 0) meds.push("No acute escalation indicated; maintain hydration.");
+  if (actions.length === 0) actions.push("Continue baseline preventive surveillance; maintain 3-month NCD follow-up.");
+  if (meds.length === 0) meds.push("No urgent pharmacotherapy indicated; maintain hydration and balanced diet.");
 
-  const summary = `Vitals Analysis: BP ${systolic}/${diastolic} mmHg, SpO2 ${spo2}%, HR ${heartRate} bpm, Temp ${tempC}°C, Sugar ${bloodSugar} mg/dL. Calculated risk index: ${clamped}/100 (${level}).`;
+  const summary = `Vitals Triage: BP ${systolic}/${diastolic} mmHg, SpO2 ${spo2}%, HR ${heartRate} bpm, Temp ${tempC}°C, Sugar ${bloodSugar} mg/dL. Calculated risk score: ${clamped}/100 (${level}).`;
 
   return {
     riskScore: clamped,
     riskLevel: level,
     primarySummary: summary,
-    possibleConditions: conditions,
+    possibleConditions: diseaseList.filter(d => d.riskPercentage >= 40).map(d => `${d.diseaseName} (${d.riskPercentage}%)`),
     medicineSuggestions: meds,
     recommendedActions: actions,
     redFlags: redFlags,
-    diseaseRisksWithPercentage: [
-      { diseaseName: "Cardiovascular / BP Risk", riskPercentage: systolic >= 140 ? 78 : 22, riskTier: systolic >= 140 ? "High" : "Low", rationale: `BP ${systolic}/${diastolic} mmHg` },
-      { diseaseName: "Metabolic / Glycemic Risk", riskPercentage: bloodSugar >= 180 ? 74 : 18, riskTier: bloodSugar >= 180 ? "High" : "Low", rationale: `Blood Sugar ${bloodSugar} mg/dL` },
-      { diseaseName: "Hypoxemic / Respiratory Risk", riskPercentage: spo2 < 94 ? 82 : 12, riskTier: spo2 < 94 ? "High" : "Low", rationale: `SpO2 ${spo2}%` }
-    ]
+    diseaseRisksWithPercentage: diseaseList.sort((a, b) => b.riskPercentage - a.riskPercentage)
   };
 }

@@ -338,65 +338,191 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
       {/* Numeric Vitals Triage Tab */}
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === 'vitals' && (
-        <div className="p-4 rounded-3xl bg-[#131926] border border-slate-800 space-y-4">
-          <h3 className="text-xs font-bold text-white">Numeric Vitals Screening</h3>
+        <div className="p-4 rounded-3xl bg-[#0f172a] border border-slate-800 space-y-4">
+          <div>
+            <h3 className="text-xs font-bold text-white tracking-wide">Numeric Vitals Screening</h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Enter clinical vitals to calculate all potential disease probabilities and differential diagnoses
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-2.5 rounded-2xl bg-[#101421] border border-slate-800">
-              <label className="text-[10px] text-slate-400 block mb-0.5">Systolic BP</label>
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+              <label className="text-[10px] text-slate-400 block mb-0.5">Systolic BP (mmHg)</label>
               <input
                 type="number"
                 value={sys}
                 onChange={(e) => setSys(Number(e.target.value))}
-                className="w-full bg-transparent text-xs text-white font-semibold focus:outline-none"
+                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#101421] border border-slate-800">
-              <label className="text-[10px] text-slate-400 block mb-0.5">Diastolic BP</label>
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+              <label className="text-[10px] text-slate-400 block mb-0.5">Diastolic BP (mmHg)</label>
               <input
                 type="number"
                 value={dia}
                 onChange={(e) => setDia(Number(e.target.value))}
-                className="w-full bg-transparent text-xs text-white font-semibold focus:outline-none"
+                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#101421] border border-slate-800">
-              <label className="text-[10px] text-slate-400 block mb-0.5">SpO2 %</label>
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+              <label className="text-[10px] text-slate-400 block mb-0.5">SpO2 Percentage (%)</label>
               <input
                 type="number"
                 value={spo2}
                 onChange={(e) => setSpo2(Number(e.target.value))}
-                className="w-full bg-transparent text-xs text-white font-semibold focus:outline-none"
+                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-[#101421] border border-slate-800">
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
               <label className="text-[10px] text-slate-400 block mb-0.5">Heart Rate (bpm)</label>
               <input
                 type="number"
                 value={hr}
                 onChange={(e) => setHr(Number(e.target.value))}
-                className="w-full bg-transparent text-xs text-white font-semibold focus:outline-none"
+                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
               />
+            </div>
+
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 focus-within:border-indigo-500/50">
+              <label className="text-[10px] text-slate-400 block mb-0.5">Blood Glucose (mg/dL)</label>
+              <input
+                type="number"
+                value={sugar}
+                onChange={(e) => setSugar(Number(e.target.value))}
+                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
+              />
+            </div>
+
+            <div className="p-2.5 rounded-2xl bg-[#0b101c] border border-slate-800 flex items-center justify-between">
+              <div>
+                <label className="text-[10px] text-slate-400 block">Pregnancy Flag</label>
+                <span className="text-[11px] font-semibold text-white">{isPregnant ? 'Active ANC' : 'Not Pregnant'}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPregnant(!isPregnant)}
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-colors ${
+                  isPregnant ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
+                }`}
+              >
+                {isPregnant ? 'ON' : 'OFF'}
+              </button>
             </div>
           </div>
 
           <button
             onClick={handleRunVitals}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs shadow-lg shadow-purple-600/30 cursor-pointer"
+            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 cursor-pointer transition-all active:scale-[0.99]"
           >
             Calculate Vitals Triage
           </button>
 
+          {/* Exhaustive Disease Possibilities & Differential Diagnosis Breakdown */}
           {vitalsResult && (
-            <div className="p-3.5 rounded-2xl bg-[#161a2b] border border-purple-500/40 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-white">{vitalsResult.possibleConditions[0] || 'Vitals Normal'}</span>
-                <span className="text-xs font-bold text-purple-400">{vitalsResult.riskScore}/100</span>
+            <div className="space-y-3.5 pt-2 animate-in fade-in-50 duration-300">
+              {/* Primary Clinical Risk Score Banner with 48px Typography */}
+              <div className="p-4 rounded-3xl bg-[#0b101c] border border-indigo-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">
+                    Composite Clinical Risk Score
+                  </span>
+                  <div className="stat-headline-bold mt-1">
+                    {vitalsResult.riskScore}
+                    <span className="text-xl text-slate-400 font-normal">/100</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Priority Tier: <strong className={vitalsResult.riskLevel === 'CRITICAL' ? 'text-red-400' : 'text-emerald-400'}>{vitalsResult.riskLevel}</strong>
+                  </p>
+                </div>
+
+                <div className="text-right space-y-1">
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold inline-block ${
+                    vitalsResult.riskLevel === 'CRITICAL' 
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'
+                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  }`}>
+                    {vitalsResult.riskLevel}
+                  </div>
+                  <p className="text-[10px] text-slate-400 block">MoHFW Guideline Match</p>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-300">{vitalsResult.primarySummary}</p>
+
+              {/* All Possibilities of Diseases List */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-white tracking-wide">
+                    All Differential Disease Possibilities ({vitalsResult.diseaseRisksWithPercentage.length})
+                  </h4>
+                  <span className="text-[10px] text-indigo-400 font-medium">Scored by Probability</span>
+                </div>
+
+                <div className="space-y-2">
+                  {vitalsResult.diseaseRisksWithPercentage.map((d, idx) => {
+                    const isCrit = d.riskPercentage >= 70;
+                    const isHigh = d.riskPercentage >= 40 && d.riskPercentage < 70;
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-3.5 rounded-2xl border space-y-2 ${
+                          isCrit
+                            ? 'bg-red-950/20 border-red-500/30'
+                            : isHigh
+                            ? 'bg-indigo-950/30 border-indigo-500/30'
+                            : 'bg-[#0b101c] border-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h5 className="text-xs font-bold text-white">{d.diseaseName}</h5>
+                            <span className="text-[10px] text-slate-400 mt-0.5 block">{d.riskTier}</span>
+                          </div>
+
+                          <div className="text-right">
+                            <span className={`text-sm font-mono font-bold ${
+                              isCrit ? 'text-red-400' : isHigh ? 'text-indigo-300' : 'text-emerald-400'
+                            }`}>
+                              {d.riskPercentage}%
+                            </span>
+                            <span className="text-[9px] text-slate-500 block">probability</span>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              isCrit ? 'bg-red-500' : isHigh ? 'bg-indigo-500' : 'bg-emerald-500'
+                            }`}
+                            style={{ width: `${d.riskPercentage}%` }}
+                          />
+                        </div>
+
+                        {/* Clinical Rationale & Action */}
+                        <p className="text-[11px] text-slate-300 leading-snug">
+                          <strong>Clinical Rationale:</strong> {d.rationale}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Immediate Clinical Directives */}
+              <div className="p-3.5 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
+                <h5 className="text-xs font-bold text-indigo-300">ASHA Protocol & Immediate Directives:</h5>
+                <div className="space-y-1">
+                  {vitalsResult.recommendedActions.map((action, i) => (
+                    <div key={i} className="flex items-start gap-2 text-[11px] text-slate-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{action}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

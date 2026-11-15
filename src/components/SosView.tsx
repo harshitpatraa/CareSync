@@ -158,9 +158,57 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
           </button>
         </div>
 
+        {/* Active Emergency Dispatch & Nearest Doctor Card */}
         {sosDispatched && (
-          <div className="p-3 rounded-2xl bg-red-950/80 border border-red-500 text-white text-xs font-bold animate-in fade-in-50">
-            🚨 SOS DISPATCH BROADCASTED! Alert sent to 108 Emergency Ambulance & On-Duty PHC Doctor!
+          <div className="p-4 rounded-3xl bg-red-950/80 border-2 border-red-500/80 text-left space-y-3 animate-in fade-in-50">
+            <div className="flex items-center justify-between border-b border-red-500/40 pb-2">
+              <div className="flex items-center gap-2 text-white font-extrabold text-xs">
+                <Radio className="w-4 h-4 text-red-400 animate-pulse" />
+                <span>108 DISPATCH BROADCASTED · LIVE NETWORK</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold animate-pulse">
+                ETA 4 MINS
+              </span>
+            </div>
+
+            {/* Nearest Doctor Profile */}
+            <div className="p-3 rounded-2xl bg-[#0f172a] border border-red-500/40 space-y-2">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-red-400 tracking-wider">Nearest On-Duty Doctor</span>
+                  <h4 className="text-sm font-bold text-white mt-0.5">Dr. Arvind Mehta (MBBS, MD)</h4>
+                  <p className="text-[11px] text-slate-300">Senior Medical Officer · PHC Rampur</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-emerald-400">1.8 km away</span>
+                  <span className="text-[10px] text-slate-400 block">On Active Duty</span>
+                </div>
+              </div>
+
+              <div className="text-[11px] text-slate-300 space-y-0.5 border-t border-slate-800 pt-1.5">
+                <p><strong>Facility Address:</strong> Primary Health Centre (PHC) Rampur, Block Health Complex, Main Hospital Road, Ward 2, Rampur East (Pin: 110041)</p>
+                <p><strong>Direct Phone:</strong> <span className="text-indigo-300 font-mono font-bold">+91 98765 11000</span></p>
+                <p><strong>Secondary Backup:</strong> Dr. Sunita Deshmukh (Obstetrics / Trauma) · +91 98765 11002 (3.2 km)</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <a
+                  href="tel:+919876511000"
+                  className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 cursor-pointer"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Call Dr. Mehta</span>
+                </a>
+
+                <button
+                  onClick={() => alert("Transmitting patient telemetry and vitals to Dr. Arvind Mehta's tablet...")}
+                  className="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/30 cursor-pointer"
+                >
+                  <Radio className="w-3.5 h-3.5" />
+                  <span>Send Vitals Telemetry</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
