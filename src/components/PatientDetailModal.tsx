@@ -32,28 +32,28 @@ export const PatientDetailModal: React.FC<PatientDetailModalProps> = ({
   const patientRecords = records.filter(r => r.patientId === patient.id);
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in-50">
-      <div className="bg-[#0f172a] border border-slate-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-5 p-6 shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in-50">
+      <div className="bg-white border-2 border-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-5 p-6 shadow-2xl text-slate-800">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-200 pb-4">
           <div className="flex items-center space-x-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-extrabold text-base">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center font-extrabold text-base">
               {patient.fullName.slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-white">{patient.fullName}</h3>
-                <span className="text-xs text-slate-400 font-mono">({patient.id})</span>
+                <h3 className="font-black text-lg text-[#0F172A]">{patient.fullName}</h3>
+                <span className="text-xs text-slate-500 font-mono font-bold">({patient.id})</span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {patient.age}y · {patient.gender} · Blood {patient.bloodGroup} · Category: <strong className="text-blue-400">{patient.category}</strong>
+              <p className="text-xs text-slate-600 mt-0.5">
+                {patient.age}y · {patient.gender} · Blood {patient.bloodGroup} · Category: <strong className="text-slate-900">{patient.category}</strong>
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-black transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -140,8 +140,8 @@ export const PatientDetailModal: React.FC<PatientDetailModalProps> = ({
 
         {/* Associated Records */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-blue-400" />
+          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <FileText className="w-4 h-4 text-slate-800" />
             Patient Clinical Records ({patientRecords.length})
           </h4>
 

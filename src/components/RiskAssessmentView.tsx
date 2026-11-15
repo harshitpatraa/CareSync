@@ -159,38 +159,45 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 pb-2">
-        <button onClick={onBack} className="p-1.5 text-slate-700 hover:text-white cursor-pointer">
+    <div className="space-y-3.5 pb-4 select-none text-slate-800">
+      {/* Official Government Tricolor Header Bar */}
+      <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
+        <div className="w-1/3 bg-[#FF9933]"></div>
+        <div className="w-1/3 bg-white border-y border-slate-200"></div>
+        <div className="w-1/3 bg-[#138808]"></div>
+      </div>
+
+      {/* Top Header Bar - Clean Light Mode */}
+      <div className="flex items-center justify-between py-1 border-b border-slate-200 pb-2">
+        <button onClick={onBack} className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs">
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        <h2 className="font-bold text-base text-white tracking-tight">Medical Assessment</h2>
+        <h2 className="font-black text-sm text-[#0F172A] tracking-tight">Medical Assessment</h2>
 
         <div className="flex items-center space-x-2">
-          <div className="px-2 py-0.5 rounded-full bg-[#1b382b] text-[#22c55e] border border-[#22c55e]/30 text-[10px] font-semibold flex items-center gap-1">
+          <div className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1 shadow-xs">
             <span className="text-[9px]">☁️</span>
             <span>Sync</span>
           </div>
-          <button className="p-1.5 text-slate-700 hover:text-white cursor-pointer">
+          <button className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs">
             <Bell className="w-4 h-4 text-slate-700" />
           </button>
         </div>
       </div>
 
       {/* Disease Risk Assessment Header */}
-      <div className="p-4 rounded-3xl bg-white border border-slate-200 space-y-3">
+      <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 space-y-3 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-bold text-sm text-white tracking-tight">Disease Risk Assessment</h3>
-            <p className="text-[11px] text-slate-600 mt-0.5">
+            <h3 className="font-black text-sm text-[#0F172A] tracking-tight">Disease Risk Assessment</h3>
+            <p className="text-[11px] font-medium text-slate-600 mt-0.5">
               Multi-disease probability scoring powered by Sehat Setu AI
             </p>
           </div>
 
-          <div className="px-2.5 py-1 rounded-full bg-[#163a29] text-[#4ade80] border border-[#22c55e]/30 text-[10px] font-semibold whitespace-nowrap">
-            Sehat Setu Offline Engine
+          <div className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-900 border border-slate-300 text-[10px] font-black whitespace-nowrap shadow-xs">
+            Sehat Setu Engine
           </div>
         </div>
 
@@ -198,20 +205,20 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
         <div className="flex gap-2 pt-1">
           <button
             onClick={() => setActiveTab('screening')}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+            className={`flex-1 py-2 rounded-xl text-xs font-black cursor-pointer transition-colors shadow-xs ${
               activeTab === 'screening'
-                ? 'bg-[#183a2b] text-[#4ade80] border border-[#22c55e]/40'
-                : 'bg-white text-slate-600 border border-slate-200'
+                ? 'bg-black text-white'
+                : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
             }`}
           >
             12-Question Screening
           </button>
           <button
             onClick={() => setActiveTab('vitals')}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+            className={`flex-1 py-2 rounded-xl text-xs font-black cursor-pointer transition-colors shadow-xs ${
               activeTab === 'vitals'
-                ? 'bg-[#183a2b] text-[#4ade80] border border-[#22c55e]/40'
-                : 'bg-white text-slate-600 border border-slate-200'
+                ? 'bg-black text-white'
+                : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
             }`}
           >
             Numeric Vitals Triage
@@ -221,32 +228,32 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
         {/* 1-Tap Diagnostic Presets */}
         {activeTab === 'screening' && (
           <div className="space-y-1.5 pt-1">
-            <span className="text-[11px] font-semibold text-slate-600 block">1-Tap Diagnostic Presets:</span>
-            <div className="flex gap-2 overflow-x-auto pb-1 select-none">
+            <span className="text-[11px] font-bold text-slate-700 block">1-Tap Diagnostic Presets:</span>
+            <div className="flex gap-2 overflow-x-auto pb-1 select-none scrollbar-none">
               <button
                 onClick={() => {
                   setAnswers(initialAnswers);
                   setScreeningResult(null);
                 }}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-white text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 text-xs font-bold whitespace-nowrap cursor-pointer shadow-xs"
               >
                 Reset (All No)
               </button>
               <button
                 onClick={() => handleApplyPreset('dengue')}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-amber-400 hover:border-amber-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 hover:bg-amber-100 text-xs font-bold whitespace-nowrap cursor-pointer shadow-xs"
               >
                 Preset: Dengue / Febrile
               </button>
               <button
                 onClick={() => handleApplyPreset('anc')}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-white hover:border-slate-200 text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 hover:bg-emerald-100 text-xs font-bold whitespace-nowrap cursor-pointer shadow-xs"
               >
                 Preset: ANC Danger
               </button>
               <button
                 onClick={() => handleApplyPreset('cardiac')}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-red-400 hover:border-red-500/40 text-xs font-semibold whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-red-50 border border-red-300 text-red-900 hover:bg-red-100 text-xs font-bold whitespace-nowrap cursor-pointer shadow-xs"
               >
                 Preset: Cardiac
               </button>
@@ -261,16 +268,16 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
       {activeTab === 'screening' && (
         <div className="space-y-3">
           {screeningResult && (
-            <div className="p-4 rounded-3xl bg-[#1b152b] border border-slate-200 space-y-3 animate-in fade-in-50">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-300 space-y-3 shadow-sm animate-in fade-in-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-white">AI Diagnostic Assessment</h4>
-                  <p className="text-[11px] text-[#d4d4d8]">Community Risk Score: {screeningResult.riskScore}/100</p>
+                  <h4 className="text-sm font-black text-[#0F172A]">AI Diagnostic Assessment</h4>
+                  <p className="text-[11px] font-bold text-slate-600">Community Risk Score: {screeningResult.riskScore}/100</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  screeningResult.riskLevel === 'CRITICAL' ? 'bg-red-500/20 text-red-400 border border-red-500/40' :
-                  screeningResult.riskLevel === 'HIGH' ? 'bg-whitember-500/20 text-amber-400 border border-amber-500/40' :
-                  'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                  screeningResult.riskLevel === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-300' :
+                  screeningResult.riskLevel === 'HIGH' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                  'bg-emerald-100 text-emerald-900 border border-emerald-300'
                 }`}>
                   {screeningResult.riskLevel} PRIORITY
                 </div>
@@ -278,9 +285,9 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
 
               <div className="space-y-1.5">
                 {screeningResult.diseaseRisksWithPercentage.map((d, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-50">
-                    <span className="text-white">{d.diseaseName}</span>
-                    <span className="font-bold text-white">{d.riskPercentage}%</span>
+                  <div key={idx} className="flex items-center justify-between text-xs p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+                    <span className="font-bold text-[#0F172A]">{d.diseaseName}</span>
+                    <span className="font-mono font-black text-slate-900">{d.riskPercentage}%</span>
                   </div>
                 ))}
               </div>
@@ -290,15 +297,15 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
           {screeningQuestions.map((q) => {
             const currentVal = answers[q.key] || "No";
             return (
-              <div key={q.key} className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2.5">
+              <div key={q.key} className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-xs">
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-bold text-xs text-white leading-tight">{q.title}</h4>
-                  <span className="px-2 py-0.5 rounded-md bg-[#251d3b] text-white border border-slate-200 text-[10px] font-medium whitespace-nowrap">
+                  <h4 className="font-black text-xs text-[#0F172A] leading-tight">{q.title}</h4>
+                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-300 text-[10px] font-bold whitespace-nowrap">
                     {q.tag}
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-600 leading-snug">{q.desc}</p>
+                <p className="text-[11px] font-medium text-slate-600 leading-snug">{q.desc}</p>
 
                 {/* 3 Buttons */}
                 <div className="flex gap-2">
@@ -313,14 +320,14 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                           setAnswers(updated);
                           setScreeningResult(evaluateQuestionnaireRisk(updated));
                         }}
-                        className={`flex-1 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+                        className={`flex-1 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-xs ${
                           isSelected
                             ? opt === 'No'
-                              ? 'bg-[#183a2b] text-[#4ade80] border border-[#22c55e]/40'
+                              ? 'bg-emerald-100 text-emerald-900 border border-emerald-400'
                               : opt === 'Yes'
-                              ? 'bg-[#3b151e] text-[#f43f5e] border border-red-500/40'
-                              : 'bg-[#2b1f14] text-[#fb923c] border border-amber-500/40'
-                            : 'bg-white text-slate-600 border border-slate-200 hover:text-white'
+                              ? 'bg-red-100 text-red-900 border border-red-400'
+                              : 'bg-amber-100 text-amber-900 border border-amber-400'
+                            : 'bg-slate-50 text-slate-700 border border-slate-300 hover:bg-slate-100'
                         }`}
                       >
                         {opt}
@@ -338,75 +345,75 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
       {/* Numeric Vitals Triage Tab */}
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === 'vitals' && (
-        <div className="p-4 rounded-3xl bg-[#0f172a] border border-slate-200 space-y-4">
+        <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 space-y-4 shadow-sm">
           <div>
-            <h3 className="text-xs font-bold text-white tracking-wide">Numeric Vitals Screening</h3>
-            <p className="text-[11px] text-slate-600 mt-0.5">
+            <h3 className="text-xs font-black text-[#0F172A] tracking-wide">Numeric Vitals Screening</h3>
+            <p className="text-[11px] font-medium text-slate-600 mt-0.5">
               Enter clinical vitals to calculate all potential disease probabilities and differential diagnoses
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-slate-200">
-              <label className="text-[10px] text-slate-600 block mb-0.5">Systolic BP (mmHg)</label>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-300 focus-within:border-black">
+              <label className="text-[10px] text-slate-600 font-bold block mb-0.5">Systolic BP (mmHg)</label>
               <input
                 type="number"
                 value={sys}
                 onChange={(e) => setSys(Number(e.target.value))}
-                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
+                className="w-full bg-transparent text-sm text-[#0F172A] font-black focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-slate-200">
-              <label className="text-[10px] text-slate-600 block mb-0.5">Diastolic BP (mmHg)</label>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-300 focus-within:border-black">
+              <label className="text-[10px] text-slate-600 font-bold block mb-0.5">Diastolic BP (mmHg)</label>
               <input
                 type="number"
                 value={dia}
                 onChange={(e) => setDia(Number(e.target.value))}
-                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
+                className="w-full bg-transparent text-sm text-[#0F172A] font-black focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-slate-200">
-              <label className="text-[10px] text-slate-600 block mb-0.5">SpO2 Percentage (%)</label>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-300 focus-within:border-black">
+              <label className="text-[10px] text-slate-600 font-bold block mb-0.5">SpO2 Percentage (%)</label>
               <input
                 type="number"
                 value={spo2}
                 onChange={(e) => setSpo2(Number(e.target.value))}
-                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
+                className="w-full bg-transparent text-sm text-[#0F172A] font-black focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-slate-200">
-              <label className="text-[10px] text-slate-600 block mb-0.5">Heart Rate (bpm)</label>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-300 focus-within:border-black">
+              <label className="text-[10px] text-slate-600 font-bold block mb-0.5">Heart Rate (bpm)</label>
               <input
                 type="number"
                 value={hr}
                 onChange={(e) => setHr(Number(e.target.value))}
-                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
+                className="w-full bg-transparent text-sm text-[#0F172A] font-black focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-slate-200">
-              <label className="text-[10px] text-slate-600 block mb-0.5">Blood Glucose (mg/dL)</label>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-300 focus-within:border-black">
+              <label className="text-[10px] text-slate-600 font-bold block mb-0.5">Blood Glucose (mg/dL)</label>
               <input
                 type="number"
                 value={sugar}
                 onChange={(e) => setSugar(Number(e.target.value))}
-                className="w-full bg-transparent text-sm text-white font-bold focus:outline-none"
+                className="w-full bg-transparent text-sm text-[#0F172A] font-black focus:outline-none"
               />
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-300 flex items-center justify-between">
               <div>
-                <label className="text-[10px] text-slate-600 block">Pregnancy Flag</label>
-                <span className="text-[11px] font-semibold text-white">{isPregnant ? 'Active ANC' : 'Not Pregnant'}</span>
+                <label className="text-[10px] text-slate-600 font-bold block">Pregnancy Flag</label>
+                <span className="text-[11px] font-bold text-[#0F172A]">{isPregnant ? 'Active ANC' : 'Not Pregnant'}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPregnant(!isPregnant)}
-                className={`px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-colors ${
-                  isPregnant ? 'bg-white text-black font-black text-white' : 'bg-slate-800 text-slate-600'
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-black cursor-pointer transition-colors shadow-xs ${
+                  isPregnant ? 'bg-black text-white' : 'bg-slate-200 text-slate-700'
                 }`}
               >
                 {isPregnant ? 'ON' : 'OFF'}
@@ -416,7 +423,7 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
 
           <button
             onClick={handleRunVitals}
-            className="w-full py-3 rounded-2xl bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-black font-bold text-xs shadow-lg shadow-none cursor-pointer transition-all active:scale-[0.99]"
+            className="w-full py-3 rounded-xl bg-black hover:bg-neutral-800 text-white font-black text-xs shadow-xs cursor-pointer transition-all active:scale-[0.99]"
           >
             Calculate Vitals Triage
           </button>
@@ -425,39 +432,39 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
           {vitalsResult && (
             <div className="space-y-3.5 pt-2 animate-in fade-in-50 duration-300">
               {/* Primary Clinical Risk Score Banner with 48px Typography */}
-              <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-300 flex items-center justify-between shadow-xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-white tracking-wider block">
+                  <span className="text-[10px] uppercase font-bold text-slate-600 tracking-wider block">
                     Composite Clinical Risk Score
                   </span>
-                  <div className="stat-headline-bold mt-1">
+                  <div className="stat-headline-bold text-[#0F172A] mt-1">
                     {vitalsResult.riskScore}
-                    <span className="text-xl text-slate-600 font-normal">/100</span>
+                    <span className="text-xl text-slate-500 font-normal">/100</span>
                   </div>
-                  <p className="text-[11px] text-slate-600 mt-1">
-                    Priority Tier: <strong className={vitalsResult.riskLevel === 'CRITICAL' ? 'text-red-400' : 'text-emerald-400'}>{vitalsResult.riskLevel}</strong>
+                  <p className="text-[11px] text-slate-600 mt-1 font-medium">
+                    Priority Tier: <strong className={vitalsResult.riskLevel === 'CRITICAL' ? 'text-red-700' : 'text-emerald-800'}>{vitalsResult.riskLevel}</strong>
                   </p>
                 </div>
 
                 <div className="text-right space-y-1">
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold inline-block ${
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-black inline-block shadow-xs ${
                     vitalsResult.riskLevel === 'CRITICAL' 
-                      ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'
-                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      ? 'bg-red-100 text-red-800 border border-red-300 animate-pulse'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                   }`}>
                     {vitalsResult.riskLevel}
                   </div>
-                  <p className="text-[10px] text-slate-600 block">MoHFW Guideline Match</p>
+                  <p className="text-[10px] text-slate-500 font-medium block">MoHFW Guideline Match</p>
                 </div>
               </div>
 
               {/* All Possibilities of Diseases List */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-white tracking-wide">
+                  <h4 className="text-xs font-black text-[#0F172A] tracking-wide">
                     All Differential Disease Possibilities ({vitalsResult.diseaseRisksWithPercentage.length})
                   </h4>
-                  <span className="text-[10px] text-white font-medium">Scored by Probability</span>
+                  <span className="text-[10px] text-slate-600 font-bold">Scored by Probability</span>
                 </div>
 
                 <div className="space-y-2">
@@ -467,23 +474,23 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                     return (
                       <div
                         key={idx}
-                        className={`p-3.5 rounded-2xl border space-y-2 ${
+                        className={`p-3.5 rounded-2xl border space-y-2 shadow-xs ${
                           isCrit
-                            ? 'bg-red-950/20 border-red-500/30'
+                            ? 'bg-red-50/70 border-red-300'
                             : isHigh
-                            ? 'bg-white border-slate-200'
-                            : 'bg-slate-50 border-slate-200'
+                            ? 'bg-amber-50/50 border-amber-300'
+                            : 'bg-white border-slate-200'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <h5 className="text-xs font-bold text-white">{d.diseaseName}</h5>
-                            <span className="text-[10px] text-slate-600 mt-0.5 block">{d.riskTier}</span>
+                            <h5 className="text-xs font-black text-[#0F172A]">{d.diseaseName}</h5>
+                            <span className="text-[10px] text-slate-500 font-medium mt-0.5 block">{d.riskTier}</span>
                           </div>
 
                           <div className="text-right">
-                            <span className={`text-sm font-mono font-bold ${
-                              isCrit ? 'text-red-400' : isHigh ? 'text-white' : 'text-emerald-400'
+                            <span className={`text-sm font-mono font-black ${
+                              isCrit ? 'text-red-700' : isHigh ? 'text-amber-800' : 'text-emerald-700'
                             }`}>
                               {d.riskPercentage}%
                             </span>
@@ -492,18 +499,18 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${
-                              isCrit ? 'bg-red-500' : isHigh ? 'bg-[#52525b]' : 'bg-emerald-500'
+                              isCrit ? 'bg-red-600' : isHigh ? 'bg-amber-600' : 'bg-emerald-600'
                             }`}
                             style={{ width: `${d.riskPercentage}%` }}
                           />
                         </div>
 
                         {/* Clinical Rationale & Action */}
-                        <p className="text-[11px] text-slate-700 leading-snug">
-                          <strong>Clinical Rationale:</strong> {d.rationale}
+                        <p className="text-[11px] text-slate-700 font-medium leading-snug">
+                          <strong className="text-[#0F172A]">Clinical Rationale:</strong> {d.rationale}
                         </p>
                       </div>
                     );
@@ -512,12 +519,12 @@ export const RiskAssessmentView: React.FC<RiskAssessmentViewProps> = ({ onBack }
               </div>
 
               {/* Immediate Clinical Directives */}
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2">
-                <h5 className="text-xs font-bold text-white">ASHA Protocol & Immediate Directives:</h5>
+              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                <h5 className="text-xs font-black text-[#0F172A]">ASHA Protocol & Immediate Directives:</h5>
                 <div className="space-y-1">
                   {vitalsResult.recommendedActions.map((action, i) => (
-                    <div key={i} className="flex items-start gap-2 text-[11px] text-slate-200">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <div key={i} className="flex items-start gap-2 text-[11px] text-slate-700 font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] shrink-0 mt-0.5" />
                       <span>{action}</span>
                     </div>
                   ))}

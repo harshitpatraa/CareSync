@@ -81,7 +81,7 @@ const MobileDeviceApp: React.FC = () => {
           <h1 className="text-sm font-black text-[#0F172A] tracking-wide">
             CareSync Mobile System Preview (Official Government Light Mode)
           </h1>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-[#1E40AF] border border-blue-200 font-bold">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-900 border border-slate-300 font-bold">
             Android 14 · ABDM Standard
           </span>
         </div>
@@ -99,7 +99,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               !isAuthenticated
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -114,7 +114,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && !isRegisteringPatient && currentTab === 'dashboard'
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -161,7 +161,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               selectedPatient
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -176,7 +176,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && currentTab === 'emergency'
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -191,7 +191,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && currentTab === 'risk-assessment'
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -220,7 +220,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && !isRegisteringPatient && currentTab === 'ai-assistant'
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -250,7 +250,7 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               showRecentActivity
-                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
@@ -269,7 +269,7 @@ const MobileDeviceApp: React.FC = () => {
             <button
               onClick={() => setPhoneHeight('standard')}
               className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
-                phoneHeight === 'standard' ? 'bg-[#1E40AF] text-white' : 'text-slate-600 hover:text-slate-900'
+                phoneHeight === 'standard' ? 'bg-black text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Standard
@@ -277,7 +277,7 @@ const MobileDeviceApp: React.FC = () => {
             <button
               onClick={() => setPhoneHeight('long')}
               className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
-                phoneHeight === 'long' ? 'bg-[#1E40AF] text-white' : 'text-slate-600 hover:text-slate-900'
+                phoneHeight === 'long' ? 'bg-black text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Long
@@ -285,7 +285,7 @@ const MobileDeviceApp: React.FC = () => {
             <button
               onClick={() => setPhoneHeight('xl')}
               className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
-                phoneHeight === 'xl' ? 'bg-[#1E40AF] text-white' : 'text-slate-600 hover:text-slate-900'
+                phoneHeight === 'xl' ? 'bg-black text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Extra Long
@@ -456,12 +456,12 @@ const MobileDeviceApp: React.FC = () => {
                     }}
                     className="flex flex-col items-center justify-center flex-1 h-full py-1 cursor-pointer transition-all"
                   >
-                    {/* Active capsule - Clean Govt Light Theme */}
+                    {/* Active capsule - Clean Govt Light Theme with Solid Black */}
                     <div className={`px-4 py-1 rounded-full transition-all ${
                       isActive && isDanger
                         ? 'bg-red-50 text-red-700 border border-red-300'
                         : isActive
-                        ? 'bg-blue-50 text-[#1E40AF] border border-blue-200'
+                        ? 'bg-black text-white border-black shadow-xs'
                         : isDanger
                         ? 'text-red-600 hover:text-red-700'
                         : 'text-slate-500 hover:text-slate-800'
@@ -472,7 +472,7 @@ const MobileDeviceApp: React.FC = () => {
                       isDanger
                         ? 'text-red-600'
                         : isActive
-                        ? 'text-[#1E40AF]'
+                        ? 'text-black font-black'
                         : 'text-slate-500'
                     }`}>
                       {btn.label}

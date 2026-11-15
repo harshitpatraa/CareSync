@@ -44,8 +44,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onOpenDraw
       time: '35 mins ago',
       desc: 'Verify Ferrous Sulfate + Folic Acid evening dose & monitor ankle edema.',
       icon: Pill,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-[#1E40AF]',
+      iconBg: 'bg-slate-100',
+      iconColor: 'text-slate-900',
       cardBg: 'bg-white',
       borderColor: 'border-slate-200',
       patientName: 'Meera Devi'
@@ -58,8 +58,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onOpenDraw
       time: '1 hr ago',
       desc: 'Inspect dressing and check fasting blood glucose tomorrow morning.',
       icon: Calendar,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-[#1E40AF]',
+      iconBg: 'bg-slate-100',
+      iconColor: 'text-slate-900',
       cardBg: 'bg-white',
       borderColor: 'border-slate-200',
       patientName: 'Fatima Begum'
@@ -86,8 +86,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onOpenDraw
       time: '3 hrs ago',
       desc: 'Connect to network or tap Sync Now to upload queued patient records.',
       icon: RotateCw,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-[#1E40AF]',
+      iconBg: 'bg-slate-100',
+      iconColor: 'text-slate-900',
       cardBg: 'bg-white',
       borderColor: 'border-slate-200'
     },
@@ -99,8 +99,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onOpenDraw
       time: 'Yesterday',
       desc: 'Platelet count re-evaluation & hydration check due tomorrow.',
       icon: Calendar,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-[#1E40AF]',
+      iconBg: 'bg-slate-100',
+      iconColor: 'text-slate-900',
       cardBg: 'bg-white',
       borderColor: 'border-slate-200',
       patientName: 'Sunita Rao'
@@ -159,7 +159,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onOpenDraw
         </h3>
         <button
           onClick={() => setReadAll(true)}
-          className="text-xs font-bold text-[#1E40AF] hover:underline cursor-pointer"
+          className="text-xs font-bold text-slate-900 hover:underline cursor-pointer"
         >
           {readAll ? 'All Marked Read' : 'Mark all read'}
         </button>
@@ -175,7 +175,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onOpenDraw
               onClick={() => setActiveFilter(cat)}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-black whitespace-nowrap transition-colors cursor-pointer shadow-xs ${
                 isSelected
-                  ? 'bg-[#1E40AF] text-white border border-[#1E40AF]'
+                  ? 'bg-black text-white border border-black'
                   : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
               }`}
             >

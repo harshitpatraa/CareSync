@@ -152,8 +152,8 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
 
         {/* GPS Coordinates Pill */}
         <div className="flex justify-center">
-          <div className="px-3 py-1 rounded-full bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-black flex items-center gap-1.5 shadow-xs">
-            <Crosshair className="w-3.5 h-3.5 text-[#1E40AF]" />
+          <div className="px-3 py-1 rounded-full bg-slate-100 border border-slate-300 text-slate-800 text-[11px] font-black flex items-center gap-1.5 shadow-xs">
+            <Crosshair className="w-3.5 h-3.5 text-slate-900" />
             <span>GPS: 28.7387, 77.1213</span>
           </div>
         </div>
@@ -200,7 +200,7 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
 
               <div className="text-[11px] text-slate-700 space-y-0.5 border-t border-slate-100 pt-1.5 font-medium">
                 <p><strong className="text-[#0F172A]">Facility Address:</strong> Primary Health Centre (PHC) Rampur, Block Health Complex, Main Hospital Road, Ward 2, Rampur East (Pin: 110041)</p>
-                <p><strong className="text-[#0F172A]">Direct Phone:</strong> <span className="text-[#1E40AF] font-mono font-black">+91 98765 11000</span></p>
+                <p><strong className="text-[#0F172A]">Direct Phone:</strong> <span className="text-black font-mono font-black">+91 98765 11000</span></p>
                 <p><strong className="text-[#0F172A]">Secondary Backup:</strong> Dr. Sunita Deshmukh (Obstetrics / Trauma) · +91 98765 11002 (3.2 km)</p>
               </div>
 
@@ -215,7 +215,7 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
 
                 <button
                   onClick={() => alert("Transmitting patient telemetry and vitals to Dr. Arvind Mehta's tablet...")}
-                  className="py-2.5 px-3 rounded-lg bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                  className="py-2.5 px-3 rounded-lg bg-black hover:bg-neutral-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <Radio className="w-3.5 h-3.5" />
                   <span>Send Telemetry</span>
@@ -237,9 +237,9 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
 
           <button
             onClick={handleShareBrief}
-            className="py-2.5 px-3 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-[#1E40AF] text-xs font-black flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
+            className="py-2.5 px-3 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-900 text-xs font-black flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
           >
-            <Share2 className="w-3.5 h-3.5 text-[#1E40AF]" />
+            <Share2 className="w-3.5 h-3.5 text-slate-800" />
             <span>{copiedBrief ? 'Copied to Clipboard!' : 'Share Brief'}</span>
           </button>
         </div>
@@ -269,7 +269,7 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
               <div className="flex items-center space-x-1.5 shrink-0">
                 <button 
                   onClick={() => alert(`Opening CareSync direct SMS/Notes for ${patient.name}`)}
-                  className="p-2 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 hover:bg-blue-100 cursor-pointer shadow-xs"
+                  className="p-2 rounded-lg bg-slate-100 text-slate-800 border border-slate-300 hover:bg-slate-200 cursor-pointer shadow-xs"
                   title="SMS Note"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
@@ -294,7 +294,7 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
           </h3>
           <button
             onClick={() => setShowAddContact(!showAddContact)}
-            className="text-xs font-bold text-[#1E40AF] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-slate-900 hover:underline flex items-center gap-1 cursor-pointer"
           >
             <Plus className="w-3 h-3" />
             <span>Add Contact</span>
@@ -303,7 +303,7 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
 
         {/* Add Contact inline form */}
         {showAddContact && (
-          <form onSubmit={handleAddContactSubmit} className="p-3.5 rounded-xl bg-white border border-[#1E40AF] space-y-2.5 shadow-sm">
+          <form onSubmit={handleAddContactSubmit} className="p-3.5 rounded-xl bg-white border-2 border-slate-900 space-y-2.5 shadow-sm">
             <h4 className="text-xs font-extrabold text-[#0F172A]">Add Emergency Contact</h4>
             <div className="grid grid-cols-2 gap-2">
               <input
@@ -311,14 +311,14 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
                 placeholder="Full Name / Facility"
                 value={newContactName}
                 onChange={(e) => setNewContactName(e.target.value)}
-                className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-[#1E40AF]"
+                className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-black"
               />
               <input
                 type="text"
                 placeholder="Phone Number"
                 value={newContactPhone}
                 onChange={(e) => setNewContactPhone(e.target.value)}
-                className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-[#1E40AF]"
+                className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-black"
               />
             </div>
             <div className="flex justify-end gap-2">
@@ -331,7 +331,7 @@ export const SosView: React.FC<SosViewProps> = ({ onOpenDrawer, onSelectPatient 
               </button>
               <button
                 type="submit"
-                className="px-3 py-1 rounded-lg bg-[#1E40AF] text-white text-xs font-extrabold hover:bg-[#1E3A8A]"
+                className="px-3 py-1 rounded-lg bg-black text-white text-xs font-extrabold hover:bg-neutral-800"
               >
                 Save Contact
               </button>

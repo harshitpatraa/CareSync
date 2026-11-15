@@ -63,7 +63,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     <div className="space-y-3 pb-4 select-none text-slate-800">
       {/* Toast Notification */}
       {syncToast && (
-        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-white border-2 border-[#1E40AF] text-[#0F172A] text-xs font-black shadow-2xl flex items-center gap-2 animate-in fade-in-50">
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-[#0F172A] text-xs font-black shadow-2xl flex items-center gap-2 animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-[#15803D] shrink-0" />
           <span>{syncToast}</span>
         </div>
@@ -88,13 +88,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           {/* National Health Mission Emblem Badge */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center p-1 text-blue-900 shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center p-1 text-slate-900 shadow-xs">
               <span className="text-base leading-none">🏛️</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-sm text-[#0F172A] tracking-tight">CareSync</span>
-                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-blue-100 text-[#1E40AF] border border-blue-300 uppercase">
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-slate-200 text-slate-900 border border-slate-300 uppercase">
                   NHM Govt
                 </span>
               </div>
@@ -111,7 +111,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             onClick={() => setActiveLang(activeLang === 'EN' ? 'हिन्दी' : 'EN')}
             className="px-2 py-1 rounded-md bg-white border border-slate-300 text-[10px] font-black text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-1 shadow-xs"
           >
-            <Globe2 className="w-2.5 h-2.5 text-[#1E40AF]" />
+            <Globe2 className="w-2.5 h-2.5 text-slate-900" />
             <span>{activeLang}</span>
           </button>
 
@@ -130,12 +130,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Official Government Officer Hero Banner (Authentic Ayushman Bharat Card Design) */}
-      <div className="p-4 rounded-2xl bg-white border-2 border-[#1E40AF] shadow-sm space-y-3 relative overflow-hidden">
+      <div className="p-4 rounded-2xl bg-white border-2 border-slate-900 shadow-sm space-y-3 relative overflow-hidden">
         {/* Top Header Strip */}
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black text-[#1E40AF] tracking-wider uppercase">
+              <span className="text-[10px] font-black text-slate-900 tracking-wider uppercase">
                 Ayushman Bharat · Health & Wellness Centre
               </span>
               <ShieldCheck className="w-3.5 h-3.5 text-[#15803D]" />
@@ -150,8 +150,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Official ABHA Verified Seal */}
-          <div className="w-14 h-12 rounded-xl bg-blue-50 border border-blue-200 p-1 flex flex-col items-center justify-center shadow-xs shrink-0 text-center">
-            <span className="text-xs font-black text-[#1E40AF]">ABHA</span>
+          <div className="w-14 h-12 rounded-xl bg-slate-100 border border-slate-300 p-1 flex flex-col items-center justify-center shadow-xs shrink-0 text-center">
+            <span className="text-xs font-black text-slate-900">ABHA</span>
             <span className="text-[8px] font-black text-[#15803D] uppercase tracking-tight">Verified</span>
           </div>
         </div>
@@ -169,7 +169,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <button
             onClick={handleSync}
             disabled={isSyncing}
-            className="px-3.5 py-1.5 rounded-lg bg-[#1E40AF] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition-all"
+            className="px-3.5 py-1.5 rounded-lg bg-black hover:bg-neutral-800 text-white text-xs font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition-all"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
             <span>Sync ABDM</span>
@@ -181,7 +181,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-1.5">
-            <Building2 className="w-3.5 h-3.5 text-[#1E40AF]" />
+            <Building2 className="w-3.5 h-3.5 text-slate-900" />
             <span>Field Health Directives</span>
           </h3>
           <span className="text-[10px] font-bold text-slate-500">MoHFW Standard 2026</span>
@@ -191,9 +191,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Add Patient / ABHA Registration */}
           <button
             onClick={onOpenAddModal}
-            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#1E40AF] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-900 flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center shadow-inner">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center shadow-inner">
               <UserPlus className="w-4 h-4" />
             </div>
             <span className="text-[10px] font-black text-[#0F172A] text-center leading-tight">
@@ -204,9 +204,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* NCD & Symptoms Checker */}
           <button
             onClick={() => onNavigateTab('risk-assessment')}
-            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#1E40AF] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-900 flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center shadow-inner">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center shadow-inner">
               <BriefcaseMedical className="w-4 h-4" />
             </div>
             <span className="text-[10px] font-black text-[#0F172A] text-center leading-tight">
@@ -217,9 +217,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* AI Clinical Assistant (Sehat Setu) */}
           <button
             onClick={() => onNavigateTab('ai-assistant')}
-            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#1E40AF] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-900 flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center shadow-inner">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center shadow-inner">
               <Bot className="w-4 h-4" />
             </div>
             <span className="text-[10px] font-black text-[#0F172A] text-center leading-tight">
@@ -230,9 +230,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Clinical Risk Triage */}
           <button
             onClick={() => onNavigateTab('risk-assessment')}
-            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#1E40AF] flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-900 flex flex-col items-center justify-center space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center shadow-inner">
+            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center shadow-inner">
               <Stethoscope className="w-4 h-4" />
             </div>
             <span className="text-[10px] font-black text-[#0F172A] text-center leading-tight">
@@ -258,7 +258,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
             <div className="flex items-center justify-between">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center">
                 <Calendar className="w-3.5 h-3.5" />
               </div>
               <span className="text-2xl font-black text-[#0F172A]">{todayCount}</span>
@@ -280,7 +280,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
             <div className="flex items-center justify-between">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center">
                 <Clock className="w-3.5 h-3.5" />
               </div>
               <span className="text-2xl font-black text-[#0F172A]">{pendingCount}</span>
@@ -324,7 +324,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
             <div className="flex items-center justify-between">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center">
                 <History className="w-3.5 h-3.5" />
               </div>
               <span className="text-2xl font-black text-[#0F172A]">4</span>
@@ -346,7 +346,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
             <div className="flex items-center justify-between">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center">
                 <Baby className="w-3.5 h-3.5" />
               </div>
               <span className="text-2xl font-black text-[#0F172A]">{ancCount}</span>
@@ -363,7 +363,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 space-y-1.5 cursor-pointer transition-colors shadow-xs"
           >
             <div className="flex items-center justify-between">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E40AF] border border-blue-200 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center">
                 <Heart className="w-3.5 h-3.5" />
               </div>
               <span className="text-2xl font-black text-[#0F172A]">{childCount}</span>
@@ -379,7 +379,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Universal Immunization UIP Target Card */}
       <div 
         onClick={() => onNavigateTab('patients')}
-        className="p-3.5 rounded-xl bg-white border border-blue-200 flex items-center justify-between cursor-pointer hover:border-blue-300 transition-colors shadow-xs"
+        className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between cursor-pointer hover:border-slate-300 transition-colors shadow-xs"
       >
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-lg bg-emerald-50 text-[#15803D] border border-emerald-200 flex items-center justify-center shrink-0">
@@ -388,7 +388,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div>
             <div className="flex items-center gap-1.5">
               <h4 className="text-xs font-black text-[#0F172A]">Mission Indradhanush (UIP)</h4>
-              <span className="px-1.5 py-0.2 rounded-xs bg-blue-100 text-[#1E40AF] text-[8px] font-black">Govt Target</span>
+              <span className="px-1.5 py-0.2 rounded-xs bg-slate-200 text-slate-900 text-[8px] font-black">Govt Target</span>
             </div>
             <p className="text-[10px] font-medium text-slate-500">Ward 7 cohort vaccination coverage verified</p>
           </div>
@@ -404,7 +404,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div>
           <h4 className="text-xs font-black text-[#0F172A] flex items-center gap-1.5">
             <span>ASHA Field Work Ledger</span>
-            <ChevronRight className="w-3.5 h-3.5 text-[#1E40AF]" />
+            <ChevronRight className="w-3.5 h-3.5 text-slate-900" />
           </h4>
           <p className="text-[10px] font-medium text-slate-500">Live clinical field records & household surveys</p>
         </div>
@@ -422,3 +422,4 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     </div>
   );
 };
+

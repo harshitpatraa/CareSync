@@ -95,7 +95,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-black text-sm text-[#0F172A] tracking-tight">Sehat Setu AI</span>
-              <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-blue-100 text-[#1E40AF] border border-blue-300 uppercase">
+              <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-black text-white border border-black uppercase">
                 MoHFW
               </span>
             </div>
@@ -117,8 +117,8 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
       </div>
 
       {/* Official MoHFW Protocol Badge Banner */}
-      <div className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center gap-2 text-[10px] text-[#1E40AF] font-bold shadow-xs">
-        <Bot className="w-3.5 h-3.5 text-[#1E40AF]" />
+      <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 flex items-center gap-2 text-[10px] text-slate-900 font-bold shadow-xs">
+        <Bot className="w-3.5 h-3.5 text-slate-900" />
         <span>Sehat Setu · Verified against Official MoHFW & National Health Mission Standard 2026</span>
       </div>
 
@@ -129,11 +129,11 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
             {/* Message Box */}
             <div className={`p-3.5 rounded-2xl text-xs leading-relaxed space-y-2 shadow-xs ${
               m.isUser
-                ? 'bg-[#1E40AF] text-white ml-auto max-w-[85%] rounded-tr-none font-medium'
+                ? 'bg-black text-white ml-auto max-w-[85%] rounded-tr-none font-medium'
                 : 'bg-white text-slate-800 border border-slate-200 max-w-[95%] rounded-tl-none font-medium'
             }`}>
               {!m.isUser && (
-                <div className="flex items-center justify-between text-[#1E40AF] font-extrabold text-xs pb-1 border-b border-slate-100">
+                <div className="flex items-center justify-between text-slate-900 font-black text-xs pb-1 border-b border-slate-100">
                   <span className="flex items-center gap-1.5">
                     <Bot className="w-3.5 h-3.5" />
                     Sehat Setu
@@ -148,7 +148,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
               {m.tags && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {m.tags.map(t => (
-                    <span key={t} className="px-2 py-0.5 rounded-full bg-blue-50 text-[#1E40AF] border border-blue-200 text-[9px] font-bold">
+                    <span key={t} className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-300 text-[9px] font-bold">
                       {t}
                     </span>
                   ))}
@@ -159,7 +159,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
         ))}
 
         {isTyping && (
-          <div className="p-3 rounded-xl bg-white border border-slate-200 text-[#1E40AF] text-xs font-bold inline-flex items-center gap-2 shadow-xs">
+          <div className="p-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-bold inline-flex items-center gap-2 shadow-xs">
             <span className="animate-spin">🌀</span>
             <span>Sehat Setu is analyzing clinical protocols...</span>
           </div>
@@ -173,7 +173,7 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
           <button
             key={idx}
             onClick={() => handleSend(chip.query)}
-            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#1E40AF] text-slate-700 hover:text-slate-900 text-[11px] font-bold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-black text-slate-700 hover:text-black text-[11px] font-bold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
           >
             {chip.label}
           </button>
@@ -188,11 +188,11 @@ export const AiAssistantView: React.FC<AiAssistantViewProps> = ({ onBack, onOpen
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Ask Sehat Setu clinical assistant..."
-          className="flex-1 py-2.5 px-3.5 rounded-xl bg-white border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-[#1E40AF] shadow-xs"
+          className="flex-1 py-2.5 px-3.5 rounded-xl bg-white border border-slate-300 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-black shadow-xs"
         />
         <button
           onClick={() => handleSend()}
-          className="p-2.5 rounded-xl bg-[#1E40AF] hover:bg-[#1E3A8A] text-white cursor-pointer transition-all shadow-xs shrink-0"
+          className="p-2.5 rounded-xl bg-black hover:bg-neutral-800 text-white cursor-pointer transition-all shadow-xs shrink-0"
         >
           <Send className="w-4 h-4" />
         </button>

@@ -105,7 +105,7 @@ export const EmergencyView: React.FC<EmergencyViewProps> = () => {
       {/* On-Duty Nearest Clinicians */}
       <div className="space-y-3">
         <h3 className="font-bold text-base text-white flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-blue-400" />
+          <Navigation className="w-4 h-4 text-slate-300" />
           Nearest On-Duty Clinicians (GPS Proximity)
         </h3>
 
@@ -116,7 +116,7 @@ export const EmergencyView: React.FC<EmergencyViewProps> = () => {
               className="p-4 rounded-2xl bg-[#0f172a]/70 border border-slate-800 flex items-center justify-between"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs">
+                <div className="w-10 h-10 rounded-xl bg-slate-800 text-white border border-slate-700 flex items-center justify-center font-bold text-xs">
                   {doc.name.slice(4, 6)}
                 </div>
                 <div>
@@ -131,7 +131,7 @@ export const EmergencyView: React.FC<EmergencyViewProps> = () => {
 
               <a
                 href={`tel:${doc.phone}`}
-                className="p-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 cursor-pointer transition-colors"
+                className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 cursor-pointer transition-colors"
                 title="Call Clinician"
               >
                 <Phone className="w-4 h-4" />
@@ -181,10 +181,10 @@ export const EmergencyView: React.FC<EmergencyViewProps> = () => {
             <a
               key={c.id}
               href={`tel:${c.phone}`}
-              className="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/40 transition-colors flex items-center justify-between text-xs cursor-pointer group"
+              className="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-600 transition-colors flex items-center justify-between text-xs cursor-pointer group"
             >
               <div>
-                <span className="font-bold text-white group-hover:text-blue-400 transition-colors">{c.name}</span>
+                <span className="font-bold text-white group-hover:text-slate-200 transition-colors">{c.name}</span>
                 <span className="text-[11px] text-slate-400 block mt-0.5">{c.role}</span>
               </div>
               <span className="px-2 py-1 rounded bg-red-500/20 text-red-400 font-mono font-bold text-xs">

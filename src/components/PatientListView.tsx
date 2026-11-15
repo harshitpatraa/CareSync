@@ -98,7 +98,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
         <div>
           <h2 className="text-xs font-black text-[#0F172A] tracking-wide uppercase flex items-center gap-1.5">
             <span>Enrolled Citizens</span>
-            <span className="px-1.5 py-0.2 rounded-xs bg-blue-100 text-[#1E40AF] text-[9px] font-black">
+            <span className="px-1.5 py-0.2 rounded-xs bg-slate-200 text-slate-900 text-[9px] font-black">
               {filteredPatients.length} Active
             </span>
           </h2>
@@ -109,7 +109,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
 
         <button
           onClick={onOpenAddModal}
-          className="px-3 py-1.5 rounded-lg bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
+          className="px-3 py-1.5 rounded-lg bg-black hover:bg-neutral-800 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span>+ Enroll ABHA</span>
@@ -124,7 +124,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by ABHA ID, name, ward, phone..."
-          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-[#1E40AF] shadow-xs transition-colors"
+          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-black shadow-xs transition-colors"
         />
       </div>
 
@@ -138,7 +138,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
               onClick={() => setCategoryFilter(c.value)}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-black whitespace-nowrap transition-colors cursor-pointer shadow-xs ${
                 isSelected
-                  ? 'bg-[#1E40AF] text-white border border-[#1E40AF]'
+                  ? 'bg-black text-white border border-black'
                   : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -161,7 +161,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
               className={`p-3.5 rounded-2xl border transition-all space-y-2.5 shadow-xs ${
                 isCrit
                   ? 'bg-red-50/50 border-red-200 hover:border-red-300'
-                  : 'bg-white border-slate-200 hover:border-[#1E40AF]'
+                  : 'bg-white border-slate-200 hover:border-slate-800'
               }`}
             >
               <div>
@@ -171,7 +171,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-inner ${
                       isCrit 
                         ? 'bg-red-100 text-red-700 border border-red-300' 
-                        : 'bg-blue-50 text-[#1E40AF] border border-blue-200'
+                        : 'bg-slate-100 text-slate-900 border border-slate-300'
                     }`}>
                       {initials}
                     </div>
@@ -200,19 +200,19 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
                 {/* Patient metadata details */}
                 <div className="grid grid-cols-2 gap-1.5 mt-2.5 text-[10px] text-slate-600">
                   <div className="flex items-center gap-1.5 font-bold truncate">
-                    <MapPin className="w-3 h-3 text-[#1E40AF] shrink-0" />
+                    <MapPin className="w-3 h-3 text-slate-700 shrink-0" />
                     <span className="truncate">{p.villageOrWard}</span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Phone className="w-3 h-3 text-[#1E40AF] shrink-0" />
+                    <Phone className="w-3 h-3 text-slate-700 shrink-0" />
                     <span className="truncate">{p.phone}</span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Calendar className="w-3 h-3 text-[#1E40AF] shrink-0" />
+                    <Calendar className="w-3 h-3 text-slate-700 shrink-0" />
                     <span className="truncate">Next Field Visit: <strong className="text-slate-900">{p.nextFollowUpDate}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Clock className="w-3 h-3 text-[#1E40AF] shrink-0" />
+                    <Clock className="w-3 h-3 text-slate-700 shrink-0" />
                     <span className="truncate">{p.lastVisitLabel}</span>
                   </div>
                 </div>
@@ -253,9 +253,9 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
 
                 <button
                   onClick={() => onSelectPatient(p)}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1E40AF] border border-blue-200 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                 >
-                  <FileCheck className="w-3.5 h-3.5 text-[#1E40AF]" />
+                  <FileCheck className="w-3.5 h-3.5 text-slate-700" />
                   <span>Clinical File</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
@@ -267,3 +267,4 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
     </div>
   );
 };
+
