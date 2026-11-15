@@ -11,44 +11,63 @@ import {
   User, 
   Settings, 
   Info,
-  X
+  X,
+  Camera,
+  HeartPulse,
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
+import { UserRole } from './ClinicianSignInView';
 
 interface NavigationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (tab: string) => void;
   onSignOut: () => void;
+  userRole?: UserRole;
+  userProfile?: any;
 }
 
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   isOpen,
   onClose,
   onNavigate,
-  onSignOut
+  onSignOut,
+  userRole = 'asha_worker',
+  userProfile
 }) => {
   if (!isOpen) return null;
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Home', icon: LayoutGrid },
-    { id: 'patients', label: 'Patients', icon: Users },
-    { id: 'records', label: 'Health Records', icon: FolderMinus },
-    { id: 'risk-assessment', label: 'Symptom Checker', icon: PlusSquare },
-    { id: 'ai-assistant', label: 'AI Chat Assistant', icon: Bot },
-    { id: 'risk-assessment', label: 'Medical Assessment', icon: Activity },
+  const isIndividual = userRole === 'individual';
+
+  const individualMenuItems = [
+    { id: 'dashboard', label: 'My Health Vault (ABHA)', icon: HeartPulse },
+    { id: 'ocr', label: 'Scan Rx & Lab OCR', icon: Camera },
+    { id: 'ai-assistant', label: 'Sehat Setu AI Assistant', icon: Bot },
+    { id: 'sos', label: '108 Emergency & Nearest Doctor', icon: Asterisk, isDanger: true },
+  ];
+
+  const ashaMenuItems = [
+    { id: 'dashboard', label: 'ASHA Home Dashboard', icon: LayoutGrid },
+    { id: 'patients', label: 'Beneficiary Register (Patients)', icon: Users },
+    { id: 'records', label: 'Clinical Health Records', icon: FolderMinus },
+    { id: 'risk-assessment', label: '12-Q Symptom & Risk Assessment', icon: PlusSquare },
+    { id: 'ai-assistant', label: 'Sehat Setu AI CDSS', icon: Bot },
+    { id: 'ocr', label: 'Rx & Lab OCR Scanner', icon: Camera },
     { 
       id: 'sos', 
-      label: 'CareSync Emergency Dispatch', 
+      label: '108 CareSync Emergency Dispatch', 
       icon: Asterisk, 
       isDanger: true 
     },
-    { id: 'emergency', label: 'Alerts', icon: Bell },
+    { id: 'emergency', label: 'Ward Alerts & Notifications', icon: Bell },
   ];
 
+  const menuItems = isIndividual ? individualMenuItems : ashaMenuItems;
+
   const secondaryItems = [
-    { id: 'profile', label: 'Profile', icon: User, action: () => onNavigate('settings') },
-    { id: 'settings', label: 'Settings & Sync', icon: Settings, action: () => onNavigate('settings') },
-    { id: 'about', label: 'About CareSync', icon: Info, action: onSignOut },
+    { id: 'settings', label: 'Settings & ABDM Vault', icon: Settings, action: () => onNavigate('settings') },
+    { id: 'signout', label: 'Sign Out / Switch Mode', icon: LogOut, action: onSignOut },
   ];
 
   return (
@@ -87,25 +106,35 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
               <div className="flex items-center gap-1.5">
                 <h3 className="font-black text-base text-[#0F172A] leading-tight">CareSync</h3>
                 <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-black text-white border border-black uppercase">
-                  NHM Govt
+                  {isIndividual ? 'Citizen' : 'NHM Govt'}
                 </span>
               </div>
               <p className="text-[9px] font-bold text-slate-600 leading-none">
-                Ministry of Health & Family Welfare · Govt of India
+                Ministry of Health & Family Welfare · ABDM
               </p>
             </div>
           </div>
 
-          {/* Clinician Details */}
+          {/* User Details */}
           <div className="pt-2 border-t border-slate-200">
             <div className="flex items-center justify-between">
-              <h4 className="font-black text-xs text-[#0F172A]">Dr. Priya Kulkarni</h4>
+              <h4 className="font-black text-xs text-[#0F172A]">
+                {userProfile?.name || (isIndividual ? 'Ramesh Sharma' : 'Dr. Priya Kulkarni')}
+              </h4>
               <span className="text-[8px] font-black px-1.5 py-0.2 rounded-xs bg-emerald-50 text-emerald-800 border border-emerald-300">
-                ABHA Verified
+                ABDM Verified
               </span>
             </div>
-            <p className="text-[10px] text-slate-600 font-medium">Medical Officer Incharge · PHC Rampur</p>
-            <p className="text-[9px] text-slate-900 font-mono font-bold mt-0.5">Govt Reg: NHM-DEL-2026-88102</p>
+            <p className="text-[10px] text-slate-600 font-medium">
+              {isIndividual 
+                ? (userProfile?.ward || 'Ward 4 · Shanti Nagar, Rampur') 
+                : (userProfile?.designation || 'Medical Officer · PHC Rampur')}
+            </p>
+            <p className="text-[9px] text-slate-900 font-mono font-bold mt-0.5">
+              {isIndividual 
+                ? `ABHA: ${userProfile?.abhaId || '91-8842-1092-4412'}` 
+                : 'Govt Reg: NHM-DEL-2026-88102'}
+            </p>
           </div>
         </div>
 

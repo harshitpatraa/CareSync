@@ -6,11 +6,10 @@ import {
   Bell, 
   Asterisk,
   Signal,
-  Wifi,
-  Battery,
   ShieldCheck,
-  CheckCircle2,
-  Share2
+  Camera,
+  HeartPulse,
+  IdCard
 } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
 import { DashboardView } from './components/DashboardView';
@@ -26,17 +25,29 @@ import { PatientProfileView } from './components/PatientProfileView';
 import { PatientRegistrationView } from './components/PatientRegistrationView';
 import { SosView } from './components/SosView';
 import { RecentActivityView } from './components/RecentActivityView';
-import { ClinicianSignInView } from './components/ClinicianSignInView';
+import { ClinicianSignInView, UserRole } from './components/ClinicianSignInView';
+import { IndividualHomeView } from './components/IndividualHomeView';
+import { OcrScannerView } from './components/OcrScannerView';
 import { NavigationDrawer } from './components/NavigationDrawer';
-import { PatientDetailModal } from './components/PatientDetailModal';
 import { SosBroadcastModal } from './components/SosBroadcastModal';
 import { Patient } from './types';
 
 const MobileDeviceApp: React.FC = () => {
   const { patients } = useApp();
+
+  // Role & Authentication States
+  // Starts with false so the Login/Register menu is seen on start of app as requested
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<UserRole>('individual');
+  const [userProfile, setUserProfile] = useState<any>({
+    name: 'Ramesh Sharma',
+    abhaId: '91-8842-1092-4412',
+    ward: 'Ward 4 · Shanti Nagar, Rampur',
+    phone: '+91 98231 44102'
+  });
+
   // Navigation & View States
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isRegisteringPatient, setIsRegisteringPatient] = useState<boolean>(false);
   const [showRecentActivity, setShowRecentActivity] = useState<boolean>(false);
@@ -57,14 +68,32 @@ const MobileDeviceApp: React.FC = () => {
     setShowSosModal(true);
   };
 
-  // Bottom Navigation Items matching Screenshot 1 & 2
-  const bottomTabs = [
+  const handleSignInSuccess = (role: UserRole, profile?: any) => {
+    setUserRole(role);
+    if (profile) setUserProfile(profile);
+    setIsAuthenticated(true);
+    setCurrentTab('dashboard');
+    setSelectedPatient(null);
+    setIsRegisteringPatient(false);
+  };
+
+  // Role-Separated Bottom Tabs
+  const individualBottomTabs = [
+    { id: 'dashboard', label: 'My Health', icon: HeartPulse },
+    { id: 'ocr', label: 'Scan Rx', icon: Camera },
+    { id: 'ai-assistant', label: 'AI Health', icon: Sparkles },
+    { id: 'sos', label: '108 SOS', icon: Asterisk, isDanger: true },
+  ];
+
+  const ashaBottomTabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutGrid },
     { id: 'patients', label: 'Patients', icon: Users },
     { id: 'ai-assistant', label: 'AI Care', icon: Sparkles },
     { id: 'emergency', label: 'Alerts', icon: Bell },
     { id: 'sos', label: 'SOS', icon: Asterisk, isDanger: true },
   ];
+
+  const bottomTabs = userRole === 'individual' ? individualBottomTabs : ashaBottomTabs;
 
   const phoneDimensions = {
     standard: 'w-full max-w-[420px] h-[890px]',
@@ -79,138 +108,100 @@ const MobileDeviceApp: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#15803D] animate-pulse"></span>
           <h1 className="text-sm font-black text-[#0F172A] tracking-wide">
-            CareSync Mobile System Preview (Official Government Light Mode)
+            CareSync Mobile System (Role-Separated: Citizen vs ASHA Worker)
           </h1>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-900 border border-slate-300 font-bold">
             Android 14 · ABDM Standard
           </span>
         </div>
         <p className="text-[11px] font-bold text-slate-600 mt-0.5">
-          100% Interactive Demo Prototype · National Health Mission & MoHFW CDSS Engine
+          Role-Gated Security · Direct AI Precautions · Medical Supervisor Verification Protocol
         </p>
 
         {/* View Switchers & Phone Size Controls */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-2.5">
+          {/* Sign-In / Register Switcher */}
           <button
             onClick={() => {
               setIsAuthenticated(false);
               setSelectedPatient(null);
               setIsRegisteringPatient(false);
             }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               !isAuthenticated
                 ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
-            🔑 Sign-In
+            🔑 Login / Register Menu
           </button>
+
+          {/* Citizen Mode */}
           <button
             onClick={() => {
+              setUserRole('individual');
+              setUserProfile({
+                name: 'Ramesh Sharma',
+                abhaId: '91-8842-1092-4412',
+                ward: 'Ward 4 · Shanti Nagar, Rampur',
+                phone: '+91 98231 44102'
+              });
               setIsAuthenticated(true);
               setSelectedPatient(null);
               setIsRegisteringPatient(false);
               setCurrentTab('dashboard');
             }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              isAuthenticated && !selectedPatient && !isRegisteringPatient && currentTab === 'dashboard'
-                ? 'bg-black text-white border-black shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            className={`px-3 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
+              isAuthenticated && userRole === 'individual' && currentTab === 'dashboard'
+                ? 'bg-[#FF9933] text-white border-[#FF9933] shadow-xs'
+                : 'bg-white text-amber-900 border-amber-300 hover:bg-amber-50'
             }`}
           >
-            🏠 Dashboard
+            👤 Citizen Mode (Ramesh)
           </button>
+
+          {/* ASHA Worker Mode */}
           <button
             onClick={() => {
-              setIsAuthenticated(true);
-              setIsRegisteringPatient(false);
-              setSelectedPatient(patients[0] || {
-                id: 'pt-1003',
-                fullName: 'Harish Verma',
-                age: 62,
-                gender: 'Male',
-                phone: '+91 98765 43210',
-                villageOrWard: 'Ward 7 · Old Mill Colony',
-                bloodGroup: 'A+',
-                category: 'CHRONIC',
-                riskLevel: 'CRITICAL',
-                isCritical: true,
-                isTodayVisit: true,
-                isPendingVisit: false,
-                syncStatus: 'PENDING_UPLOAD',
-                lastVisitLabel: 'Today, 10:05 AM',
-                nextFollowUpDate: 'Tomorrow, 9:00 AM',
-                allergies: 'Penicillin',
-                chronicConditions: 'Hypertension, Diabetes Type 2',
-                familyHeadName: 'Harish Verma',
-                familyMembersCount: 4,
-                vaccinationProgress: 80,
-                notes: 'Critical SpO2 alert and high systolic BP.',
-                vitals: {
-                  id: 'vt-1',
-                  patientId: 'pt-1003',
-                  systolicBp: 164,
-                  diastolicBp: 98,
-                  heartRate: 112,
-                  spo2Percent: 90,
-                  temperatureC: 37.3,
-                  bloodSugarMgDl: 214,
-                  recordedAt: Date.now()
-                }
+              setUserRole('asha_worker');
+              setUserProfile({
+                name: 'Dr. Priya Kulkarni',
+                email: 'priya.kulkarni@nhm.gov.in',
+                designation: 'Medical Officer / ASHA Supervisor',
+                phc: 'Rampur Primary Health Centre'
               });
-            }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              selectedPatient
-                ? 'bg-black text-white border-black shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-          >
-            👤 Patient Profile
-          </button>
-          <button
-            onClick={() => {
               setIsAuthenticated(true);
               setSelectedPatient(null);
               setIsRegisteringPatient(false);
-              setCurrentTab('emergency');
+              setCurrentTab('dashboard');
             }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              isAuthenticated && !selectedPatient && currentTab === 'emergency'
-                ? 'bg-black text-white border-black shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-          >
-            🔔 Notifications
-          </button>
-          <button
-            onClick={() => {
-              setIsAuthenticated(true);
-              setSelectedPatient(null);
-              setIsRegisteringPatient(false);
-              setCurrentTab('risk-assessment');
-            }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              isAuthenticated && !selectedPatient && currentTab === 'risk-assessment'
-                ? 'bg-black text-white border-black shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-          >
-            🩺 Medical Assessment
-          </button>
-          <button
-            onClick={() => {
-              setIsAuthenticated(true);
-              setSelectedPatient(null);
-              setIsRegisteringPatient(true);
-            }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              isAuthenticated && isRegisteringPatient
+            className={`px-3 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
+              isAuthenticated && userRole === 'asha_worker' && currentTab === 'dashboard'
                 ? 'bg-[#15803D] text-white border-[#15803D] shadow-xs'
+                : 'bg-white text-emerald-900 border-emerald-300 hover:bg-emerald-50'
+            }`}
+          >
+            👩‍⚕️ ASHA Mode (Dr. Priya)
+          </button>
+
+          {/* OCR Scanner */}
+          <button
+            onClick={() => {
+              setIsAuthenticated(true);
+              setSelectedPatient(null);
+              setIsRegisteringPatient(false);
+              setCurrentTab('ocr');
+            }}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
+              isAuthenticated && currentTab === 'ocr'
+                ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
-            📝 Registration
+            📸 Scan Rx (OCR)
           </button>
+
+          {/* AI Health Assistant */}
           <button
             onClick={() => {
               setIsAuthenticated(true);
@@ -219,13 +210,15 @@ const MobileDeviceApp: React.FC = () => {
               setCurrentTab('ai-assistant');
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              isAuthenticated && !selectedPatient && !isRegisteringPatient && currentTab === 'ai-assistant'
+              isAuthenticated && currentTab === 'ai-assistant'
                 ? 'bg-black text-white border-black shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
-            🤖 AI Chat
+            🤖 AI Precautions & Rx
           </button>
+
+          {/* 108 SOS */}
           <button
             onClick={() => {
               setIsAuthenticated(true);
@@ -234,33 +227,12 @@ const MobileDeviceApp: React.FC = () => {
               setCurrentTab('sos');
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              isAuthenticated && !selectedPatient && currentTab === 'sos'
+              isAuthenticated && currentTab === 'sos'
                 ? 'bg-red-600 text-white border-red-600 shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                : 'bg-white text-red-700 border-red-300 hover:bg-red-50'
             }`}
           >
-            🚨 108 Emergency
-          </button>
-          <button
-            onClick={() => {
-              setIsAuthenticated(true);
-              setSelectedPatient(null);
-              setIsRegisteringPatient(false);
-              setShowRecentActivity(true);
-            }}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
-              showRecentActivity
-                ? 'bg-black text-white border-black shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-          >
-            📋 Recent Activity
-          </button>
-          <button
-            onClick={() => setIsDrawerOpen(true)}
-            className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 cursor-pointer shadow-xs"
-          >
-            ☰ Drawer
+            🚨 108 SOS
           </button>
 
           {/* Length / Height selector */}
@@ -272,7 +244,7 @@ const MobileDeviceApp: React.FC = () => {
                 phoneHeight === 'standard' ? 'bg-black text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Standard
+              Std
             </button>
             <button
               onClick={() => setPhoneHeight('long')}
@@ -288,7 +260,7 @@ const MobileDeviceApp: React.FC = () => {
                 phoneHeight === 'xl' ? 'bg-black text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Extra Long
+              XL
             </button>
           </div>
         </div>
@@ -326,8 +298,11 @@ const MobileDeviceApp: React.FC = () => {
           <NavigationDrawer
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
+            userRole={userRole}
+            userProfile={userProfile}
             onNavigate={(tab) => {
               setIsRegisteringPatient(false);
+              setShowRecentActivity(false);
               setCurrentTab(tab);
             }}
             onSignOut={() => {
@@ -340,10 +315,7 @@ const MobileDeviceApp: React.FC = () => {
           <div className="flex-1 overflow-y-auto px-4 py-2 text-xs relative">
             {!isAuthenticated ? (
               <ClinicianSignInView
-                onSignInSuccess={() => {
-                  setIsAuthenticated(true);
-                  setCurrentTab('dashboard');
-                }}
+                onSignInSuccess={handleSignInSuccess}
               />
             ) : selectedPatient ? (
               <PatientProfileView
@@ -374,72 +346,135 @@ const MobileDeviceApp: React.FC = () => {
               />
             ) : (
               <>
-                {currentTab === 'dashboard' && (
-                  <DashboardView
-                    onNavigateTab={(tab) => {
-                      setShowRecentActivity(false);
-                      setCurrentTab(tab);
-                    }}
-                    onSelectPatient={setSelectedPatient}
-                    onOpenAddModal={() => setIsRegisteringPatient(true)}
-                    onOpenSosModal={handleOpenGeneralSos}
-                    onOpenDrawer={() => setIsDrawerOpen(true)}
-                    onOpenRecentActivity={() => setShowRecentActivity(true)}
-                  />
-                )}
+                {/* 1. CITIZEN / INDIVIDUAL SPECIFIC VIEWS */}
+                {userRole === 'individual' ? (
+                  <>
+                    {currentTab === 'dashboard' && (
+                      <IndividualHomeView
+                        onNavigateTab={(tab) => {
+                          setShowRecentActivity(false);
+                          setCurrentTab(tab);
+                        }}
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onOpenSosModal={handleOpenGeneralSos}
+                        citizenName={userProfile?.name || 'Ramesh Sharma'}
+                        abhaId={userProfile?.abhaId || '91-8842-1092-4412'}
+                      />
+                    )}
 
-                {currentTab === 'patients' && (
-                  <PatientListView
-                    onSelectPatient={setSelectedPatient}
-                    onOpenAddModal={() => setIsRegisteringPatient(true)}
-                    onOpenSosModal={handleOpenSosForPatient}
-                  />
-                )}
+                    {currentTab === 'ocr' && (
+                      <OcrScannerView
+                        onBack={() => setCurrentTab('dashboard')}
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onNavigateToAi={(query) => {
+                          setCurrentTab('ai-assistant');
+                        }}
+                        userRole="individual"
+                      />
+                    )}
 
-                {currentTab === 'ai-assistant' && (
-                  <AiAssistantView
-                    onBack={() => setCurrentTab('dashboard')}
-                    onOpenDrawer={() => setIsDrawerOpen(true)}
-                  />
-                )}
+                    {currentTab === 'ai-assistant' && (
+                      <AiAssistantView
+                        onBack={() => setCurrentTab('dashboard')}
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        userRole="individual"
+                      />
+                    )}
 
-                {currentTab === 'risk-assessment' && (
-                  <RiskAssessmentView onBack={() => setCurrentTab('dashboard')} />
-                )}
+                    {currentTab === 'sos' && (
+                      <SosView
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onSelectPatient={(p) => setSelectedPatient(p)}
+                      />
+                    )}
 
-                {currentTab === 'records' && (
-                  <RecordsView />
-                )}
+                    {currentTab === 'settings' && (
+                      <SettingsView />
+                    )}
+                  </>
+                ) : (
+                  /* 2. ASHA WORKER CLINICAL SUITE VIEWS */
+                  <>
+                    {currentTab === 'dashboard' && (
+                      <DashboardView
+                        onNavigateTab={(tab) => {
+                          setShowRecentActivity(false);
+                          setCurrentTab(tab);
+                        }}
+                        onSelectPatient={setSelectedPatient}
+                        onOpenAddModal={() => setIsRegisteringPatient(true)}
+                        onOpenSosModal={handleOpenGeneralSos}
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onOpenRecentActivity={() => setShowRecentActivity(true)}
+                      />
+                    )}
 
-                {currentTab === 'analytics' && (
-                  <AnalyticsView />
-                )}
+                    {currentTab === 'patients' && (
+                      <PatientListView
+                        onSelectPatient={setSelectedPatient}
+                        onOpenAddModal={() => setIsRegisteringPatient(true)}
+                        onOpenSosModal={handleOpenSosForPatient}
+                      />
+                    )}
 
-                {currentTab === 'emergency' && (
-                  <NotificationsView
-                    onOpenDrawer={() => setIsDrawerOpen(true)}
-                    onSelectPatient={(name) => {
-                      const matched = patients.find(p => p.fullName.toLowerCase().includes(name.toLowerCase())) || patients[0];
-                      setSelectedPatient(matched);
-                    }}
-                  />
-                )}
+                    {currentTab === 'ai-assistant' && (
+                      <AiAssistantView
+                        onBack={() => setCurrentTab('dashboard')}
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        userRole="asha_worker"
+                      />
+                    )}
 
-                {currentTab === 'sos' && (
-                  <SosView
-                    onOpenDrawer={() => setIsDrawerOpen(true)}
-                    onSelectPatient={(p) => setSelectedPatient(p)}
-                  />
-                )}
+                    {currentTab === 'ocr' && (
+                      <OcrScannerView
+                        onBack={() => setCurrentTab('dashboard')}
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onNavigateToAi={(query) => {
+                          setCurrentTab('ai-assistant');
+                        }}
+                        userRole="asha_worker"
+                      />
+                    )}
 
-                {currentTab === 'settings' && (
-                  <SettingsView />
+                    {currentTab === 'risk-assessment' && (
+                      <RiskAssessmentView onBack={() => setCurrentTab('dashboard')} />
+                    )}
+
+                    {currentTab === 'records' && (
+                      <RecordsView />
+                    )}
+
+                    {currentTab === 'analytics' && (
+                      <AnalyticsView />
+                    )}
+
+                    {currentTab === 'emergency' && (
+                      <NotificationsView
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onSelectPatient={(name) => {
+                          const matched = patients.find(p => p.fullName.toLowerCase().includes(name.toLowerCase())) || patients[0];
+                          setSelectedPatient(matched);
+                        }}
+                      />
+                    )}
+
+                    {currentTab === 'sos' && (
+                      <SosView
+                        onOpenDrawer={() => setIsDrawerOpen(true)}
+                        onSelectPatient={(p) => setSelectedPatient(p)}
+                      />
+                    )}
+
+                    {currentTab === 'settings' && (
+                      <SettingsView />
+                    )}
+                  </>
                 )}
               </>
             )}
           </div>
 
-          {/* Android Bottom Navigation Bar (Hidden on Sign-In screen & Patient Profile) - Clean Light Mode */}
+          {/* Android Bottom Navigation Bar (Hidden on Sign-In screen & Patient Profile) */}
           {isAuthenticated && !isRegisteringPatient && !selectedPatient && (
             <div className="h-16 w-full bg-white border-t border-slate-200 flex items-center justify-around px-2 shrink-0 z-40 select-none shadow-xs">
               {bottomTabs.map((btn) => {

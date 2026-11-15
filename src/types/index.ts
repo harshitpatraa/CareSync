@@ -102,6 +102,19 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   tags?: string[];
+  precautions?: string[];
+  dietAdvice?: string[];
+  warningRedFlags?: string[];
+  prescriptions?: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+  }[];
+  requiresSupervisorVerification?: boolean;
+  supervisorVerified?: boolean;
+  verifiedBy?: string;
+  verifiedAt?: string;
 }
 
 export interface DiseaseRiskItem {

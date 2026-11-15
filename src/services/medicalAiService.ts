@@ -259,7 +259,22 @@ Mandatory Vaccinations: 2 doses of Tetanus & adult Diphtheria (Td) toxoid inject
   }
 ];
 
-export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): { text: string; tags: string[] } {
+export interface AiMedicalResponse {
+  text: string;
+  tags: string[];
+  precautions: string[];
+  dietAdvice: string[];
+  warningRedFlags: string[];
+  prescriptions: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+  }[];
+  requiresSupervisorVerification: boolean;
+}
+
+export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): AiMedicalResponse {
   const q = query.toLowerCase().trim();
   const isHindi = lang === 'hi' || /[\u0900-\u097F]/.test(q);
 
@@ -275,6 +290,150 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): { text:
       highestScore = score;
       bestMatch = item;
     }
+  }
+
+  // Pre-configured precautions, diet advice, warning signs, and guarded prescriptions
+  let precautions: string[] = [];
+  let dietAdvice: string[] = [];
+  let warningRedFlags: string[] = [];
+  let prescriptions: { name: string; dosage: string; frequency: string; duration: string }[] = [];
+
+  if (q.includes('fever') || q.includes('bukhar') || q.includes('dengue') || q.includes('malaria')) {
+    precautions = [
+      "Room-temperature sponge bathing (Never use cold ice water)",
+      "Strict physical bed rest; keep room well-ventilated",
+      "Sleep under Long Lasting Insecticidal Mosquito Nets (LLIN)",
+      "Monitor body temperature every 4 hours with digital thermometer"
+    ];
+    dietAdvice = [
+      "High fluid intake: 2.5 - 3 Litres/day (ORS solution, fresh coconut water, clear dal soup)",
+      "Light, easily digestible meals (Khichdi, porridge, mashed vegetables)",
+      "Avoid oily, deep-fried, or spicy street food"
+    ];
+    warningRedFlags = [
+      "Continuous vomiting or inability to retain fluids",
+      "Bleeding gums, nosebleed, or red petechial spots on skin (Thrombocytopenia warning)",
+      "Severe abdominal pain or extreme lethargy / cold extremities",
+      "Persistent temperature > 103°F (39.4°C) despite sponging"
+    ];
+    prescriptions = [
+      { name: "Tab Paracetamol", dosage: "500 mg", frequency: "1 tab TDS (every 8 hrs) PRN fever", duration: "3-5 days" },
+      { name: "ORS (Oral Rehydration Salt)", dosage: "1 packet in 1L clean water", frequency: "Sip throughout day", duration: "As needed" },
+      { name: "Tab Pantoprazole", dosage: "40 mg", frequency: "1 tab once daily before breakfast", duration: "3 days" }
+    ];
+  } else if (q.includes('bp') || q.includes('hypertension') || q.includes('blood pressure') || q.includes('chhati') || q.includes('stroke')) {
+    precautions = [
+      "Strict dietary sodium restriction (< 5g salt / 1 teaspoon total daily)",
+      "Seated resting posture for 10 minutes prior to blood pressure verification",
+      "Avoid sudden postural changes (rise slowly from bed to avoid orthostatic dizziness)",
+      "Engage in 30 minutes of mild brisk walking daily once stable"
+    ];
+    dietAdvice = [
+      "DASH Diet: High potassium vegetables (bottle gourd, spinach, carrots)",
+      "Completely avoid salty pickles, papad, packaged chips, and instant noodles",
+      "Limit daily caffeine, tea, and tobacco consumption to zero"
+    ];
+    warningRedFlags = [
+      "Sudden occipital crushing headache or blurred double vision",
+      "Chest heaviness or pain radiating to left shoulder, jaw, or arm",
+      "Sudden facial drooping, arm weakness, or slurred speech (FAST Stroke warning)",
+      "Systolic BP > 180 mmHg or Diastolic > 110 mmHg (Hypertensive Crisis)"
+    ];
+    prescriptions = [
+      { name: "Tab Telmisartan", dosage: "40 mg", frequency: "1 tablet once daily morning (Empty stomach)", duration: "Continuous / Regular" },
+      { name: "Tab Amlodipine", dosage: "5 mg", frequency: "1 tablet once daily evening", duration: "Continuous" }
+    ];
+  } else if (q.includes('sugar') || q.includes('diabetes') || q.includes('diabetic') || q.includes('meetha') || q.includes('glucose')) {
+    precautions = [
+      "Daily foot inspection for minor blisters, cuts, or redness (Diabetic foot guard)",
+      "Maintain fixed meal timings; never skip breakfast or delay meals",
+      "Carry glucose candy or sugar sachet when traveling for hypoglycemia emergencies",
+      "Maintain adequate hydration with clean plain water"
+    ];
+    dietAdvice = [
+      "Low Glycemic Index foods: whole wheat chapati, oats, sprouts, green moong dal",
+      "Zero refined sugar, sweets, cold drinks, honey, or high-sugar fruits (mango, banana)",
+      "Follow Plate Method: 50% fibrous vegetables, 25% protein (dal/paneer), 25% complex carbs"
+    ];
+    warningRedFlags = [
+      "Cold clammy sweating, trembling hands, sudden dizziness (Hypoglycemia < 70 mg/dL)",
+      "Fruity ketone breath odor with rapid breathing (Diabetic Ketoacidosis warning)",
+      "Non-healing foot ulcer or dark blackened skin on toes",
+      "Random blood glucose > 300 mg/dL with severe dehydration"
+    ];
+    prescriptions = [
+      { name: "Tab Metformin HCl", dosage: "500 mg", frequency: "1 tablet twice daily after lunch & dinner", duration: "Regular" },
+      { name: "Tab Glimepiride", dosage: "1 mg", frequency: "1 tablet once daily before breakfast", duration: "Regular" }
+    ];
+  } else if (q.includes('anc') || q.includes('pregnancy') || q.includes('pregnant') || q.includes('garbh') || q.includes('trimester')) {
+    precautions = [
+      "Left lateral sleeping position to maximize placental blood flow to baby",
+      "Minimum 8 hours nighttime sleep plus 2 hours afternoon rest",
+      "Avoid lifting heavy water pots or rigorous manual agricultural work",
+      "Ensure all 4 mandatory ANC checkups are completed per MCP card schedule"
+    ];
+    dietAdvice = [
+      "Iron-rich foods: jaggery (gur), roasted chana, green leafy vegetables (Palak, Methi)",
+      "Calcium support: fresh curd, milk, ragi porridge",
+      "Take IFA tablet strictly with clean lemon water; NEVER take with tea or milk"
+    ];
+    warningRedFlags = [
+      "Sudden swelling on face, eyelids, and hands with persistent headache (Preeclampsia)",
+      "Vaginal bleeding or sudden gush of clear amniotic fluid",
+      "Noticeable reduction or absence of baby's movements for > 4 hours",
+      "High fever with chills or foul-smelling vaginal discharge"
+    ];
+    prescriptions = [
+      { name: "Tab Iron & Folic Acid (IFA Red)", dosage: "100 mg elemental Iron + 500 mcg FA", frequency: "1 tab daily post-lunch", duration: "180 days in pregnancy" },
+      { name: "Tab Calcium & Vit D3", dosage: "500 mg Calcium + 250 IU D3", frequency: "2 tabs daily (morning & night, 2 hrs away from IFA)", duration: "180 days" },
+      { name: "Inj Tetanus & adult Diphtheria (Td)", dosage: "0.5 mL IM", frequency: "2 doses (minimum 4 weeks apart)", duration: "Antenatal course" }
+    ];
+  } else if (q.includes('burn') || q.includes('wound') || q.includes('skin') || q.includes('chot') || q.includes('jalna')) {
+    precautions = [
+      "Immediately run cool tap water over burn for 15-20 minutes continuously",
+      "NEVER apply ice, ghee, turmeric paste, or toothpaste to burn surfaces",
+      "Do NOT puncture or pop burn blisters — intact skin prevents deep infection",
+      "Keep minor cuts washed with clean water and covered with sterile gauze"
+    ];
+    dietAdvice = [
+      "High protein intake (boiled lentils, sprouts, milk) to accelerate tissue granulation",
+      "Vitamin C rich fruits (amla, oranges, lemons) to support collagen synthesis",
+      "Drink at least 2.5 litres clean water daily to prevent dehydration"
+    ];
+    warningRedFlags = [
+      "Burns covering face, palms, joints, or groin (> 5% body surface area)",
+      "Spreading circumferential redness, foul odor, or yellowish pus from wound bed",
+      "High fever developing 24-48 hours after traumatic injury (Cellulitis/Sepsis)",
+      "Unknown tetanus vaccination history or puncture wound from dirty rusted metal"
+    ];
+    prescriptions = [
+      { name: "Silver Sulfadiazine Cream 1%", dosage: "Topical application", frequency: "Apply sterile layer twice daily", duration: "5-7 days" },
+      { name: "Inj Td (Tetanus Toxoid)", dosage: "0.5 mL IM", frequency: "Stat dose if not received in past 5 yrs", duration: "Single dose" },
+      { name: "Tab Amoxicillin + Clavulanate", dosage: "625 mg", frequency: "1 tab BD after food (Strict MO approval)", duration: "5 days" }
+    ];
+  } else {
+    // General universal advisory
+    precautions = [
+      "Verify vital signs: Record Body Temperature, Blood Pressure, Pulse, and SpO2",
+      "Ensure clean, boiled, filtered drinking water at all times",
+      "Maintain adequate rest; avoid strenuous physical exertion during illness",
+      "Practice strict hand hygiene before meals and after caregiving"
+    ];
+    dietAdvice = [
+      "Provide light, warm, freshly cooked home meals (khichdi, vegetable soups, dalia)",
+      "Avoid raw street food, stale leftovers, and heavily spiced preparations",
+      "Support recovery with natural fluids: lemon water, ORS, tender coconut water"
+    ];
+    warningRedFlags = [
+      "High persistent fever > 102°F lasting more than 48 hours",
+      "Difficulty in breathing, rapid shallow breaths, or SpO2 dropping below 94%",
+      "Inability to tolerate oral fluids or severe dizziness upon standing",
+      "Altered mental alertness, confusion, or extreme sluggishness"
+    ];
+    prescriptions = [
+      { name: "Tab Paracetamol", dosage: "500 mg", frequency: "1 tablet PRN for pain or fever > 100°F (Max 3/day)", duration: "2-3 days" },
+      { name: "Oral Rehydration Salt (ORS)", dosage: "1 standard sachet in 1 Litre water", frequency: "Drink regularly", duration: "As needed" }
+    ];
   }
 
   if (bestMatch && highestScore > 0) {
@@ -296,7 +455,12 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): { text:
 
     return {
       text: response,
-      tags: ["Sehat Setu AI", isHindi ? "एनएचएम दिशानिर्देश" : "MoHFW Guidelines", "Verified Medical DB"]
+      tags: ["Sehat Setu AI", isHindi ? "एनएचएम दिशानिर्देश" : "MoHFW Guidelines", "Verified Medical DB"],
+      precautions,
+      dietAdvice,
+      warningRedFlags,
+      prescriptions,
+      requiresSupervisorVerification: true
     };
   }
 
@@ -304,13 +468,23 @@ export function queryMedicalAi(query: string, lang: 'en' | 'hi' = 'en'): { text:
   if (isHindi) {
     return {
       text: `### सेहत सेतु आशा स्वास्थ्य सहायक (NHM Certified)\n\nआपके प्रश्न '${query}' के संदर्भ में राष्ट्रीय स्वास्थ्य मिशन के अनुसार सामान्य स्वास्थ्य दिशा-निर्देश:\n\n• **प्राथमिक जांच:** मरीज का तापमान, रक्तचाप (BP), नब्ज और सांस की गति की जांच करें।\n• **हाइड्रेशन:** पर्याप्त तरल पदार्थ (ओआरएस का घोल, नारियल पानी, स्वच्छ उबला पानी) दें।\n• **पोषण:** ताजा, पौष्टिक और सुपाच्य आहार सुनिश्चित करें।\n• **खतरे के संकेत:** यदि लक्षण 48 घंटे से अधिक बने रहें, तेज बुखार, उल्टी या सांस फूलने की समस्या हो, तो तुरंत प्राथमिक स्वास्थ्य केंद्र (PHC) में डॉक्टर को दिखाएं।\n\n---\n*ℹ️ राष्ट्रीय स्वास्थ्य मिशन आशा मॉड्यूल द्वारा समर्थित सुरक्षित स्वास्थ्य ज्ञानकोष।*`,
-      tags: ["Sehat Setu", "MoHFW Guidelines", "Community Health"]
+      tags: ["Sehat Setu", "MoHFW Guidelines", "Community Health"],
+      precautions,
+      dietAdvice,
+      warningRedFlags,
+      prescriptions,
+      requiresSupervisorVerification: true
     };
   }
 
   return {
     text: `### Sehat Setu ASHA Health Assistant (NHM Certified)\n\nRegarding your query on '${query}': General community health advisory per MoHFW guidelines:\n\n• **Baseline Evaluation:** Verify vital signs (Body temperature, Blood Pressure, Respiratory Rate, SpO2).\n• **Rest & Hydration:** Ensure clean boiled water, ORS fluids, and restorative rest.\n• **Nutritional Support:** Provide home-cooked, balanced energy-dense meals.\n• **Escalation Protocol:** If symptoms persist beyond 48 hours or red flags emerge (severe weakness, chest pain, high fever, dyspnea), facilitate immediate referral to the Primary Health Center (PHC).\n\n---\n*ℹ️ Verified medical database based on National Health Mission (NHM) standards.*`,
-    tags: ["Sehat Setu", "MoHFW Guidelines", "Community Health"]
+    tags: ["Sehat Setu", "MoHFW Guidelines", "Community Health"],
+    precautions,
+    dietAdvice,
+    warningRedFlags,
+    prescriptions,
+    requiresSupervisorVerification: true
   };
 }
 
