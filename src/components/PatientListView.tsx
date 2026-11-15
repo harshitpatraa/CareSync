@@ -54,41 +54,41 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
   });
 
   return (
-    <div className="space-y-3 pb-2 select-none">
+    <div className="space-y-3 pb-2 select-none text-slate-800">
       {/* Official Government Tricolor Header Bar */}
       <div className="h-1.5 w-full rounded-full flex overflow-hidden shadow-xs">
         <div className="w-1/3 bg-[#FF9933]"></div>
-        <div className="w-1/3 bg-white"></div>
+        <div className="w-1/3 bg-white border-y border-slate-200"></div>
         <div className="w-1/3 bg-[#138808]"></div>
       </div>
 
-      {/* Mobile Top Header Bar */}
-      <div className="flex items-center justify-between py-0.5 border-b border-[#1e293b] pb-2">
+      {/* Mobile Top Header Bar - Clean Light Mode */}
+      <div className="flex items-center justify-between py-1 border-b border-slate-200 pb-2">
         <div className="flex items-center space-x-2">
           <button 
             onClick={onOpenDrawer}
-            className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer"
+            className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-black text-sm text-white tracking-tight">ABHA Beneficiary Register</span>
+              <span className="font-black text-sm text-[#0F172A] tracking-tight">ABHA Beneficiary Register</span>
             </div>
-            <p className="text-[9px] font-bold text-slate-400 leading-none">
+            <p className="text-[9px] font-bold text-slate-600 leading-none">
               राष्ट्रीय स्वास्थ्य मिशन (NHM) · Ward 7 Sub-Centre
             </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-1.5">
-          <div className="px-2 py-0.5 rounded-md bg-[#064e3b] text-[#34d399] border border-[#059669]/50 text-[10px] font-black flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-[#10b981]" />
+          <div className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1 shadow-xs">
+            <ShieldCheck className="w-3 h-3 text-[#15803D]" />
             <span>ABDM</span>
           </div>
-          <button className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
-            <Bell className="w-4 h-4 text-slate-300" />
+          <button className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs">
+            <Bell className="w-4 h-4 text-slate-700" />
           </button>
         </div>
       </div>
@@ -96,20 +96,20 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
       {/* Roster Title & Add ABHA Patient Action */}
       <div className="flex items-center justify-between pt-0.5">
         <div>
-          <h2 className="text-xs font-black text-white tracking-wide uppercase flex items-center gap-1.5">
+          <h2 className="text-xs font-black text-[#0F172A] tracking-wide uppercase flex items-center gap-1.5">
             <span>Enrolled Citizens</span>
-            <span className="px-1.5 py-0.2 rounded-xs bg-[#1e3a8a] text-blue-200 text-[9px] font-black">
+            <span className="px-1.5 py-0.2 rounded-xs bg-blue-100 text-[#1E40AF] text-[9px] font-black">
               {filteredPatients.length} Active
             </span>
           </h2>
-          <p className="text-[10px] font-medium text-slate-400">
+          <p className="text-[10px] font-medium text-slate-500">
             Encrypted offline health ledger (NIC Vault compliant)
           </p>
         </div>
 
         <button
           onClick={onOpenAddModal}
-          className="px-3 py-1.5 rounded-lg bg-[#1d4ed8] hover:bg-[#1e40af] text-white font-black text-[11px] flex items-center gap-1.5 shadow-md border border-[#3b82f6]/40 cursor-pointer transition-all"
+          className="px-3 py-1.5 rounded-lg bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span>+ Enroll ABHA</span>
@@ -124,7 +124,7 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by ABHA ID, name, ward, phone..."
-          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#0f172a] border border-[#334155] text-xs text-white placeholder-slate-400 font-medium focus:outline-none focus:border-[#38bdf8] transition-colors"
+          className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-[#0F172A] placeholder-slate-400 font-medium focus:outline-none focus:border-[#1E40AF] shadow-xs transition-colors"
         />
       </div>
 
@@ -136,10 +136,10 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
             <button
               key={c.value}
               onClick={() => setCategoryFilter(c.value)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-black whitespace-nowrap transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-black whitespace-nowrap transition-colors cursor-pointer shadow-xs ${
                 isSelected
-                  ? 'bg-[#1d4ed8] text-white border border-[#3b82f6] shadow-xs'
-                  : 'bg-[#0f172a] text-slate-300 border border-[#334155] hover:text-white'
+                  ? 'bg-[#1E40AF] text-white border border-[#1E40AF]'
+                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {c.label}
@@ -158,10 +158,10 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
           return (
             <div
               key={p.id}
-              className={`p-3.5 rounded-2xl border transition-all space-y-2.5 ${
+              className={`p-3.5 rounded-2xl border transition-all space-y-2.5 shadow-xs ${
                 isCrit
-                  ? 'bg-[#181014] border-red-800 hover:border-red-500'
-                  : 'bg-[#0f172a] border-[#334155] hover:border-[#3b82f6]'
+                  ? 'bg-red-50/50 border-red-200 hover:border-red-300'
+                  : 'bg-white border-slate-200 hover:border-[#1E40AF]'
               }`}
             >
               <div>
@@ -170,19 +170,19 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
                   <div className="flex items-center space-x-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-inner ${
                       isCrit 
-                        ? 'bg-red-950 text-red-400 border border-red-700' 
-                        : 'bg-[#1e293b] text-[#60a5fa] border border-[#334155]'
+                        ? 'bg-red-100 text-red-700 border border-red-300' 
+                        : 'bg-blue-50 text-[#1E40AF] border border-blue-200'
                     }`}>
                       {initials}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h3 className="font-black text-xs text-white tracking-tight">{p.fullName}</h3>
-                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-[#1e293b] text-slate-300 border border-[#334155] font-mono">
+                        <h3 className="font-black text-xs text-[#0F172A] tracking-tight">{p.fullName}</h3>
+                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded-xs bg-slate-100 text-slate-700 border border-slate-300 font-mono">
                           ABHA: {pseudoAbha}
                         </span>
                       </div>
-                      <p className="text-[11px] font-bold text-slate-300 mt-0.5">
+                      <p className="text-[11px] font-bold text-slate-600 mt-0.5">
                         {p.age}y · {p.gender} · Blood {p.bloodGroup} · PM-JAY Eligible
                       </p>
                     </div>
@@ -190,43 +190,43 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
 
                   <span className={`text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 ${
                     isCrit 
-                      ? 'bg-red-950 text-red-400 border border-red-600 animate-pulse'
-                      : 'bg-[#064e3b] text-[#34d399] border border-[#059669]/40'
+                      ? 'bg-red-100 text-red-800 border border-red-300 animate-pulse'
+                      : 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                   }`}>
                     {p.riskLevel} PRIORITY
                   </span>
                 </div>
 
                 {/* Patient metadata details */}
-                <div className="grid grid-cols-2 gap-1.5 mt-2.5 text-[10px] text-slate-300">
+                <div className="grid grid-cols-2 gap-1.5 mt-2.5 text-[10px] text-slate-600">
                   <div className="flex items-center gap-1.5 font-bold truncate">
-                    <MapPin className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                    <MapPin className="w-3 h-3 text-[#1E40AF] shrink-0" />
                     <span className="truncate">{p.villageOrWard}</span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Phone className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                    <Phone className="w-3 h-3 text-[#1E40AF] shrink-0" />
                     <span className="truncate">{p.phone}</span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Calendar className="w-3 h-3 text-[#38bdf8] shrink-0" />
-                    <span className="truncate">Next Field Visit: <strong className="text-white">{p.nextFollowUpDate}</strong></span>
+                    <Calendar className="w-3 h-3 text-[#1E40AF] shrink-0" />
+                    <span className="truncate">Next Field Visit: <strong className="text-slate-900">{p.nextFollowUpDate}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5 font-bold">
-                    <Clock className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                    <Clock className="w-3 h-3 text-[#1E40AF] shrink-0" />
                     <span className="truncate">{p.lastVisitLabel}</span>
                   </div>
                 </div>
 
                 {/* Vitals pill */}
                 {p.vitals && (
-                  <div className="mt-2 p-2 rounded-lg bg-[#0b1329] border border-[#1e293b] flex items-center justify-between text-[11px]">
-                    <div className="flex items-center gap-1.5 text-white">
-                      <HeartPulse className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                      <span>BP: <strong className="text-white font-black">{p.vitals.systolicBp}/{p.vitals.diastolicBp}</strong></span>
-                      <span className="text-[#334155]">·</span>
-                      <span>SpO2: <strong className="text-white font-black">{p.vitals.spo2Percent}%</strong></span>
+                  <div className="mt-2 p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px]">
+                    <div className="flex items-center gap-1.5 text-slate-800">
+                      <HeartPulse className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                      <span>BP: <strong className="text-[#0F172A] font-black">{p.vitals.systolicBp}/{p.vitals.diastolicBp}</strong></span>
+                      <span className="text-slate-300">·</span>
+                      <span>SpO2: <strong className="text-[#0F172A] font-black">{p.vitals.spo2Percent}%</strong></span>
                     </div>
-                    <div className="text-[10px] font-black text-slate-300">
+                    <div className="text-[10px] font-black text-slate-600">
                       HR: {p.vitals.heartRate} · Sugar: {p.vitals.bloodSugarMgDl}
                     </div>
                   </div>
@@ -234,28 +234,28 @@ export const PatientListView: React.FC<PatientListViewProps> = ({
 
                 {/* Clinical note */}
                 {p.chronicConditions && (
-                  <p className="mt-1.5 text-[10px] text-amber-300 font-black flex items-center gap-1">
+                  <p className="mt-1.5 text-[10px] text-amber-800 font-black flex items-center gap-1">
                     <span>⚠️ NCD Watch:</span>
-                    <span className="text-white">{p.chronicConditions}</span>
+                    <span className="text-slate-900">{p.chronicConditions}</span>
                   </p>
                 )}
               </div>
 
               {/* Action buttons */}
-              <div className="pt-2 border-t border-[#1e293b] flex items-center justify-between gap-2">
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                 <button
                   onClick={() => onOpenSosModal(p)}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-red-950 hover:bg-red-900 text-red-400 border border-red-700 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                 >
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
                   <span>108 Referral</span>
                 </button>
 
                 <button
                   onClick={() => onSelectPatient(p)}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-[#1e293b] hover:bg-[#334155] text-white border border-[#334155] text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1E40AF] border border-blue-200 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                 >
-                  <FileCheck className="w-3.5 h-3.5 text-[#38bdf8]" />
+                  <FileCheck className="w-3.5 h-3.5 text-[#1E40AF]" />
                   <span>Clinical File</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>

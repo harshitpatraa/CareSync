@@ -73,20 +73,20 @@ const MobileDeviceApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-black flex flex-col items-center justify-start py-6 px-2 sm:px-4 select-none font-sans text-white overflow-y-auto">
+    <div className="min-h-screen w-full bg-[#F1F5F9] flex flex-col items-center justify-start py-6 px-2 sm:px-4 select-none font-sans text-slate-800 overflow-y-auto">
       {/* Top Banner / Studio Control Header */}
       <div className="text-center mb-4 hidden sm:flex flex-col items-center">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e] animate-pulse"></span>
-          <h1 className="text-sm font-black text-white tracking-wide">
-            CareSync Mobile System Preview
+          <span className="w-2.5 h-2.5 rounded-full bg-[#15803D] animate-pulse"></span>
+          <h1 className="text-sm font-black text-[#0F172A] tracking-wide">
+            CareSync Mobile System Preview (Official Government Light Mode)
           </h1>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#27272a] text-[#d4d4d8] border border-[#3f3f46] font-bold">
-            Android 14 (Pixel 8)
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-[#1E40AF] border border-blue-200 font-bold">
+            Android 14 · ABDM Standard
           </span>
         </div>
-        <p className="text-[11px] font-bold text-[#a1a1aa] mt-0.5">
-          100% Interactive Demo Prototype · Live MoHFW Clinical Intelligence & Offline-First Room DB
+        <p className="text-[11px] font-bold text-slate-600 mt-0.5">
+          100% Interactive Demo Prototype · National Health Mission & MoHFW CDSS Engine
         </p>
 
         {/* View Switchers & Phone Size Controls */}
@@ -99,8 +99,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               !isAuthenticated
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             🔑 Sign-In
@@ -114,8 +114,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && !isRegisteringPatient && currentTab === 'dashboard'
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             🏠 Dashboard
@@ -161,8 +161,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               selectedPatient
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             👤 Patient Profile
@@ -176,8 +176,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && currentTab === 'emergency'
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             🔔 Notifications
@@ -191,8 +191,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && currentTab === 'risk-assessment'
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             🩺 Medical Assessment
@@ -205,8 +205,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && isRegisteringPatient
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#15803D] text-white border-[#15803D] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             📝 Registration
@@ -220,8 +220,8 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && !isRegisteringPatient && currentTab === 'ai-assistant'
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             🤖 AI Chat
@@ -235,11 +235,11 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               isAuthenticated && !selectedPatient && currentTab === 'sos'
-                ? 'bg-red-600 text-white border-red-500 shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-red-600 text-white border-red-600 shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
-            🚨 Emergency SOS
+            🚨 108 Emergency
           </button>
           <button
             onClick={() => {
@@ -250,26 +250,26 @@ const MobileDeviceApp: React.FC = () => {
             }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black border transition-all cursor-pointer ${
               showRecentActivity
-                ? 'bg-white text-black border-white shadow-xs'
-                : 'bg-[#18181b] text-[#a1a1aa] border-[#27272a] hover:text-white'
+                ? 'bg-[#1E40AF] text-white border-[#1E40AF] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
             📋 Recent Activity
           </button>
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-[#18181b] text-white border border-[#27272a] hover:border-[#3f3f46] cursor-pointer"
+            className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 cursor-pointer shadow-xs"
           >
             ☰ Drawer
           </button>
 
           {/* Length / Height selector */}
-          <div className="flex items-center gap-1 bg-[#18181b] p-0.5 rounded-lg border border-[#27272a] ml-2">
-            <span className="text-[10px] text-[#a1a1aa] px-1.5 font-bold">Phone Size:</span>
+          <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-slate-300 ml-2 shadow-xs">
+            <span className="text-[10px] text-slate-600 px-1.5 font-bold">Size:</span>
             <button
               onClick={() => setPhoneHeight('standard')}
               className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
-                phoneHeight === 'standard' ? 'bg-white text-black' : 'text-[#a1a1aa] hover:text-white'
+                phoneHeight === 'standard' ? 'bg-[#1E40AF] text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Standard
@@ -277,15 +277,15 @@ const MobileDeviceApp: React.FC = () => {
             <button
               onClick={() => setPhoneHeight('long')}
               className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
-                phoneHeight === 'long' ? 'bg-white text-black' : 'text-[#a1a1aa] hover:text-white'
+                phoneHeight === 'long' ? 'bg-[#1E40AF] text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Long (Default)
+              Long
             </button>
             <button
               onClick={() => setPhoneHeight('xl')}
               className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
-                phoneHeight === 'xl' ? 'bg-white text-black' : 'text-[#a1a1aa] hover:text-white'
+                phoneHeight === 'xl' ? 'bg-[#1E40AF] text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Extra Long
@@ -294,31 +294,30 @@ const MobileDeviceApp: React.FC = () => {
         </div>
       </div>
 
-      {/* Android Device Outer Chassis - Solid Black & Solid Grey */}
-      <div className={`relative ${phoneDimensions[phoneHeight]} bg-[#0f0f10] rounded-[52px] p-3 shadow-2xl border-[6px] border-[#27272a] flex flex-col overflow-hidden ring-1 ring-[#3f3f46] transition-all duration-300`}>
+      {/* Android Device Outer Chassis - Clean Premium Device Frame */}
+      <div className={`relative ${phoneDimensions[phoneHeight]} bg-[#E2E8F0] rounded-[52px] p-3 shadow-2xl border-[6px] border-[#CBD5E1] flex flex-col overflow-hidden ring-1 ring-slate-300 transition-all duration-300`}>
         
         {/* Device Camera Punch Hole (Center Top) */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center pointer-events-none">
-          <div className="w-4 h-4 bg-black rounded-full border border-[#27272a] flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#18181b]"></div>
+          <div className="w-4 h-4 bg-slate-800 rounded-full border border-slate-400 flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
           </div>
         </div>
 
-        {/* Screen Viewport - Solid Black Background */}
-        <div className="w-full h-full bg-[#0a0a0a] rounded-[42px] overflow-hidden flex flex-col relative border border-[#27272a]">
+        {/* Screen Viewport - Pure Clean Light Mode Background */}
+        <div className="w-full h-full bg-[#F8FAFC] rounded-[42px] overflow-hidden flex flex-col relative border border-slate-300">
           
           {/* Android Status Bar */}
-          <div className="h-9 w-full px-6 flex items-center justify-between text-[11px] font-black text-white z-40 bg-[#0a0a0a] select-none shrink-0 pt-1">
+          <div className="h-9 w-full px-6 flex items-center justify-between text-[11px] font-black text-slate-800 z-40 bg-[#F8FAFC] select-none shrink-0 pt-1">
             <div className="flex items-center space-x-2">
               <span className="font-black tracking-tight">8:00</span>
-              <span className="text-[10px] opacity-80">👻</span>
+              <span className="text-[10px] opacity-70">🔔</span>
             </div>
-            <div className="flex items-center space-x-1.5 text-white">
-              <span className="text-[10px] opacity-70">🔕</span>
+            <div className="flex items-center space-x-1.5 text-slate-800">
               <span className="text-[10px] font-black">5G</span>
-              <Signal className="w-3 h-3 text-white fill-white" />
-              <div className="flex items-center gap-0.5 px-1 py-0.2 rounded-full border border-[#3f3f46] text-[9px] font-black">
-                <span>33</span>
+              <Signal className="w-3 h-3 text-slate-800 fill-slate-800" />
+              <div className="flex items-center gap-0.5 px-1 py-0.2 rounded-full border border-slate-400 text-[9px] font-black">
+                <span>94%</span>
               </div>
             </div>
           </div>
@@ -440,9 +439,9 @@ const MobileDeviceApp: React.FC = () => {
             )}
           </div>
 
-          {/* Android Bottom Navigation Bar (Hidden on Sign-In screen & Patient Profile) */}
+          {/* Android Bottom Navigation Bar (Hidden on Sign-In screen & Patient Profile) - Clean Light Mode */}
           {isAuthenticated && !isRegisteringPatient && !selectedPatient && (
-            <div className="h-16 w-full bg-[#0a0a0a] border-t-2 border-[#27272a] flex items-center justify-around px-2 shrink-0 z-40 select-none">
+            <div className="h-16 w-full bg-white border-t border-slate-200 flex items-center justify-around px-2 shrink-0 z-40 select-none shadow-xs">
               {bottomTabs.map((btn) => {
                 const Icon = btn.icon;
                 const isDanger = btn.isDanger;
@@ -457,24 +456,24 @@ const MobileDeviceApp: React.FC = () => {
                     }}
                     className="flex flex-col items-center justify-center flex-1 h-full py-1 cursor-pointer transition-all"
                   >
-                    {/* Active capsule - Solid Black & Solid Grey / Red for SOS */}
+                    {/* Active capsule - Clean Govt Light Theme */}
                     <div className={`px-4 py-1 rounded-full transition-all ${
                       isActive && isDanger
-                        ? 'bg-red-950 text-red-400 border border-red-600'
+                        ? 'bg-red-50 text-red-700 border border-red-300'
                         : isActive
-                        ? 'bg-[#27272a] text-white border border-[#3f3f46]'
+                        ? 'bg-blue-50 text-[#1E40AF] border border-blue-200'
                         : isDanger
-                        ? 'text-red-500'
-                        : 'text-[#a1a1aa] hover:text-white'
+                        ? 'text-red-600 hover:text-red-700'
+                        : 'text-slate-500 hover:text-slate-800'
                     }`}>
                       <Icon className={`w-4 h-4 ${isDanger ? 'stroke-[2.5]' : ''}`} />
                     </div>
                     <span className={`text-[10px] mt-0.5 font-bold ${
                       isDanger
-                        ? 'text-red-500'
+                        ? 'text-red-600'
                         : isActive
-                        ? 'text-white'
-                        : 'text-[#a1a1aa]'
+                        ? 'text-[#1E40AF]'
+                        : 'text-slate-500'
                     }`}>
                       {btn.label}
                     </span>
@@ -485,8 +484,8 @@ const MobileDeviceApp: React.FC = () => {
           )}
 
           {/* Android Gesture Bar */}
-          <div className="h-4 w-full bg-[#0a0a0a] flex items-center justify-center shrink-0">
-            <div className="w-32 h-1 bg-white/70 rounded-full"></div>
+          <div className="h-4 w-full bg-white flex items-center justify-center shrink-0 border-t border-slate-100">
+            <div className="w-32 h-1 bg-slate-300 rounded-full"></div>
           </div>
         </div>
       </div>

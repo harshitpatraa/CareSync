@@ -127,7 +127,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     <div className="space-y-3.5 pb-4">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-[#27272a] border border-[#3f3f46] text-[#d4d4d8] text-xs font-semibold shadow-2xl flex items-center gap-2 animate-in fade-in-50">
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-[#27272a] border border-slate-200 text-[#d4d4d8] text-xs font-semibold shadow-2xl flex items-center gap-2 animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -142,7 +142,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
       {/* Top Header Bar */}
       <div className="flex items-center justify-between py-1 border-b border-[#1e293b] pb-2">
-        <button onClick={onBack} className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
+        <button onClick={onBack} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-200 hover:text-white cursor-pointer">
           <ArrowLeft className="w-5 h-5" />
         </button>
 
@@ -156,21 +156,21 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             <ShieldCheck className="w-3 h-3 text-[#10b981]" />
             <span>ABDM</span>
           </div>
-          <button className="p-1.5 rounded-lg bg-[#0f172a] border border-[#334155] text-slate-200 hover:text-white cursor-pointer">
+          <button className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-200 hover:text-white cursor-pointer">
             <Bell className="w-4 h-4 text-slate-300" />
           </button>
         </div>
       </div>
 
       {/* Patient Hero Card - Official ABHA Health ID Format */}
-      <div className="p-4 rounded-2xl bg-[#0f172a] border-2 border-[#1e3a8a] space-y-3.5 shadow-xl relative overflow-hidden">
+      <div className="p-4 rounded-2xl bg-white border-2 border-[#1e3a8a] space-y-3.5 shadow-xl relative overflow-hidden">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3.5">
             {/* Avatar Circle */}
             <div className={`w-13 h-13 rounded-2xl flex items-center justify-center font-black text-sm shadow-inner ${
               patient.isCritical
                 ? 'bg-red-950 text-red-400 border border-red-600'
-                : 'bg-[#1e293b] text-[#60a5fa] border border-[#334155]'
+                : 'bg-[#1e293b] text-[#60a5fa] border border-slate-200'
             }`}>
               {getInitials(patient.fullName)}
             </div>
@@ -193,7 +193,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
           <button 
             onClick={handleSpeech}
-            className="p-2 rounded-xl bg-[#1e293b] text-[#60a5fa] hover:bg-[#334155] cursor-pointer border border-[#334155]"
+            className="p-2 rounded-xl bg-[#1e293b] text-[#60a5fa] hover:bg-[#334155] cursor-pointer border border-slate-200"
             title="Read clinical snapshot aloud"
           >
             <Volume2 className="w-4 h-4" />
@@ -202,13 +202,13 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
         {/* Status badges */}
         <div className="flex items-center gap-2">
-          <div className="px-2.5 py-1 rounded-full bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold flex items-center gap-1">
+          <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-semibold flex items-center gap-1">
             <span>☁️</span>
             <span>Local Vault Ready</span>
           </div>
 
           {patient.isCritical && (
-            <div className="px-2.5 py-1 rounded-full bg-red-950/50 text-red-400 border border-red-500/40 text-[10px] font-semibold flex items-center gap-1 animate-pulse">
+            <div className="px-2.5 py-1 rounded-full bg-red-50 text-red-800 border border-red-300 text-[10px] font-semibold flex items-center gap-1 animate-pulse">
               <span>⚠️</span>
               <span>Critical Priority</span>
             </div>
@@ -221,7 +221,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           <div className="grid grid-cols-3 gap-2">
             <button 
               onClick={() => setShowCallModal(true)}
-              className="py-2.5 px-3 rounded-xl bg-[#0b101c] border border-[#27272a] text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 hover:border-[#3f3f46] hover:text-white cursor-pointer transition-colors"
+              className="py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 hover:border-slate-200 hover:text-white cursor-pointer transition-colors"
             >
               <Phone className="w-3.5 h-3.5 text-white" />
               <span>Call</span>
@@ -232,7 +232,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 toggleCriticalStatus(patient.id);
                 showToast(patient.isCritical ? "Patient unflagged from critical list" : "Patient flagged as Critical Priority!");
               }}
-              className="py-2.5 px-3 rounded-xl bg-[#0b101c] border border-[#27272a] text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 hover:border-[#3f3f46] hover:text-white cursor-pointer transition-colors"
+              className="py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 hover:border-slate-200 hover:text-white cursor-pointer transition-colors"
             >
               <Flag className={`w-3.5 h-3.5 ${patient.isCritical ? 'text-red-400 fill-red-400' : 'text-slate-400'}`} />
               <span>{patient.isCritical ? 'Unflag' : 'Flag'}</span>
@@ -240,7 +240,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
             <button 
               onClick={onOpenRiskAssessment}
-              className="py-2.5 px-3 rounded-xl bg-white hover:bg-[#e4e4e7] text-black font-black text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/30 cursor-pointer transition-all"
+              className="py-2.5 px-3 rounded-xl bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all"
             >
               <Activity className="w-3.5 h-3.5" />
               <span>Risk AI</span>
@@ -251,7 +251,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           <div className="grid grid-cols-4 gap-2">
             <button 
               onClick={() => setShowQrModal(true)}
-              className="py-2 px-2 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold flex items-center justify-center gap-1 hover:bg-emerald-900/50 cursor-pointer transition-colors"
+              className="py-2 px-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 text-[11px] font-semibold flex items-center justify-center gap-1 hover:bg-emerald-900/50 cursor-pointer transition-colors"
             >
               <QrCode className="w-3.5 h-3.5" />
               <span>QR Card</span>
@@ -259,7 +259,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
             <button 
               onClick={() => setShowReferralModal(true)}
-              className="py-2 px-2 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold flex items-center justify-center gap-1 hover:bg-emerald-900/50 cursor-pointer transition-colors"
+              className="py-2 px-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 text-[11px] font-semibold flex items-center justify-center gap-1 hover:bg-emerald-900/50 cursor-pointer transition-colors"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>Referral</span>
@@ -267,7 +267,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
             <button 
               onClick={() => setShowEditModal(true)}
-              className="py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-white hover:text-white flex items-center justify-center cursor-pointer hover:border-[#3f3f46] transition-colors"
+              className="py-2 rounded-xl bg-slate-50 border border-slate-200 text-white hover:text-white flex items-center justify-center cursor-pointer hover:border-slate-200 transition-colors"
               title="Edit Demographics"
             >
               <Edit3 className="w-3.5 h-3.5" />
@@ -275,7 +275,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
             <button 
               onClick={() => setShowDeleteConfirm(true)}
-              className="py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-red-400 hover:bg-red-500/20 flex items-center justify-center cursor-pointer transition-colors"
+              className="py-2 rounded-xl bg-slate-50 border border-slate-200 text-red-400 hover:bg-red-500/20 flex items-center justify-center cursor-pointer transition-colors"
               title="Archive Patient"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -285,7 +285,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       </div>
 
       {/* Tabs Row (Unified 2-color theme: Indigo indicator) */}
-      <div className="border-b border-[#27272a] flex text-xs font-semibold">
+      <div className="border-b border-slate-200 flex text-xs font-semibold">
         {[
           { id: 'vitals', label: 'Vitals & Overview' },
           { id: 'timeline', label: 'Timeline & History' },
@@ -325,7 +325,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           </div>
 
           {/* Vitals Trend Card */}
-          <div className="p-4 rounded-3xl bg-[#0f172a] border border-[#27272a] space-y-3">
+          <div className="p-4 rounded-3xl bg-white border border-slate-200 space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-white" />
@@ -347,7 +347,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   className={`px-3 py-1 rounded-xl text-[11px] font-semibold cursor-pointer ${
                     trendMetric === m.id
                       ? 'bg-white text-black font-black text-white shadow-xs'
-                      : 'bg-[#0b101c] text-slate-400 border border-[#27272a]'
+                      : 'bg-slate-50 text-slate-400 border border-slate-200'
                   }`}
                 >
                   {m.label}
@@ -356,7 +356,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             </div>
 
             {/* Clinical Trend Graphic */}
-            <div className="h-32 w-full bg-[#0b101c] rounded-2xl p-3 border border-[#27272a]/80 flex flex-col justify-between relative overflow-hidden">
+            <div className="h-32 w-full bg-slate-50 rounded-2xl p-3 border border-slate-200/80 flex flex-col justify-between relative overflow-hidden">
               {/* Top Systolic Line */}
               <div className="relative w-full flex items-center">
                 <div className="w-2.5 h-2.5 rounded-full bg-indigo-400 ring-2 ring-indigo-600/50"></div>
@@ -392,16 +392,16 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           </div>
 
           {/* Vitals Snapshot 5-Column Grid */}
-          <div className="p-3.5 rounded-2xl bg-[#0f172a] border border-[#27272a] space-y-2.5">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-300">Recorded Today, 10:05 AM</span>
-              <div className="px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-500/30 text-[9px] font-semibold flex items-center gap-1">
+              <div className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[9px] font-semibold flex items-center gap-1">
                 <span>✓</span>
                 <span>Verified</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-2 text-center pt-1 border-t border-[#27272a]/80">
+            <div className="grid grid-cols-5 gap-2 text-center pt-1 border-t border-slate-200/80">
               <div>
                 <span className="text-xs font-bold text-white block">{sysInput}/{diaInput}</span>
                 <span className="text-[9px] text-slate-400 uppercase">BP</span>
@@ -434,13 +434,13 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === 'timeline' && (
         <div className="space-y-3">
-          <div className="p-3.5 rounded-2xl bg-[#0f172a] border border-[#27272a] space-y-3">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-3">
             <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-white" />
               <span>Clinical Visit History</span>
             </h4>
 
-            <div className="space-y-3 relative pl-4 border-l border-[#3f3f46] ml-2">
+            <div className="space-y-3 relative pl-4 border-l border-slate-200 ml-2">
               <div className="relative space-y-1">
                 <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-red-500"></div>
                 <div className="flex justify-between items-center text-[10px]">
@@ -483,7 +483,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === 'meds' && (
         <div className="space-y-3">
-          <div className="p-3.5 rounded-2xl bg-[#0f172a] border border-[#27272a] space-y-2.5">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2.5">
             <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
               <Pill className="w-3.5 h-3.5 text-white" />
               <span>Active Prescribed Medications</span>
@@ -495,12 +495,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 { name: 'Metformin Hydrochloride', dose: '500 mg', timing: 'Twice daily after meals', duration: '30 Days Supply' },
                 { name: 'Paracetamol', dose: '500 mg', timing: 'SOS for fever / headache', duration: 'As Needed' }
               ].map((m, idx) => (
-                <div key={idx} className="p-2.5 rounded-xl bg-[#0b101c] border border-[#27272a] flex justify-between items-center">
+                <div key={idx} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
                   <div>
                     <h5 className="text-xs font-bold text-white">{m.name} ({m.dose})</h5>
                     <p className="text-[10px] text-slate-400 mt-0.5">{m.timing}</p>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md bg-[#27272a] text-white border border-[#3f3f46] text-[10px] font-semibold">
+                  <span className="px-2 py-0.5 rounded-md bg-[#27272a] text-white border border-slate-200 text-[10px] font-semibold">
                     {m.duration}
                   </span>
                 </div>
@@ -508,21 +508,21 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#0f172a] border border-[#27272a] space-y-2.5">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2.5">
             <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>Immunization & Vaccine Register</span>
             </h4>
 
             <div className="space-y-1.5">
-              <div className="p-2 rounded-xl bg-[#0b101c] border border-[#27272a] flex justify-between items-center text-xs">
+              <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center text-xs">
                 <span className="text-slate-200">COVID-19 Precautionary Dose</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Administered
                 </span>
               </div>
-              <div className="p-2 rounded-xl bg-[#0b101c] border border-[#27272a] flex justify-between items-center text-xs">
+              <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center text-xs">
                 <span className="text-slate-200">Tetanus Toxoid (TT Booster)</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -538,9 +538,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* MODAL 1: Interactive Call Simulation */}
       {/* ────────────────────────────────────────────────────────── */}
       {showCallModal && (
-        <div className="fixed inset-0 z-50 bg-[#0f0f10]lack/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-[#0f172a] border border-[#27272a] p-5 space-y-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-white text-black font-black/20 text-white border border-[#3f3f46] flex items-center justify-center mx-auto animate-pulse">
+        <div className="fixed inset-0 z-50 bg-slate-50lack/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-white text-black font-black/20 text-white border border-slate-200 flex items-center justify-center mx-auto animate-pulse">
               <Phone className="w-7 h-7" />
             </div>
 
@@ -551,7 +551,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             </div>
 
             <div className="py-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-mono font-bold">
                 00:14 · Connected
               </span>
             </div>
@@ -587,9 +587,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* MODAL 2: ABHA / ABDM QR Health Card */}
       {/* ────────────────────────────────────────────────────────── */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-[#0f0f10]lack/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-[#0f172a] border border-[#27272a] p-5 space-y-4">
-            <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
+        <div className="fixed inset-0 z-50 bg-slate-50lack/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">Ayushman Bharat Health Card (ABHA)</span>
               </div>
@@ -599,7 +599,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             </div>
 
             {/* QR Card Graphic */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-900/60 to-slate-900 border border-[#3f3f46] text-center space-y-3">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-900/60 to-slate-900 border border-slate-200 text-center space-y-3">
               <div className="flex items-center justify-between text-[10px] text-white font-semibold border-b border-white/10 pb-1.5">
                 <span>National Health Authority (NHA)</span>
                 <span>MoHFW · India</span>
@@ -608,22 +608,22 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
               {/* QR Code Matrix preview */}
               <div className="w-32 h-32 mx-auto bg-white p-2 rounded-2xl flex items-center justify-center shadow-lg">
                 <div className="w-full h-full border-4 border-black grid grid-cols-4 gap-1 p-1 bg-white">
-                  <div className="bg-[#0f0f10]lack"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
+                  <div className="bg-slate-50lack"></div>
+                  <div className="bg-slate-50lack"></div>
                   <div className="bg-white"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
+                  <div className="bg-slate-50lack"></div>
                   <div className="bg-white"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
+                  <div className="bg-slate-50lack"></div>
+                  <div className="bg-slate-50lack"></div>
                   <div className="bg-white"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
+                  <div className="bg-slate-50lack"></div>
                   <div className="bg-white"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
+                  <div className="bg-slate-50lack"></div>
+                  <div className="bg-slate-50lack"></div>
+                  <div className="bg-slate-50lack"></div>
+                  <div className="bg-slate-50lack"></div>
                   <div className="bg-white"></div>
-                  <div className="bg-[#0f0f10]lack"></div>
+                  <div className="bg-slate-50lack"></div>
                 </div>
               </div>
 
@@ -665,9 +665,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* MODAL 3: Official PHC Referral Slip PDF Preview */}
       {/* ────────────────────────────────────────────────────────── */}
       {showReferralModal && (
-        <div className="fixed inset-0 z-50 bg-[#0f0f10]lack/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-[#0f172a] border border-[#27272a] p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
+        <div className="fixed inset-0 z-50 bg-slate-50lack/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
               <span className="text-xs font-bold text-white">Official NHM Referral Slip</span>
               <button onClick={() => setShowReferralModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
@@ -738,9 +738,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* MODAL 4: Edit Patient Demographics Form */}
       {/* ────────────────────────────────────────────────────────── */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 bg-[#0f0f10]lack/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleSaveEdit} className="w-full max-w-sm rounded-3xl bg-[#0f172a] border border-[#27272a] p-5 space-y-3.5">
-            <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
+        <div className="fixed inset-0 z-50 bg-slate-50lack/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleSaveEdit} className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-3.5">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
               <span className="text-xs font-bold text-white">Edit Patient Record</span>
               <button type="button" onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
@@ -754,7 +754,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white"
                   required
                 />
               </div>
@@ -766,7 +766,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     type="number"
                     value={editAge}
                     onChange={(e) => setEditAge(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white"
                     required
                   />
                 </div>
@@ -776,7 +776,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     type="text"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white"
                     required
                   />
                 </div>
@@ -788,7 +788,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="text"
                   value={editWard}
                   onChange={(e) => setEditWard(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white"
                   required
                 />
               </div>
@@ -808,9 +808,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* MODAL 5: Log Vitals Form */}
       {/* ────────────────────────────────────────────────────────── */}
       {showLogVitalsModal && (
-        <div className="fixed inset-0 z-50 bg-[#0f0f10]lack/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleSaveVitals} className="w-full max-w-sm rounded-3xl bg-[#0f172a] border border-[#27272a] p-5 space-y-3.5">
-            <div className="flex justify-between items-center border-b border-[#27272a] pb-2">
+        <div className="fixed inset-0 z-50 bg-slate-50lack/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleSaveVitals} className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-3.5">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
               <span className="text-xs font-bold text-white">Record New Vitals Snapshot</span>
               <button type="button" onClick={() => setShowLogVitalsModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
@@ -824,7 +824,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="number"
                   value={sysInput}
                   onChange={(e) => setSysInput(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white font-semibold"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white font-semibold"
                   required
                 />
               </div>
@@ -835,7 +835,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="number"
                   value={diaInput}
                   onChange={(e) => setDiaInput(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white font-semibold"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white font-semibold"
                   required
                 />
               </div>
@@ -846,7 +846,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="number"
                   value={spo2Input}
                   onChange={(e) => setSpo2Input(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white font-semibold"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white font-semibold"
                   required
                 />
               </div>
@@ -857,7 +857,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="number"
                   value={hrInput}
                   onChange={(e) => setHrInput(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white font-semibold"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white font-semibold"
                   required
                 />
               </div>
@@ -868,7 +868,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   type="number"
                   value={sugarInput}
                   onChange={(e) => setSugarInput(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0b101c] border border-[#27272a] text-xs text-white font-semibold"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-white font-semibold"
                   required
                 />
               </div>
@@ -888,8 +888,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       {/* MODAL 6: Archive Patient Confirmation */}
       {/* ────────────────────────────────────────────────────────── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 bg-[#0f0f10]lack/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-[#0f172a] border border-[#27272a] p-5 space-y-4 text-center">
+        <div className="fixed inset-0 z-50 bg-slate-50lack/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-5 space-y-4 text-center">
             <div className="w-12 h-12 rounded-full bg-red-950/60 text-red-400 border border-red-500/40 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
@@ -904,7 +904,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="py-2.5 rounded-xl bg-[#0b101c] border border-[#27272a] text-slate-300 font-semibold text-xs cursor-pointer hover:bg-slate-800"
+                className="py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-300 font-semibold text-xs cursor-pointer hover:bg-slate-800"
               >
                 Cancel
               </button>
@@ -926,4 +926,5 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     </div>
   );
 };
+
 
