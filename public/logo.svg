@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="100%" height="100%">
+  <!-- Background Squircle in Teal / Emerald -->
+  <rect x="20" y="20" width="984" height="984" rx="225" fill="#0E9F8E" />
+  
+  <!-- White Medical Cross -->
+  <rect x="432" y="205" width="160" height="614" rx="80" fill="#FFFFFF" />
+  <rect x="205" y="432" width="614" height="160" rx="80" fill="#FFFFFF" />
+  
+  <!-- Orange Saffron Clinical Accent Dot -->
+  <circle cx="708" cy="273" r="95" fill="#ED751E" />
+</svg>

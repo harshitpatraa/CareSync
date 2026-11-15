@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { RealHealthQrModal, HealthRecordPayload } from './RealHealthQrModal';
+import { CareSyncLogo } from './CareSyncLogo';
 
 interface IndividualHomeViewProps {
   onNavigateTab: (tab: string) => void;
@@ -157,9 +158,7 @@ export const IndividualHomeView: React.FC<IndividualHomeViewProps> = ({
           )}
 
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center p-1 shadow-xs">
-              <span className="text-base leading-none">🏛️</span>
-            </div>
+            <CareSyncLogo size={32} className="rounded-lg shadow-xs" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-sm text-black tracking-tight">CareSync Citizen</span>

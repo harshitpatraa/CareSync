@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Patient } from '../types';
+import { CareSyncLogo } from './CareSyncLogo';
 
 interface DashboardViewProps {
   onNavigateTab: (tab: string) => void;
@@ -86,11 +87,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* National Health Mission Emblem Badge */}
+          {/* Official CareSync Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center p-1 text-slate-900 shadow-xs">
-              <span className="text-base leading-none">🏛️</span>
-            </div>
+            <CareSyncLogo size={32} className="rounded-lg shadow-xs" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-sm text-[#0F172A] tracking-tight">CareSync</span>

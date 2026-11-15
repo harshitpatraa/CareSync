@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CareSyncLogo } from './CareSyncLogo';
 import { 
   User, 
   Mail, 
@@ -108,10 +109,8 @@ export const ClinicianSignInView: React.FC<ClinicianSignInViewProps> = ({ onSign
       </div>
 
       {/* Brand Logo & Header */}
-      <div className="flex flex-col items-center text-center space-y-1.5">
-        <div className="w-14 h-14 rounded-2xl bg-white border-2 border-slate-900 p-2 shadow-xs flex items-center justify-center text-2xl">
-          🏛️
-        </div>
+      <div className="flex flex-col items-center text-center space-y-2">
+        <CareSyncLogo size={56} className="rounded-2xl shadow-md border-2 border-slate-900" />
 
         <div>
           <div className="flex items-center justify-center gap-1.5">

@@ -18,6 +18,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { UserRole } from './ClinicianSignInView';
+import { CareSyncLogo } from './CareSyncLogo';
 
 interface NavigationDrawerProps {
   isOpen: boolean;
@@ -98,11 +99,9 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
             <X className="w-4 h-4" />
           </button>
 
-          {/* Logo with Govt Emblem */}
+          {/* Official CareSync Logo */}
           <div className="flex items-center space-x-2.5 mb-2.5">
-            <div className="w-9 h-9 rounded-xl bg-white border border-slate-300 p-1 flex items-center justify-center text-lg shadow-xs">
-              🏛️
-            </div>
+            <CareSyncLogo size={36} className="rounded-xl shadow-xs" />
             <div>
               <div className="flex items-center gap-1.5">
                 <h3 className="font-black text-base text-[#0F172A] leading-tight">CareSync</h3>
